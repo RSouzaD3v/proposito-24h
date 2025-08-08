@@ -1,0 +1,91 @@
+enum Role {
+  ADMIN        // Admin master (sem writerId OU writerId opcional)
+  WRITER_ADMIN // Admin do writer (gestor da instância)
+  CLIENT       // Usuário final
+}
+
+model Writer {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  logoUrl       String?
+  colorPrimary  String?
+  colorSecondary String?
+  // Configs de white label
+  branding      Json?       // (opcional) tema avançado, favicon, tipografia
+  socials       Json?       // instagram, youtube etc.
+  storagePrefix String?     // prefixo de bucket/pasta (ex: uploads/<writer>)
+  emailFrom     String?     // remetente padrão de e-mails
+  featureFlags  Json?       // liga/desliga módulos
+
+  domains       Domain[]     // domínios/subdomínios dessa instância
+  products      Product[]
+  users         User[]
+  purchases     Purchase[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Domain {
+  id        String  @id @default(uuid())
+  host      String  @unique // ex: igreja1.seudominio.com ou dominio-proprio.com
+  writerId  String
+  writer    Writer  @relation(fields: [writerId], references: [id])
+  isPrimary Boolean @default(false)
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String?
+  password   String
+  role       Role     @default(CLIENT)
+
+  // Para CLIENT e WRITER_ADMIN é obrigatório.
+  // Para ADMIN master pode ser opcional (nulo) para enxergar tudo.
+  writerId   String?
+  writer     Writer?  @relation(fields: [writerId], references: [id])
+
+  purchases  Purchase[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Int
+  fileUrl     String?
+  coverUrl    String?
+  isFree      Boolean  @default(false)
+
+  writerId    String
+  writer      Writer   @relation(fields: [writerId], references: [id])
+
+  purchases   Purchase[]
+  createdAt   DateTime @default(now())
+}
+
+enum PurchaseStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  writerId    String   // redundância útil p/ relatórios rápidos por writer
+  writer      Writer   @relation(fields: [writerId], references: [id])
+
+  amount      Int
+  status      PurchaseStatus
+  createdAt   DateTime @default(now())
+}
