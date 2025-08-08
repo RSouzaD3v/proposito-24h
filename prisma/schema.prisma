@@ -1,71 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/** Papéis */
 enum Role {
-  ADMIN        // Admin master (sem writerId OU writerId opcional)
-  WRITER_ADMIN // Admin do writer (gestor da instância)
-  CLIENT       // Usuário final
+  ADMIN        // Admin master (writerId opcional)
+  WRITER_ADMIN // Admin/gestor da instância (writerId obrigatório)
+  CLIENT       // Usuário final (writerId obrigatório)
 }
 
-model Writer {
-  id            String   @id @default(uuid())
-  name          String
-  slug          String   @unique
-  logoUrl       String?
-  colorPrimary  String?
-  colorSecondary String?
-  // Configs de white label
-  branding      Json?       // (opcional) tema avançado, favicon, tipografia
-  socials       Json?       // instagram, youtube etc.
-  storagePrefix String?     // prefixo de bucket/pasta (ex: uploads/<writer>)
-  emailFrom     String?     // remetente padrão de e-mails
-  featureFlags  Json?       // liga/desliga módulos
-
-  domains       Domain[]     // domínios/subdomínios dessa instância
-  products      Product[]
-  users         User[]
-  purchases     Purchase[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+/** Publicação pode ser um Devocional (página única) ou um Ebook (com capítulos) */
+enum PublicationType {
+  DEVOTIONAL   // página única (title/subtitle/description + cover)
+  EBOOK        // múltiplos capítulos
 }
 
-model Domain {
-  id        String  @id @default(uuid())
-  host      String  @unique // ex: igreja1.seudominio.com ou dominio-proprio.com
-  writerId  String
-  writer    Writer  @relation(fields: [writerId], references: [id])
-  isPrimary Boolean @default(false)
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
-model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  name       String?
-  password   String
-  role       Role     @default(CLIENT)
-
-  // Para CLIENT e WRITER_ADMIN é obrigatório.
-  // Para ADMIN master pode ser opcional (nulo) para enxergar tudo.
-  writerId   String?
-  writer     Writer?  @relation(fields: [writerId], references: [id])
-
-  purchases  Purchase[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Product {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Int
-  fileUrl     String?
-  coverUrl    String?
-  isFree      Boolean  @default(false)
-
-  writerId    String
-  writer      Writer   @relation(fields: [writerId], references: [id])
-
-  purchases   Purchase[]
-  createdAt   DateTime @default(now())
+enum Visibility {
+  FREE
+  PAID         // se PAID, exige compra para acessar conteúdo completo
 }
 
 enum PurchaseStatus {
@@ -74,18 +37,199 @@ enum PurchaseStatus {
   FAILED
 }
 
+/** Provedor de pagamento (por enquanto só Stripe) */
+enum PaymentProvider {
+  STRIPE
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+model Writer {
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  logoUrl        String?
+  colorPrimary   String?
+  colorSecondary String?
+
+  // Configurações white label
+  branding       Json?
+  socials        Json?
+  storagePrefix  String?
+  emailFrom      String?
+  featureFlags   Json?
+
+  domains        Domain[]
+  publications   Publication[]
+  users          User[]
+  purchases      Purchase[]
+  payouts        WriterPayout[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Domain {
+  id        String  @id @default(uuid())
+  host      String  @unique  // ex: igreja1.seudominio.com ou dominio-proprio.com
+  writerId  String
+  writer    Writer  @relation(fields: [writerId], references: [id])
+  isPrimary Boolean @default(false)
+}
+
+model User {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  name       String?
+  password   String
+  role       Role      @default(CLIENT)
+
+  // Para ADMIN pode ser null; para WRITER_ADMIN/CLIENT deve apontar p/ o writer
+  writerId   String?
+  writer     Writer?   @relation(fields: [writerId], references: [id])
+
+  purchases  Purchase[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+/**
+ * PUBLICATION = unidade editorial publicável e vendável.
+ * - DEVOTIONAL: página única (usa os campos de corpo na própria Publication)
+ * - EBOOK: metadados na Publication e conteúdo distribuído em Chapter(s)
+ */
+model Publication {
+  id            String            @id @default(uuid())
+  writerId      String
+  writer        Writer            @relation(fields: [writerId], references: [id])
+
+  type          PublicationType
+  status        PublicationStatus @default(DRAFT)
+  visibility    Visibility        @default(FREE)
+
+  // monetização (se visibility = PAID)
+  price         Int?              // em centavos (opcional)
+  currency      String?           // ex: "BRL"
+
+  // SEO / rota
+  slug          String            // único por writer
+  @@unique([writerId, slug])
+
+  // metadados editoriais
+  title         String
+  subtitle      String?
+  description   String?
+
+  // capa da publicação
+  coverUrl      String?
+
+  // Conteúdo direto (para DEVOTIONAL página única)
+  // Para EBOOK normalmente fica vazio e o conteúdo vem de Chapter(s)
+  body          String?           // markdown/HTML/JSON (defina no app)
+
+  // Organização
+  tags          String[]          // opcional: ["oração","família"]
+  publishedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  chapters      Chapter[]
+  purchases     Purchase[]
+}
+
+/**
+ * CHAPTER = capítulo de um ebook.
+ * - Possui ordem, imagem própria opcional e conteúdo.
+ */
+model Chapter {
+  id             String       @id @default(uuid())
+  publicationId  String
+  publication    Publication  @relation(fields: [publicationId], references: [id])
+
+  order          Int          // índice/ordem do capítulo (0..n)
+  title          String
+  subtitle       String?
+  coverUrl       String?      // imagem do capítulo (opcional)
+  content        String       // markdown/HTML/JSON
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([publicationId, order])
+}
+
+/**
+ * Purchase centralizada no Admin Master (Stripe).
+ * Mantém campos para conciliação, taxas e recibos.
+ */
 model Purchase {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  id                     String          @id @default(uuid())
+  userId                 String
+  user                   User            @relation(fields: [userId], references: [id])
 
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id])
+  publicationId          String
+  publication            Publication     @relation(fields: [publicationId], references: [id])
 
-  writerId    String   // redundância útil p/ relatórios rápidos por writer
-  writer      Writer   @relation(fields: [writerId], references: [id])
+  // redundância útil p/ relatórios rápidos por writer
+  writerId               String
+  writer                 Writer          @relation(fields: [writerId], references: [id])
 
-  amount      Int
-  status      PurchaseStatus
-  createdAt   DateTime @default(now())
+  // Valores
+  amount                 Int             // bruto em centavos
+  currency               String          @default("BRL")
+  fees                   Int?            // taxas do provedor (centavos)
+  netAmount              Int?            // líquido (amount - fees - impostos)
+
+  status                 PurchaseStatus
+  provider               PaymentProvider @default(STRIPE)
+
+  // Referências Stripe p/ conciliação
+  stripeSessionId        String?   // checkout session
+  stripePaymentIntentId  String?
+  stripePaymentMethodId  String?
+  stripeChargeId         String?
+  stripeInvoiceId        String?
+  stripeCustomerId       String?
+  receiptUrl             String?
+
+  rawProviderPayload     Json?     // payload do webhook (opcional)
+
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([writerId, createdAt])
+  @@index([publicationId, createdAt])
+}
+
+/**
+ * Registro de repasses do Admin Master para cada escritor.
+ * Pode ser gerado por período (ex.: mensal).
+ */
+model WriterPayout {
+  id           String       @id @default(uuid())
+  writerId     String
+  writer       Writer       @relation(fields: [writerId], references: [id])
+
+  periodStart  DateTime
+  periodEnd    DateTime
+
+  grossAmount  Int          // escolha: soma de netAmount ou amount conforme sua regra
+  fees         Int?         // tarifas bancárias do repasse (se houver)
+  netAmount    Int          // total a pagar ao escritor
+  status       PayoutStatus @default(PENDING)
+
+  // Referências externas (comprovante, txid Pix, etc.)
+  reference    String?
+  receiptUrl   String?
+
+  notes        String?
+  createdAt    DateTime     @default(now())
+  paidAt       DateTime?
+  updatedAt    DateTime     @updatedAt
+
+  @@index([writerId, periodStart, periodEnd])
 }
