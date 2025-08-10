@@ -30,7 +30,7 @@ function LoginInner() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: true,
       callbackUrl: "/redirector",
     });
 

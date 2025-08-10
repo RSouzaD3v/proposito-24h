@@ -76,6 +76,7 @@ model Writer {
 model Domain {
   id        String  @id @default(uuid())
   host      String  @unique  // ex: igreja1.seudominio.com ou dominio-proprio.com
+  subdomain String  @unique
   writerId  String
   writer    Writer  @relation(fields: [writerId], references: [id])
   isPrimary Boolean @default(false)
