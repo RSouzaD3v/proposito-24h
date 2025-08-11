@@ -9,7 +9,7 @@ import { Role } from "@prisma/client";
 export async function POST(request: NextRequest) {
     const host = (await headers()).get("host");
     const subdomain = host?.split(".")[0];
-    const { email, password } = await request.json();
+    const { name, email, password } = await request.json();
 
     const subdomainExisting = await db.domain.findFirst({
         where: {
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hash(password, 10);
     const reader = await db.user.create({
         data: {
+            name,
             email,
             password: hashedPassword,
             writerId,
