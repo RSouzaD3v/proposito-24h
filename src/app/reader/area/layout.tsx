@@ -11,7 +11,7 @@ export default function RootLayout({
     <AuthReaderProvider>
         <section>
             <HeaderReader />
-            <div className="mt-44">
+            <div className="mt-32">
                 {children}
             </div>
             <MenuPainel />

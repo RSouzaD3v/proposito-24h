@@ -17,19 +17,19 @@ export const MenuPainel = () => {
             id: 2,
             name: "Oração",
             icon: <FiHeart size={22} />,
-            link: "/reader/prayer"
+            link: "/reader/area/prayer"
         },
         {
             id: 3,
             name: "Bíblia",
             icon: <FiBook size={22} />,
-            link: "/reader/bible"
+            link: "/reader/area/bible"
         },
         {
             id: 4,
             name: "Ajustes",
             icon: <FiSettings size={22} />,
-            link: "/reader/settings"
+            link: "/reader/area/settings"
         },
     ];
 

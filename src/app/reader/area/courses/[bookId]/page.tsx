@@ -1,0 +1,79 @@
+import { db } from "@/lib/db";
+import ChapterSlider from "./_components/ChapterSlider";
+import Link from "next/link";
+import { FiArrowLeft } from "react-icons/fi";
+import { authOptions } from "@/lib/authOption";
+import { getServerSession } from "next-auth";
+
+export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
+    const session = await getServerSession(authOptions);
+    const { bookId } = await params;
+
+    const bookDetails = await db.publication.findUnique({
+        where: {
+            id: bookId
+        },
+        select: {
+            visibility: true,
+            chapters: {
+                select: {
+                    title: true,
+                    subtitle: true,
+                    content: true,
+                    coverUrl: true
+                }
+            }
+        }
+    });
+
+    if(bookDetails?.visibility === 'PAID') {
+        const purchase = await db.purchase.findFirst({
+            where: {
+                userId: session?.user.id,
+                publication: {
+                    id: bookId
+                }
+            }
+        });
+
+        if (!purchase) {
+            // If no purchase found, handle accordingly (e.g., redirect to payment page)
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
+                        Acesso Negado
+                    </h2>
+                    <p className="text-gray-600 mb-6">
+                        Este curso é pago. Por favor, adquira o curso para acessar o conteúdo.
+                    </p>
+                    <Link
+                        href={`/purchase/book/${bookId}`} // Adjust this link to your pricing or purchase page
+                        className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    >
+                        Comprar Livro
+                    </Link>
+                </div>
+            );
+        }
+    }
+
+    return (
+        <div>
+            <Link className="mx-5 flex items-center gap-1 bg-gray-100 p-2 rounded-sm w-fit" href={"/reader/area/courses"}>
+                <FiArrowLeft className="inline mr-2" />
+                Voltar
+            </Link>
+            {bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
+                <ChapterSlider
+                    chapters={bookDetails.chapters.map(chapter => ({
+                        ...chapter,
+                        subtitle: chapter.subtitle ?? "",
+                        coverUrl: chapter.coverUrl ?? undefined
+                    }))}
+                />
+            ) : (
+                <div>Nenhum capítulo encontrado.</div>
+            )}
+        </div>
+    );
+}

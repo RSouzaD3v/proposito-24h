@@ -40,11 +40,18 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-50 to-slate-200">
+                <div className="w-12 h-12 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
+                <span className="mt-4 text-blue-600 font-medium text-lg">
+                    Carregando...
+                </span>
+            </div>
+        );
     }
 
     if (!user) {
-        redirect("/login");
+        return null;
     }
 
     return (
