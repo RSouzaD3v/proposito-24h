@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         colorPrimary,
         colorSecondary,
         domains: {
-          create: [{ host: `${slug}.seudominio.com`, isPrimary: true }],
+          create: [{ host: `${slug}.seudominio.com`, isPrimary: true, subdomain: slug }],
         },
       },
     });

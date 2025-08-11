@@ -1,0 +1,21 @@
+"use client";
+import { useAuth } from "../_contexts/AuthContext";
+
+export const HeaderReader = () => {
+  const { user } = useAuth();
+
+  return (
+    <header className="fixed top-0 left-0 z-50 w-full flex items-center justify-center gap-10 p-4 bg-gray-100 shadow rounded-b-[50px]">
+      <div>
+        <div className="w-[70px] text-2xl h-[70px] flex items-center justify-center bg-gradient-to-l from-blue-500 to-blue-600 text-white font-bold rounded-full p-2">
+          <h2>{user ? user?.name.charAt(0).toLocaleUpperCase() : "?"}</h2>
+        </div>
+      </div>
+
+      <div>
+        <h1 className="text-3xl font-bold">Olá, {user?.name || "Usuário"}</h1>
+        <p>Vamos passar tempo com Deus?</p>
+      </div>
+    </header>
+  );
+};

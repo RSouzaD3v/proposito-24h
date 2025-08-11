@@ -16,15 +16,50 @@ export default async function WriterDashboardPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-2">Bem-vindo, {session.user.name} 👋</h1>
-      <p className="text-gray-600">Plataforma: <strong>{writer?.name}</strong></p>
-      <p className="text-gray-600">Subdomínio: <strong>{writer?.slug}.seudominio.com</strong></p>
-      <p className="text-gray-600">Cor primária: <span className="inline-block w-4 h-4 rounded-full" style={{ backgroundColor: writer?.colorPrimary ?? undefined }} /></p>
-      <p className="text-gray-600">Cor secundária: <span className="inline-block w-4 h-4 rounded-full" style={{ backgroundColor: writer?.colorSecondary ?? undefined }} /></p>
+    <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow">
+          {session.user.name?.charAt(0)}
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Bem-vindo, {session.user.name} 👋</h1>
+          <p className="text-gray-500 text-sm">Painel do escritor</p>
+        </div>
+      </div>
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
-        <p className="text-blue-800 text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex flex-col gap-2">
+          <span className="text-gray-500 text-xs">Plataforma</span>
+          <span className="font-semibold text-lg">{writer?.name}</span>
+        </div>
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex flex-col gap-2">
+          <span className="text-gray-500 text-xs">Subdomínio</span>
+          <span className="font-semibold text-lg">{writer?.slug}.seudominio.com</span>
+        </div>
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex items-center gap-3">
+          <span className="text-gray-500 text-xs">Cor primária</span>
+          <span
+            className="inline-block w-6 h-6 rounded-full border"
+            style={{ backgroundColor: writer?.colorPrimary ?? "#e5e7eb" }}
+          />
+          <span className="text-xs text-gray-700">{writer?.colorPrimary}</span>
+        </div>
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex items-center gap-3">
+          <span className="text-gray-500 text-xs">Cor secundária</span>
+          <span
+            className="inline-block w-6 h-6 rounded-full border"
+            style={{ backgroundColor: writer?.colorSecondary ?? "#e5e7eb" }}
+          />
+          <span className="text-xs text-gray-700">{writer?.colorSecondary}</span>
+        </div>
+      </div>
+
+      <div className="mt-6 p-6 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-200 rounded-lg shadow-inner flex items-center gap-3">
+        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" className="text-blue-500">
+          <path d="M12 8v4l3 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+        <p className="text-blue-900 text-base">
           Em breve você verá aqui suas publicações, vendas e relatórios personalizados!
         </p>
       </div>

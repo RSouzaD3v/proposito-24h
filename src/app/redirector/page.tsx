@@ -9,5 +9,6 @@ export default async function RedirectorPage() {
 
   if (role === "ADMIN") return redirect("/admin");
   if (role === "WRITER_ADMIN") return redirect("/writer/dashboard");
+  if (role === "CLIENT") return redirect("/reader/area");
   return redirect("/app");
 }
