@@ -2,6 +2,7 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { FiChevronLeft } from "react-icons/fi";
 
 export default async function CoursesPage() {
     const session = await getServerSession(authOptions);
@@ -47,22 +48,29 @@ export default async function CoursesPage() {
     });
 
     return (
-        <div className="flex flex-col items-center py-8 px-4">
+        <div className="flex flex-col items-center px-4">
+            <Link
+                href="/reader/area"
+                className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-800 transition"
+            >
+                <FiChevronLeft />
+                Voltar
+            </Link>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8 text-center drop-shadow">
                 Cursos
             </h1>
-            <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full max-w-5xl">
+            <ul className="flex items-center gap-12 flex-wrap justify-center">
                 {books.map((book) => (
                     <Link
                         href={`/reader/area/courses/${book.id}`}
                         key={book.id}
-                        className="relative flex flex-col items-center"
+                        className="relative flex flex-col items-center rounded-xl hover:scale-[1.03] transition-transform duration-200"
                     >
                         {book.coverUrl && (
                             <img
                                 src={book.coverUrl}
                                 alt={book.title}
-                                className="w-32 h-44 object-cover rounded-lg mb-4 shadow"
+                                className="w-40 h-60 object-cover rounded-lg mb-4 shadow"
                             />
                         )}
                     </Link>

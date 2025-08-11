@@ -1,4 +1,5 @@
 import React from "react";
+import { MenuPainel } from "../_components/MenuPainel";
 
 export default function SettingsPage() {
     return (
@@ -14,6 +15,8 @@ export default function SettingsPage() {
                 <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-400 to-blue-400 animate-pulse mb-4" />
                 <span className="text-xs text-gray-400">Versão beta</span>
             </div>
+
+            <MenuPainel />
         </div>
     );
 }

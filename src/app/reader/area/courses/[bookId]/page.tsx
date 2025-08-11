@@ -59,7 +59,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
 
     return (
         <div>
-            <Link className="mx-5 flex items-center gap-1 bg-gray-100 p-2 rounded-sm w-fit" href={"/reader/area/courses"}>
+            <Link className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 p-2 rounded-sm w-fit" href={"/reader/area/courses"}>
                 <FiArrowLeft className="inline mr-2" />
                 Voltar
             </Link>

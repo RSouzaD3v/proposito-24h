@@ -10,11 +10,11 @@ export default function RootLayout({
   return (
     <AuthReaderProvider>
         <section>
-            <HeaderReader />
-            <div className="mt-32">
+            {/* <HeaderReader /> */}
+            <div>
                 {children}
             </div>
-            <MenuPainel />
+            {/* <MenuPainel /> */}
         </section>
     </AuthReaderProvider>
   );

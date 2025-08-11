@@ -1,4 +1,5 @@
 import React from "react";
+import { MenuPainel } from "../_components/MenuPainel";
 
 export default function BiblePage() {
     return (
@@ -32,6 +33,8 @@ export default function BiblePage() {
                         Página em desenvolvimento
                     </span>
                 </div>
+
+                <MenuPainel />
             </section>
         </main>
     );

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { CreatePrayerModal } from "./_components/CreatePrayerModal";
 import { DeletePrayerBtn } from "./_components/DeletePrayerBtn";
+import { MenuPainel } from "../_components/MenuPainel";
 
 export default async function PrayerPage() {
     const session = await getServerSession(authOptions);
@@ -44,6 +45,8 @@ export default async function PrayerPage() {
                     ))}
                 </div>
             )}
+
+            <MenuPainel />
         </section>
     );
 }

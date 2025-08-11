@@ -25,13 +25,13 @@ export default function ChapterSlider({ chapters }: { chapters: Chapter[] }) {
     const chapter = chapters[index];
 
     return (
-        <div className="relative max-w-xl my-10 mb-36 mx-auto mt-12 bg-gradient-to-br from-slate-50 to-blue-100 rounded-3xl shadow-lg flex flex-col items-center gap-7 w-[92vw] border border-gray-200">
+        <div className="relative w-full mb-36 mx-auto bg-gradient-to-br flex flex-col items-center gap-7">
             {chapter.coverUrl && (
-                <div className="w-full overflow-hidden mb-2 flex items-center justify-center">
+                <div className="w-full max-h-[400px] overflow-hidden mb-2 flex items-center justify-center">
                     <img
                         src={chapter.coverUrl}
                         alt={chapter.title}
-                        className="w-full h-full object-cover block transition-transform duration-300"
+                        className="w-full object-cover block transition-transform duration-300"
                     />
                 </div>
             )}
