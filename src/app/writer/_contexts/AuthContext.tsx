@@ -1,5 +1,5 @@
 'use client';
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, createContext, useState, useEffect, use } from "react";
 
 interface AuthContextType {
@@ -11,11 +11,20 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthWriterProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);  
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
             setLoading(true);
+
+            const storedUser = localStorage.getItem("user");
+
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await fetch("/api/writer/me");
                 
@@ -25,24 +34,12 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
 
                 const data = await response.json();
 
-                const dateTime = new Date().getTime();
-
                 if(data.user.role !== 'WRITER_ADMIN') {
-                    redirect("/writer/login");
-                };
-
-                if(!data.subscription) {
-                    router.push("/writer/subscribe");
-                };
-
-                if(data.subscription) {
-                    const subDate = new Date(data.subscription.endedAt).getTime();
-                    if(subDate < dateTime) {
-                        redirect("/writer/subscribe");
-                    }
+                    router.push("/writer/login");
                 };
 
                 setUser(data.user);
+                localStorage.setItem("user", JSON.stringify(data.user));
             } catch (error) {
                 console.error("Error fetching user:", error);
             } finally {
@@ -51,7 +48,7 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
         };
 
         fetchUser();
-    }, [router]);
+    }, []);
 
     if (loading) {
         return (
