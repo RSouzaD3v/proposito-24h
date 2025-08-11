@@ -22,6 +22,10 @@ export default async function WriterPublicationPage() {
 
     return (
         <div className="max-w-3xl mx-auto py-10 px-4">
+            <Link href="/writer/dashboard" className="text-blue-600 hover:underline mb-4 inline-block">
+                Voltar ao Painel
+            </Link>
+            
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold mb-2">Bem-vindo ao painel de publicações</h1>

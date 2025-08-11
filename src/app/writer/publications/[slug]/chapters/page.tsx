@@ -60,6 +60,9 @@ export default function WriterPublicationChapterPage({ params }: { params: Promi
 
     return (
         <section className="max-w-3xl mx-auto py-8">
+            <Link href={`/writer/publications`} className="text-blue-600 hover:underline mb-4 inline-block">
+                Voltar às Publicações
+            </Link>
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold mb-1">Capítulos</h1>
