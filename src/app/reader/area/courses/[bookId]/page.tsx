@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
+import { FaCrown } from "react-icons/fa";
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -39,12 +40,14 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
         if (!purchase) {
             // If no purchase found, handle accordingly (e.g., redirect to payment page)
             return (
-                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
-                        Acesso Negado
+                <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
+                    <Link className="absolute underline top-5 left-5" href={"/reader/area/courses"}>Voltar aos cursos</Link>
+                    <h2 className="text-2xl md:text-3xl flex flex-col items-center font-bold mb-4 text-white">
+                        <FaCrown className="inline mb-2" />
+                        Este curso é pago
                     </h2>
-                    <p className="text-gray-600 mb-6">
-                        Este curso é pago. Por favor, adquira o curso para acessar o conteúdo.
+                    <p className="text-gray-500 mb-6">
+                        Por favor, adquira o curso para acessar o conteúdo.
                     </p>
                     <Link
                         href={`/purchase/book/${bookId}`} // Adjust this link to your pricing or purchase page

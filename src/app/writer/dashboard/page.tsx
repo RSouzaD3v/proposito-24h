@@ -3,13 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import Logout from "../_components/Logout";
 
 export default async function WriterDashboardPage() {
   const session = await getServerSession(authOptions);
-  const h = (await headers()).get("host");
-  const subdomain = h?.split(".")[0];
 
   const itemsNav = [
     {
@@ -32,10 +29,6 @@ export default async function WriterDashboardPage() {
   const writer = await db.writer.findUnique({
     where: { id: writerId },
   });
-
-  if(!subdomain || subdomain === "www" || subdomain !== writer?.slug) {
-    redirect(`http://${writer?.slug}.${h}/writer/dashboard`)
-  }
 
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
