@@ -1,6 +1,6 @@
 'use client';
-import { redirect } from "next/navigation";
-import { useContext, createContext, useState, useEffect } from "react";
+import { redirect, useRouter } from "next/navigation";
+import { useContext, createContext, useState, useEffect, use } from "react";
 
 interface AuthContextType {
     user: { id: string, name: string, role: string, email: string };
@@ -9,6 +9,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthWriterProvider({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);  
 
@@ -24,8 +25,21 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
 
                 const data = await response.json();
 
+                const dateTime = new Date().getTime();
+
                 if(data.user.role !== 'WRITER_ADMIN') {
                     redirect("/writer/login");
+                };
+
+                if(!data.subscription) {
+                    router.push("/writer/subscribe");
+                };
+
+                if(data.subscription) {
+                    const subDate = new Date(data.subscription.endedAt).getTime();
+                    if(subDate < dateTime) {
+                        redirect("/writer/subscribe");
+                    }
                 };
 
                 setUser(data.user);
@@ -37,7 +51,7 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
         };
 
         fetchUser();
-    }, []);
+    }, [router]);
 
     if (loading) {
         return (

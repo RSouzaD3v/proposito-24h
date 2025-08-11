@@ -24,9 +24,15 @@ export async function GET(request: Request) {
         }
     });
 
+    const subscription = await db.writerSubscription.findFirst({
+        where: {
+            writerId: user?.id
+        }
+    });
+
     if (!user) {
         return NextResponse.json({ user: null }, { status: 404 });
     };
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user, subscription });
 }
