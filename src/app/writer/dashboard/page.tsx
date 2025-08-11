@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import Logout from "../_components/Logout";
 
 export default async function WriterDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -39,7 +40,7 @@ export default async function WriterDashboardPage() {
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
       {/* Navigation */}
-      <nav className="mb-8 flex gap-4 border-b pb-4">
+      <nav className="mb-8 flex gap-4 items-center border-b pb-4">
         {itemsNav.map((item) => (
           <Link
             key={item.id}
@@ -49,6 +50,8 @@ export default async function WriterDashboardPage() {
             {item.title}
           </Link>
         ))}
+
+        <Logout />
       </nav>
 
       <div className="flex items-center gap-4 mb-6">

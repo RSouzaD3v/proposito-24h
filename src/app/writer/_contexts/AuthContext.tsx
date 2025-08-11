@@ -17,14 +17,6 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
         const fetchUser = async () => {
             setLoading(true);
 
-            const storedUser = localStorage.getItem("user");
-
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
-                setLoading(false);
-                return;
-            }
-
             try {
                 const response = await fetch("/api/writer/me");
                 
@@ -39,7 +31,6 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
                 };
 
                 setUser(data.user);
-                localStorage.setItem("user", JSON.stringify(data.user));
             } catch (error) {
                 console.error("Error fetching user:", error);
             } finally {
