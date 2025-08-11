@@ -33,7 +33,7 @@ export default async function WriterDashboardPage() {
   });
 
   if(!subdomain || subdomain === "www" || subdomain !== writer?.slug) {
-    redirect(`http://${writer?.slug}.localhost:3000/writer/dashboard`)
+    redirect(`http://${writer?.slug}.${h}/writer/dashboard`)
   }
 
   return (

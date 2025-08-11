@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegistrarEscritorPage() {
     const router = useRouter();
@@ -55,6 +56,10 @@ export default function RegistrarEscritorPage() {
     return (
         <div className="min-h-screen py-5 flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
             <div className="w-full max-w-lg bg-white/90 rounded-2xl shadow-2xl p-8 border border-blue-100">
+                <div className="flex items-center gap-2 my-2">
+                    <Link className="text-blue-500 underline" href="/">Voltar ao Início</Link>
+                    <Link className="text-blue-500 underline" href="/login">Login</Link>
+                </div>
                 <div className="flex flex-col items-center mb-6">
                     <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-2 shadow-lg">
                         <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="white"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
