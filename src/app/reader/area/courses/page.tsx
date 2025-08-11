@@ -51,12 +51,12 @@ export default async function CoursesPage() {
         <div className="flex flex-col items-center px-4">
             <Link
                 href="/reader/area"
-                className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-800 transition"
+                className="absolute top-4 left-4 flex items-center gap-2 text-white transition"
             >
                 <FiChevronLeft />
                 Voltar
             </Link>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8 text-center drop-shadow">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-8 text-center drop-shadow">
                 Cursos
             </h1>
             <ul className="flex items-center gap-12 flex-wrap justify-center">
