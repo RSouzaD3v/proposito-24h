@@ -1,11 +1,12 @@
 'use client';
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { FiMail, FiLock } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSession } from "next-auth/react"
 
 export default function LoginPage() {
   return (
@@ -23,6 +24,17 @@ function LoginInner() {
 
   const params = useSearchParams();
   const success = params.get("success");
+
+  useEffect(() => {
+    const getSessionFunc = async () => {
+      const session = await getSession();
+
+      if (session) {
+        router.push("/redirector");
+      }
+    };
+    getSessionFunc();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +57,7 @@ function LoginInner() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md bg-white dark:bg-black rounded-2xl shadow-xl p-8 border border-gray-800">
         <h1 className="text-3xl font-extrabold text-center text-black dark:text-white mb-6">Entrar</h1>
 
