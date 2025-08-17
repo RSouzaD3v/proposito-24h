@@ -69,6 +69,9 @@ model Writer {
   purchases      Purchase[]
   payouts        WriterPayout[]
   subscriptions WriterSubscription[]
+  quotes         Quote[]
+  devotionals    Devotional[]
+  verses         Verse[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -112,6 +115,10 @@ model User {
   prayers    Prayer[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+
+  userCompletationQuote UserCompletationQuote[]
+  userCompletationDevotional UserCompletationDevotional[]
+  userCompletationVerse UserCompletationVerse[]
 }
 
 model Prayer {
@@ -257,4 +264,78 @@ model WriterPayout {
   updatedAt    DateTime     @updatedAt
 
   @@index([writerId, periodStart, periodEnd])
+}
+
+// CITAÇÃO, DEVOCIONAL, PASSAGEM
+model Quote {
+  id String @id @default(uuid())
+  nameAuthor String
+  content String
+  verse String
+  imageUrl String?
+  writerId String
+  writer Writer @relation(fields: [writerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userCompletation UserCompletationQuote[]
+
+  @@index([writerId, createdAt])
+}
+
+model UserCompletationQuote {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  quoteId String
+  quote Quote @relation(fields: [quoteId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Devotional {
+  id String @id @default(uuid())
+  title String
+  content String
+  verse String
+  imageUrl String?
+  writerId String
+  writer Writer @relation(fields: [writerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userCompletation UserCompletationDevotional[]
+  @@index([writerId, createdAt])
+}
+
+model UserCompletationDevotional {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  devotionalId String
+  devotional Devotional @relation(fields: [devotionalId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Verse {
+  id String @id @default(uuid())
+  content String
+  reference String
+  writerId String
+  writer Writer @relation(fields: [writerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userCompletationVerse UserCompletationVerse[]
+  @@index([writerId, createdAt])
+}
+
+model UserCompletationVerse {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  verseId String
+  verse Verse @relation(fields: [verseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

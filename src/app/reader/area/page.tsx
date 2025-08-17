@@ -1,30 +1,56 @@
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
-import { FiChevronRight } from "react-icons/fi";
+import { FiActivity, FiBook, FiChevronRight } from "react-icons/fi";
 import { MenuPainel } from "./_components/MenuPainel";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { FaCheck, FaComments } from "react-icons/fa";
+import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
+import { VerseCard } from "./_components/devotional/verse/VerseCard";
+import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
 
 export default function AreaReader() {
+  const date = new Date();
+
   const items = [
     {
       id: 1,
       name: "Cursos Profundos",
       type: "Estudos Bíblicos",
       link: "/reader/area/courses",
-      primaryColor: "from-blue-900 to-blue-500",
+      primaryColor: "from-gray-900 to-gray-500",
     },
     {
       id: 2,
       name: "Faça sua oração",
       type: "Oração",
       link: "/reader/area/prayer",
-      primaryColor: "from-green-900 to-green-500",
+      primaryColor: "from-blue-900 to-blue-500",
     },
   ];
 
   return (
-    <section className="container mx-auto max-w-lg">
+    <section className="container mx-auto">
       <HeaderReader />
-      <div className="space-y-6 md:p-0 p-6 mt-36">
+      <div className="mt-32 px-2">
+        {date.toLocaleDateString("pt-BR", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+
+        <h2 className="text-xl font-bold my-2">Recebendo a graça de Deus: A história de Raabe</h2>
+      </div>
+
+      <h3 className="mt-5 mb-2 px-2">DEVOCIONAL DIÁRIO</h3>
+      <div className="grid md:grid-cols-3 grid-cols-1 gap-6 px-2 py-1">
+        <QuoteCard />
+        <VerseCard />
+        <DevotionalCard />
+      </div>
+
+      <h3 className="mt-5 px-2">FUNCIONALIDADES & OUTROS</h3>
+      <div className="space-y-6 md:p-0 py-6 px-2 mb-36">
         {items.map((item) => (
           <Link
             key={item.id}

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiHome, FiHeart, FiBook, FiSettings } from "react-icons/fi";
+import { FiHome, FiHeart, FiBook, FiSettings, FiCheck } from "react-icons/fi";
 
 export const MenuPainel = () => {
     const pathname = usePathname();
@@ -9,8 +9,8 @@ export const MenuPainel = () => {
     const itemsNav = [
         {
             id: 1,
-            name: "Início",
-            icon: <FiHome size={22} />,
+            name: "Hoje",
+            icon: <FiCheck size={22} />,
             link: "/reader/area"
         },
         {
