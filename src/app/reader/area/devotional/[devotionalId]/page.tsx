@@ -27,8 +27,7 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
                     </div>
 
                     <div className="flex items-center flex-col space-y-3 max-w-[400px]">
-                        <p className="text-xl text-white bg-black/20 p-2 rounded-xl">{devotional?.content} Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sapiente mollitia minima in laudantium deleniti quod recusandae omnis possimus, voluptas eaque eum adipisci esse consectetur aut ad ea. Nam, et magni?
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non, officiis facilis? Nostrum, autem facilis earum enim exercitationem provident aspernatur architecto repellendus odio vel libero animi a veritatis harum tempore quisquam. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod, vero! Tenetur molestiae iste enim, numquam doloremque sint expedita impedit neque distinctio odit vel! Maiores voluptas ratione, eum porro quis similique?</p>
+                        <p className="text-xl text-white bg-black/20 p-2 rounded-xl">{devotional?.content}</p>
                     </div>
 
                     {devotional?.id && (
