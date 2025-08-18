@@ -29,7 +29,7 @@ export default function AreaReader() {
   ];
 
   return (
-    <section className="container mx-auto">
+    <section className="container mx-auto md:px-1 px-5">
       <HeaderReader />
       <div className="mt-32 px-2">
         {date.toLocaleDateString("pt-BR", {

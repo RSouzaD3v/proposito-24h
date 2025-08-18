@@ -1,0 +1,134 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
+
+
+
+export default function VerseEditPage({ params }: { params: Promise<{ verseId: string }> }) {
+    const [form, setForm] = useState({
+        content: "",
+        reference: "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        const fetchVerse = async () => {
+            setLoadingData(true);
+            const { verseId } = await params;
+            const response = await fetch(`/api/writer/daily/verse/edit/${verseId}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch verse");
+            }
+            const data = await response.json();
+            setForm({
+                content: data.verse.content,
+                reference: data.verse.reference,
+            });
+            setLoadingData(false);
+        };
+        fetchVerse();
+    }, [params]);
+
+    function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    }
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const { verseId } = await params;
+            const response = await fetch(`/api/writer/daily/verse/edit/${verseId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(form),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create quote");
+            }
+
+            const data = await response.json();
+            console.log("Quote created successfully:", data);
+            setSuccess(true);
+        } catch (error) {
+            console.error("Error creating quote:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loadingData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="flex flex-col items-center">
+                    <svg className="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <h1 className="text-lg font-semibold text-blue-700">Carregando dados...</h1>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+            <Link href="/writer/daily/verse" className="flex items-center gap-2 mb-6 text-blue-600">
+                <FaArrowLeft size={24} />
+                Voltar
+            </Link>
+            <h1 className="text-2xl font-bold mb-6 text-center">Editar Passagem</h1>
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="content">
+                        Citação
+                    </label>
+                    <textarea
+                        id="content"
+                        name="content"
+                        value={form.content}
+                        onChange={handleChange}
+                        required
+                        rows={4}
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        placeholder="Digite a citação"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="reference">
+                        Referência - Versículo
+                    </label>
+                    <input
+                        type="text"
+                        id="reference"
+                        name="reference"
+                        value={form.reference}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        placeholder="Ex: João 3:16"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                >
+                    {loading ? "Salvando..." : "Salvar Citação"}
+                </button>
+                {success && (
+                    <div className="text-green-600 text-center font-medium mt-2">
+                        Citação salva com sucesso!
+                    </div>
+                )}
+            </form>
+        </div>
+    );
+}

@@ -4,18 +4,24 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Logout from "../_components/Logout";
+import { ClipboardLink } from "./_components/ClipboardLink";
 
 export default async function WriterDashboardPage() {
   const session = await getServerSession(authOptions);
 
   const itemsNav = [
     {
+      id: 2,
+      title: "Diário",
+      href: "/writer/daily",
+    },
+    {
       id: 1,
       title: "Minhas Publicações",
       href: "/writer/publications",
     },
     {
-      id: 2,
+      id: 3,
       title: "Configurações",
       href: "/writer/settings",
     },
@@ -33,7 +39,7 @@ export default async function WriterDashboardPage() {
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
       {/* Navigation */}
-      <nav className="mb-8 flex gap-4 items-center border-b pb-4">
+      <nav className="mb-8 flex flex-wrap gap-4 items-center border-b pb-4">
         {itemsNav.map((item) => (
           <Link
             key={item.id}
@@ -84,15 +90,11 @@ export default async function WriterDashboardPage() {
         </div>
       </div>
 
-      <div className="mt-6 p-6 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-200 rounded-lg shadow-inner flex items-center gap-3">
-        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" className="text-blue-500">
-          <path d="M12 8v4l3 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        </svg>
-        <p className="text-blue-900 text-base">
-          Em breve você verá aqui suas publicações, vendas e relatórios personalizados!
-        </p>
-      </div>
+        {writer?.slug && (
+          <div className="mt-6 p-6 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-200 rounded-lg shadow-inner flex items-center gap-3">
+            <ClipboardLink slug={writer?.slug} />
+          </div>
+        )}
     </div>
   );
 }

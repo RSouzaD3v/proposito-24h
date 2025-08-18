@@ -7,7 +7,7 @@ export default function Logout() {
     return (
         <button
             onClick={() => signOut()}
-            className="px-2 py-1 cursor-pointer bg-red-100 text-white rounded hover:bg-red-700 transition"
+            className="px-2 py-1 cursor-pointer text-white rounded bg-red-700 transition"
         >
             Logout
         </button>
