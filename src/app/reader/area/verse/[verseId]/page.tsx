@@ -1,33 +1,24 @@
-import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { CompleteVerse } from "./_components/CompleteVerse";
 
-export default async function VerseDetails({ params }: { params: Promise<{ verseId: string }>}) {
+export default async function VerseDetails({ params }: { params: Promise<{ verseId: string }> }) {
     const { verseId } = await params;
 
     const verse = await db.verse.findUnique({
-        where: {
-            id: verseId
-        }
+        where: { id: verseId }
     });
 
     return (
-        <div className="overflow-hidden relative bg-black">
-            {/* <div className="absolute hidden md:flex opacity-90 -z-20 inset-0 items-center justify-center h-full w-full">
-                <img className="w-full blur-sm object-contain" src={quote?.imageUrl || ""} alt="" />
-            </div>
-            <div className="absolute -z-10 inset-0 flex items-center justify-center h-full w-full">
-                <img className="md:max-w-full min-w-full min-h-full md:max-h-full object-contain" src={quote?.imageUrl || ""} alt="" />
-            </div> */}
-            <div className="text-center flex items-center justify-between flex-col h-screen py-10">
-                <h2 className="bg-black/20 text-white p-2 rounded-xl">{verse?.reference}</h2>
-
-                <div className="text-center flex items-center flex-col space-y-3 max-w-[400px]  max-h-[350px] overflow-auto">
-                    <p className="text-xl text-white bg-black/20 p-2 rounded-xl">{verse?.content}</p>
-                </div>
-
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
+            <div className="bg-white/80 rounded-2xl shadow-xl p-8 max-w-xl w-full flex flex-col items-center space-y-8 border border-gray-200">
+                <span className="text-gray-500 italic text-lg tracking-wide font-serif">
+                    {verse?.reference}
+                </span>
+                <p className="text-2xl text-gray-800 font-serif text-center leading-relaxed select-text">
+                    “{verse?.content}”
+                </p>
                 {verse?.id && (
-                    <div>
+                    <div className="pt-4 w-full flex justify-center">
                         <CompleteVerse verseId={verse.id} />
                     </div>
                 )}

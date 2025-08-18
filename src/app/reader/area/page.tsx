@@ -39,7 +39,7 @@ export default function AreaReader() {
           day: "numeric",
         })}
 
-        <h2 className="text-xl font-bold my-2">Recebendo a graça de Deus: A história de Raabe</h2>
+        <h2 className="text-xl font-bold my-2">Deus seja sempre louvado! 🙌</h2>
       </div>
 
       <h3 className="mt-5 mb-2 px-2">DEVOCIONAL DIÁRIO</h3>

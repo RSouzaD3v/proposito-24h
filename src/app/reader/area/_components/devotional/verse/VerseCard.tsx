@@ -23,17 +23,27 @@ export const VerseCard = async () => {
       return null;
     };
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
     const verse = await db.verse.findFirst({
       where: {
-        writerId: user.writerId,
-      }
+      writerId: user.writerId,
+      createdAt: {
+        gte: today,
+        lt: tomorrow,
+      },
+      },
     });
 
     const userCompletionVerse = await db.userCompletationVerse.findFirst({
       where: {
-        userId: user.id,
-        verseId: verse?.id
-      }
+      userId: user.id,
+      verseId: verse?.id,
+      },
     });
 
     if (!verse) {

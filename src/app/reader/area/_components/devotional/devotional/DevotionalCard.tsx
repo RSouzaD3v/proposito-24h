@@ -22,18 +22,30 @@ export const DevotionalCard = async () => {
       return null;
     };
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
     const devotional = await db.devotional.findFirst({
       where: {
-        writerId: user.writerId,
-      }
+      writerId: user.writerId,
+      createdAt: {
+        gte: today,
+        lt: tomorrow,
+      },
+      },
     });
 
-    const userCompletationDevotional = await db.userCompletationDevotional.findFirst({
-      where: {
+    const userCompletationDevotional = devotional
+      ? await db.userCompletationDevotional.findFirst({
+        where: {
         userId: user.id,
-        devotionalId: devotional?.id
-      }
-    });
+        devotionalId: devotional.id,
+        },
+      })
+      : null;
 
     if (!devotional) {
       return (

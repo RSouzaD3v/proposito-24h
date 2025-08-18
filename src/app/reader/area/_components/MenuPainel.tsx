@@ -32,12 +32,6 @@ export const MenuPainel = () => {
             icon: <FaTree size={22} />,
             link: "/reader/area/journey"
         },
-        {
-            id: 5,
-            name: "Ajustes",
-            icon: <FiSettings size={22} />,
-            link: "/reader/area/settings"
-        },
     ];
 
     return (

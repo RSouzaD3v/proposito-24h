@@ -9,14 +9,10 @@ import { FaMedal, FaQuoteRight, FaBible } from "react-icons/fa";
 export default async function JourneyPage() {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-        return;
-    }
+    if (!session) return null;
 
     const userCompetetionsDevotional = await db.userCompletationDevotional.findMany({
-        where: {
-            userId: session.user.id
-        }
+        where: { userId: session.user.id }
     });
 
     const completedVerses = await db.userCompletationVerse.count({
@@ -31,45 +27,46 @@ export default async function JourneyPage() {
     const completed = userCompetetionsDevotional.length;
 
     return (
-        <div className="min-h-screen py-10">
-            <div className="max-w-xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
-                    <Link href={"/reader/area"}>
-                        <FiArrowLeft className="text-3xl text-amber-700 hover:text-amber-900 transition" />
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white py-6 px-2 flex items-center justify-center">
+            <div className="w-full max-w-2xl mx-auto space-y-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <Link href="/reader/area" className="p-2 rounded-full hover:bg-amber-100 transition">
+                        <FiArrowLeft className="text-2xl text-amber-700" />
                     </Link>
-                    <h2 className="text-3xl font-extrabold text-amber-900 flex-1 text-center drop-shadow">Minha Jornada</h2>
+                    <h2 className="flex-1 text-center text-2xl md:text-3xl font-bold text-amber-900 tracking-tight">
+                        Minha Jornada
+                    </h2>
                 </div>
 
-                <div className="flex justify-center my-8">
+                <div className="flex justify-center">
                     <img
-                        className="w-[140px] drop-shadow-2xl rounded-full border-4 border-amber-200 bg-white"
+                        className="w-24 h-24 md:w-36 md:h-36 rounded-full border-2 border-amber-100 bg-white shadow-md object-cover"
                         src="/gifs/seed.gif"
                         alt="Semente crescendo"
                     />
                 </div>
 
-                <Card className="shadow-xl border-amber-200 bg-white/80 backdrop-blur">
-                    <CardHeader className="flex flex-col items-center gap-2 rounded-t-lg">
-                        <h3 className="text-xl font-bold text-amber-800 tracking-wide drop-shadow">PROGRESSO DA ÁRVORE</h3>
-                        <span className="bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-1 rounded-full text-white font-bold shadow-lg text-lg">
+                <Card className="border-none shadow-md bg-white/70 backdrop-blur-sm">
+                    <CardHeader className="flex flex-col items-center gap-1">
+                        <h3 className="text-lg md:text-xl font-semibold text-amber-800">Progresso da Árvore</h3>
+                        <span className="bg-amber-400/90 px-4 py-0.5 rounded-full text-white font-semibold text-base shadow">
                             {completed} / {totalSteps}
                         </span>
                     </CardHeader>
-
-                    <CardContent className="flex flex-col items-center py-8">
-                        <div className="flex gap-3 mb-4">
+                    <CardContent className="flex flex-col items-center py-6">
+                        <div className="flex gap-1 md:gap-2 mb-3">
                             {Array.from({ length: totalSteps }, (_, i) => (
                                 <div
                                     key={i}
-                                    className={`w-9 h-4 rounded-full transition-all duration-300 ${
+                                    className={`w-6 h-2 md:w-8 md:h-3 rounded-full transition-all duration-300 ${
                                         i < completed
-                                            ? "bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg scale-110"
+                                            ? "bg-gradient-to-r from-amber-300 to-amber-500 shadow scale-105"
                                             : "bg-gray-200"
                                     }`}
                                 />
                             ))}
                         </div>
-                        <span className="text-base text-amber-800 font-medium">
+                        <span className="text-sm md:text-base text-amber-800 font-medium text-center">
                             {completed === totalSteps
                                 ? "🌳 Parabéns! Você completou sua jornada!"
                                 : "Continue avançando para completar sua árvore!"}
@@ -77,26 +74,25 @@ export default async function JourneyPage() {
                     </CardContent>
                 </Card>
 
-                {/* Card de Estatísticas */}
-                <Card className="shadow-xl mt-10 bg-white/80 backdrop-blur">
-                    <CardHeader className="flex flex-col items-center gap-2 rounded-t-lg">
-                        <h3 className="text-xl font-bold text-amber-800 tracking-wide drop-shadow">SUAS CONQUISTAS</h3>
+                <Card className="border-none shadow-md bg-white/70 backdrop-blur-sm">
+                    <CardHeader className="flex flex-col items-center gap-1">
+                        <h3 className="text-lg md:text-xl font-semibold text-amber-800">Suas Conquistas</h3>
                     </CardHeader>
-                    <CardContent className="flex flex-row justify-around py-8 gap-6">
-                        <div className="flex flex-col items-center">
-                            <FaMedal className="text-3xl text-amber-500 mb-1 drop-shadow" />
-                            <span className="text-amber-700 font-extrabold text-2xl">{userCompetetionsDevotional.length}</span>
-                            <span className="text-gray-700 text-sm font-medium">Devocionais</span>
+                    <CardContent className="flex flex-row justify-between md:justify-around py-6 gap-2 md:gap-6">
+                        <div className="flex flex-col items-center min-w-[70px]">
+                            <FaMedal className="text-2xl md:text-3xl text-amber-500 mb-1" />
+                            <span className="text-amber-700 font-bold text-lg md:text-2xl">{userCompetetionsDevotional.length}</span>
+                            <span className="text-gray-600 text-xs md:text-sm font-medium">Devocionais</span>
                         </div>
-                        <div className="flex flex-col items-center">
-                            <FaBible className="text-3xl text-amber-400 mb-1 drop-shadow" />
-                            <span className="text-amber-700 font-extrabold text-2xl">{completedVerses}</span>
-                            <span className="text-gray-700 text-sm font-medium">Versículos</span>
+                        <div className="flex flex-col items-center min-w-[70px]">
+                            <FaBible className="text-2xl md:text-3xl text-amber-400 mb-1" />
+                            <span className="text-amber-700 font-bold text-lg md:text-2xl">{completedVerses}</span>
+                            <span className="text-gray-600 text-xs md:text-sm font-medium">Versículos</span>
                         </div>
-                        <div className="flex flex-col items-center">
-                            <FaQuoteRight className="text-3xl text-amber-300 mb-1 drop-shadow" />
-                            <span className="text-amber-700 font-extrabold text-2xl">{completedQuotes}</span>
-                            <span className="text-gray-700 text-sm font-medium">Citações</span>
+                        <div className="flex flex-col items-center min-w-[70px]">
+                            <FaQuoteRight className="text-2xl md:text-3xl text-amber-300 mb-1" />
+                            <span className="text-amber-700 font-bold text-lg md:text-2xl">{completedQuotes}</span>
+                            <span className="text-gray-600 text-xs md:text-sm font-medium">Citações</span>
                         </div>
                     </CardContent>
                 </Card>

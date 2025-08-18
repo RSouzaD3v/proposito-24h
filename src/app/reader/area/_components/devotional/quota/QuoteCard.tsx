@@ -23,17 +23,27 @@ export const QuoteCard = async () => {
       return null;
     };
 
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
     const quota = await db.quote.findFirst({
       where: {
-        writerId: user.writerId,
-      }
+      writerId: user.writerId,
+      createdAt: {
+        gte: startOfToday,
+        lte: endOfToday,
+      },
+      },
     });
 
     const userCompletionQuote = await db.userCompletationQuote.findFirst({
       where: {
-        userId: user.id,
-        quoteId: quota?.id
-      }
+      userId: user.id,
+      quoteId: quota?.id,
+      },
     });
 
     if (!quota) {
