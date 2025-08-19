@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import StripePortalButton from "../_components/PortalStripeButton";
 
 export default function SettingsPage() {
     return (
@@ -21,15 +22,11 @@ export default function SettingsPage() {
                     </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-indigo-700 mb-2">Configurações</h1>
-                <p className="text-gray-500 text-center mb-6">
-                    Esta página de configurações está em desenvolvimento.<br />
-                    Em breve você poderá personalizar sua experiência!
-                </p>
-                <span className="inline-block px-4 py-2 bg-indigo-50 text-indigo-500 rounded-full text-sm font-medium">
-                    Em desenvolvimento 🚧
-                </span>
+                <div className="w-full flex justify-center mb-5">
+                    <StripePortalButton />
+                </div>
                 <Link href={"/writer/dashboard"}>
-                    <span className="inline-block px-4 my-5 py-2 bg-indigo-500 text-indigo-50 rounded-full text-sm font-medium">
+                    <span className="inline-block px-4 py-2 bg-indigo-500 text-indigo-50 rounded-full text-sm font-medium">
                         Ir para o Painel
                     </span>
                 </Link>

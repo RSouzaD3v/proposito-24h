@@ -63,6 +63,9 @@ model Writer {
   emailFrom      String?
   featureFlags   Json?
 
+  stripeAccountId String?
+  stripeCustomerId String?
+
   domains        Domain[]
   publications   Publication[]
   users          User[]
@@ -85,7 +88,7 @@ model WriterSubscription {
   endedAt    DateTime
   amount     Float
   description String?
-  stripeId   String?
+  stripeId   String? @unique
   stripe     Json?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -148,6 +151,8 @@ model Publication {
   // monetização (se visibility = PAID)
   price         Int?              // em centavos (opcional)
   currency      String?           // ex: "BRL"
+  stripeProductId String?         // <--- novo
+  stripePriceId   String?         // <--- novo
 
   // SEO / rota
   slug          String            // único por writer

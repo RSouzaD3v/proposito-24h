@@ -3,11 +3,22 @@ import { NextRequest } from "next/server";
 
 export default withAuth(
   function middleware(req: NextRequest) {
-    
+    // pode adicionar logs/debug se quiser
+    return;
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        const pathname = req.nextUrl.pathname;
+
+        // 🔓 Libera o webhook do Stripe sem exigir token
+        if (pathname.startsWith("/api/stripe/webhook")) {
+          return true;
+        }
+
+        // 🔒 Demais rotas continuam exigindo token
+        return !!token;
+      },
     },
   }
 );
@@ -18,7 +29,7 @@ export const config = {
     "/writer/:path*",
     "/reader/area/:path*",
     "/app/:path*",
-    "/api/:path*",
+    "/api/:path*", // mantém as rotas API, mas o webhook tem exceção no callback
     "/redirector",
   ],
 };

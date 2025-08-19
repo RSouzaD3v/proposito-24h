@@ -1,15 +1,14 @@
-import { AuthWriterProvider } from "./(check-subscription)/_contexts/AuthContext";
-
+import SubscriptionWriter from "./_contexts/Subscription";
 export default function WriterLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-      <AuthWriterProvider>
+      <SubscriptionWriter>
           <section>
               {children}
           </section>
-      </AuthWriterProvider>
+      </SubscriptionWriter>
   );
 }

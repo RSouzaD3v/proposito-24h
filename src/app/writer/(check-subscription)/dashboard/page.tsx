@@ -12,7 +12,7 @@ export default async function WriterDashboardPage() {
   const itemsNav = [
     {
       id: 2,
-      title: "Diário",
+      title: "Daily",
       href: "/writer/daily",
     },
     {
