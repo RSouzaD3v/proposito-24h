@@ -4,9 +4,7 @@ import { db } from "@/lib/db";
 import Stripe from "stripe";
 
 export const config = {
-  api: {
-    bodyParser: false,
-  },
+  api: { bodyParser: false },
 };
 
 export async function POST(req: NextRequest) {
@@ -24,23 +22,21 @@ export async function POST(req: NextRequest) {
 
     switch (event.type) {
       /**
-       * 1) Checkout finalizado → salva stripeCustomerId e subscriptionId
+       * 1) Checkout finalizado → pode ser subscription (writer) ou pagamento único (livro)
        */
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-
         console.log("✅ Checkout finalizado:", session.id);
 
+        // --- ASSINATURA DO WRITER ---
         if (session.mode === "subscription") {
           const customerId = session.customer as string;
           const subscriptionId = session.subscription as string;
 
-          // pega writer pelo id do customer (definido no momento da criação da sessão de checkout)
           const writer = await db.writer.findFirst({
             where: { stripeCustomerId: customerId },
           });
 
-          // se ainda não existir, precisa já criar um writer (ou dar erro controlado)
           if (!writer) {
             console.log("⚠️ Nenhum writer encontrado para o customerId:", customerId);
             break;
@@ -48,36 +44,76 @@ export async function POST(req: NextRequest) {
 
           await db.writerSubscription.upsert({
             where: { stripeId: subscriptionId },
-            update: {
-              stripe: session as any,
-            },
+            update: { stripe: session as any },
             create: {
               writerId: writer.id,
               stripeId: subscriptionId,
               description: "Assinatura inicial",
-              amount: 0, // atualizado no invoice.paid
+              amount: 0, // atualizado depois em invoice.paid
               endedAt: new Date(),
               stripe: session as any,
             },
           });
 
-          console.log(
-            "💾 Writer vinculado ao customer e assinatura criada:",
-            writer.id
-          );
+          console.log("💾 Writer vinculado ao customer e assinatura criada:", writer.id);
         }
+
+        // --- COMPRA DE LIVRO ---
+        if (session.mode === "payment") {
+          const customerId = session.customer as string;
+          const paymentIntentId = session.payment_intent as string;
+          const publicationId = session.metadata?.publicationId;
+          const writerId = session.metadata?.writerId;
+          const userId =
+            (session.client_reference_id as string | null) ||
+            (session.metadata?.userId as string | undefined) ||
+            null;
+
+          if (!publicationId || !writerId || !userId) {
+            console.log("⚠️ Dados faltando:", { publicationId, writerId, userId });
+            break;
+          }
+
+          // Evita duplicata caso webhook seja reenviado
+          const existing = await db.purchase.findFirst({
+            where: { stripeSessionId: session.id },
+            select: { id: true },
+          });
+          if (existing) {
+            console.log("↩️ Purchase já existe para session:", session.id);
+            break;
+          }
+
+          await db.purchase.create({
+            data: {
+              userId,
+              publicationId,
+              writerId,
+              amount: session.amount_total ?? 0,
+              currency: (session.currency ?? "BRL").toUpperCase(),
+              status: "SUCCESS",
+              provider: "STRIPE",
+              stripeSessionId: session.id,
+              stripePaymentIntentId: paymentIntentId,
+              stripeCustomerId: customerId,
+              rawProviderPayload: session as any,
+            },
+          });
+
+          console.log("💾 Purchase criada:", { userId, publicationId });
+        }
+
         break;
       }
 
       /**
-       * 2) Invoice paga → atualiza assinatura
+       * 2) Invoice paga → atualiza assinatura do writer
        */
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
 
         let subscriptionId = (invoice as any).subscription as string | null;
 
-        // fallback: buscar assinatura se não veio no invoice
         if (!subscriptionId && invoice.customer) {
           const subs = await stripe.subscriptions.list({
             customer: invoice.customer as string,
@@ -123,17 +159,11 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      /**
-       * 3) Falha de pagamento
-       */
       case "invoice.payment_failed": {
         console.log("⚠️ Pagamento de fatura falhou");
         break;
       }
 
-      /**
-       * 4) Assinatura cancelada
-       */
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         await db.writerSubscription.deleteMany({

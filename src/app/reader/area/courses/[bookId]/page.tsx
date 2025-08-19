@@ -5,6 +5,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { FaCrown } from "react-icons/fa";
+import { BuyButton } from "./_components/BuyButton";
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -49,12 +50,13 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
                     <p className="text-gray-500 mb-6">
                         Por favor, adquira o curso para acessar o conteúdo.
                     </p>
-                    <Link
+                    {/* <Link
                         href={`/purchase/book/${bookId}`} // Adjust this link to your pricing or purchase page
                         className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                     >
                         Comprar Livro
-                    </Link>
+                    </Link> */}
+                    <BuyButton publicationId={bookId} />
                 </div>
             );
         }

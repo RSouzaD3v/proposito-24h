@@ -202,7 +202,7 @@ export default function WriterPublicationCreatePage() {
                         />
                         {form.coverUrl && (
                             <div className="mt-2 flex justify-center">
-                                <Image width={200} height={128} src={form.coverUrl} alt="Capa" className="h-32 object-cover rounded shadow" />
+                                <img width={200} height={128} src={form.coverUrl} alt="Capa" className="h-32 object-cover rounded shadow" />
                             </div>
                         )}
                     </div>
