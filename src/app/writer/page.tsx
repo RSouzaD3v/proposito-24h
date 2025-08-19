@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function WriterOnboarding({ writerId, email }: { writerId: string; email: string }) {
+export default function WriterOnboarding() {
     const [loading, setLoading] = useState(false);
 
     async function handleConnect() {
@@ -11,7 +11,6 @@ export default function WriterOnboarding({ writerId, email }: { writerId: string
         const res = await fetch("/api/stripe/create-writer-account", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ writerId, email }),
         });
 
         const data = await res.json();
