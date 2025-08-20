@@ -29,7 +29,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 title: data.devotional.title,
                 content: data.devotional.content,
                 verse: data.devotional.verse,
-                imageUrl: data.devotional.imageUrl,
+                imageUrl: data.devotional.imageUrl || "",
             });
             setLoadingData(false);
         };

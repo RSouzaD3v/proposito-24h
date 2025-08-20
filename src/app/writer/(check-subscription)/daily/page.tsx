@@ -1,4 +1,4 @@
-import { FaBook, FaFileExcel, FaQuoteLeft } from "react-icons/fa";
+import { FaBook, FaFileExcel, FaQuoteLeft, FaDailymotion } from "react-icons/fa";
 import Link from "next/link";
 import { FiArrowLeft, FiBook } from "react-icons/fi";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,12 @@ export default function DailyPage() {
             title: "Postagem em massa",
             href: "/writer/imports",
             icon: <FaFileExcel size={32} />
+        },
+        {
+            id: 5,
+            title: "Gerenciamento Daily",
+            href: "/writer/daily/management",
+            icon: <FaDailymotion size={32} />
         }
     ];
 
