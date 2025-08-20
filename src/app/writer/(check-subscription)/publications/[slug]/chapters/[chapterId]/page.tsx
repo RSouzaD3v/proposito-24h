@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -125,13 +126,16 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
                             </div>
                             <div>
                                 <label className="block text-gray-700 font-semibold mb-2">URL da Capa</label>
-                                <input
+                                <S3Uploader folder="cover-chapters" onUploaded={({ publicUrl }) => {
+                                    setCoverUrl(publicUrl);
+                                }} />
+                                {/* <input
                                     type="text"
                                     value={coverUrl}
                                     onChange={(e) => setCoverUrl(e.target.value)}
                                     placeholder="URL da Capa"
                                     className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                                />
+                                /> */}
                             </div>
                         </div>
                         <div>

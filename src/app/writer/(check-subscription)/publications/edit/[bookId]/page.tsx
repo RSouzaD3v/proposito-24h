@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -185,15 +186,17 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                     </div>
                     <div>
                         <label className="block font-semibold text-gray-700 mb-1">URL da Capa</label>
-                        <input
+                        <S3Uploader folder="cover-books-images" onUploaded={({ publicUrl }) => {
+                            setForm(prev => ({ ...prev, coverUrl: publicUrl }));
+                        }} />
+                        {/* <input
                             type="text"
                             name="coverUrl"
                             value={form.coverUrl}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200"
-                        />
+                        /> */}
                         {form.coverUrl && (
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={form.coverUrl} alt="Capa" className="mt-2 h-32 w-full object-cover rounded-lg border border-gray-200" />
                         )}
                     </div>

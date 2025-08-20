@@ -91,8 +91,8 @@ export default function WriterPublicationChapterPage({ params }: { params: Promi
                                             <p className="text-gray-500 text-sm mt-1">{chapter.subtitle}</p>
                                         </CardHeader>
                                         <CardContent>
-                                            <p className="text-gray-700">
-                                                {truncate(chapter.content, 120)}
+                                            <p className="text-gray-700 text-wrap">
+                                                {truncate(chapter.content, 15)}
                                             </p>
                                         </CardContent>
                                     </div>

@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -193,13 +194,16 @@ export default function WriterPublicationCreatePage() {
                     </div>
                     <div className="sm:col-span-2">
                         <label className="block font-semibold mb-1 text-gray-700">URL da Capa</label>
-                        <input
+                        <S3Uploader folder="cover-books-images"   onUploaded={({ publicUrl }) => {
+                            setForm(prev => ({ ...prev, coverUrl: publicUrl }));
+                        }}/>
+                        {/* <input
                             type="text"
                             name="coverUrl"
                             value={form.coverUrl}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400"
-                        />
+                        /> */}
                         {form.coverUrl && (
                             <div className="mt-2 flex justify-center">
                                 <img width={200} height={128} src={form.coverUrl} alt="Capa" className="h-32 object-cover rounded shadow" />

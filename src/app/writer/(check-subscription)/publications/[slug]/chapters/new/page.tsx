@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ export default function WriterPublicationChapterNewPage({
 }) {
     const [slug, setSlug] = useState("");
     const router = useRouter();
+    const [form, setForm] = useState<{ coverUrl?: string }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,13 +25,17 @@ export default function WriterPublicationChapterNewPage({
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const data = Object.fromEntries(formData);
+        const payload = {
+            ...data,
+            coverUrl: form.coverUrl,
+        }
 
         try {
             const response = await fetch(
                 `/api/writer/publications/${slug}/chapters`,
                 {
                     method: "POST",
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(payload),
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -109,13 +115,16 @@ export default function WriterPublicationChapterNewPage({
                         <label htmlFor="coverUrl" className="block text-sm font-semibold text-gray-700 mb-1">
                             Imagem de Capa (URL)
                         </label>
-                        <input
+                        <S3Uploader folder="cover-chapters" onUploaded={({ publicUrl }) => {
+                            setForm(prev => ({ ...prev, coverUrl: publicUrl }));
+                        }} />
+                        {/* <input
                             type="text"
                             name="coverUrl"
                             id="coverUrl"
                             className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-blue-400 outline-none"
                             placeholder="Digite a URL da imagem de capa"
-                        />
+                        /> */}
                     </div>
                     <div>
                         <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-1">
