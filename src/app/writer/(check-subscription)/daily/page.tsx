@@ -1,4 +1,4 @@
-import { FaBook, FaQuoteLeft } from "react-icons/fa";
+import { FaBook, FaFileExcel, FaQuoteLeft } from "react-icons/fa";
 import Link from "next/link";
 import { FiArrowLeft, FiBook } from "react-icons/fi";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,12 @@ export default function DailyPage() {
             title: "Minha passagem (Hoje)",
             href: "/writer/daily/verse",
             icon: <FaBook size={32} />
+        },
+        {
+            id: 4,
+            title: "Postagem em massa",
+            href: "/writer/imports",
+            icon: <FaFileExcel size={32} />
         }
     ];
 

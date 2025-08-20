@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import StripePortalButton from "../_components/PortalStripeButton";
+import WriterOnboarding from "../_components/ConnectStripe";
 
 export default function SettingsPage() {
     return (
@@ -27,6 +28,7 @@ export default function SettingsPage() {
                 </p>
                 <div className="w-full flex flex-col items-center gap-3 mb-4">
                     <StripePortalButton />
+                    <WriterOnboarding />
                     <a
                         href="/api/stripe/dashboard"
                         target="_blank"

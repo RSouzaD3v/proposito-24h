@@ -26,7 +26,7 @@ export default function ManageSubscriptionButton() {
     <button
       onClick={handleManage}
       disabled={loading}
-      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+      className="flex items-center gap-2 px-6 py-3 bg-[#635bff] hover:bg-[#7a6fff] transition text-white font-semibold rounded-md shadow-md disabled:opacity-60"
     >
       {loading ? "Abrindo..." : "Gerenciar Assinatura"}
     </button>
