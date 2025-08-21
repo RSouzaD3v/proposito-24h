@@ -5,7 +5,7 @@ export const ClipboardLink = ({ slug }: { slug: string }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(`https://${slug}.example.com/reader/register`).then(() => {
+        navigator.clipboard.writeText(`https://${slug}.proposito24h.com.br/reader/register`).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });

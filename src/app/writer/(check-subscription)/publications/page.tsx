@@ -31,7 +31,7 @@ export default async function WriterPublicationPage() {
                 ← Voltar ao Painel
             </Link>
 
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center flex-wrap gap-4 justify-between mb-8">
                 <div>
                     <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
                         Painel de Publicações
@@ -40,12 +40,19 @@ export default async function WriterPublicationPage() {
                         Gerencie suas publicações de forma fácil e rápida.
                     </p>
                 </div>
-                <Link
-                    href="/writer/publications/create"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-                >
-                    + Nova Publicação
-                </Link>
+                <div className="flex items-center gap-4 flex-wrap">
+                    <Link href={"/writer/publications/my-vitrine"}>
+                        <span className="text-blue-600 hover:underline font-medium">
+                            Minha Vitrine
+                        </span>
+                    </Link>
+                    <Link
+                        href="/writer/publications/create"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                    >
+                        + Nova Publicação
+                    </Link>
+                </div>
             </div>
 
             <div className="space-y-6">
