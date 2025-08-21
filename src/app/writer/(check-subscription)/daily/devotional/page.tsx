@@ -44,7 +44,9 @@ export default async function DevotionalPage() {
                     <h2 className="mb-4 text-indigo-400 text-xs font-semibold tracking-widest">PROPÓSITO 24H</h2>
                     <span className="text-indigo-500 text-sm font-semibold">{devotional.title}</span>
                     <blockquote className="mb-6">
-                        <p className="text-2xl font-light text-gray-800 italic">“{devotional.content}”</p>
+                        <p className="text-2xl font-light text-gray-800 italic whitespace-pre-line leading-relaxed">
+                            “{devotional.content}”
+                        </p>
                     </blockquote>
                 </div>
             ) : (

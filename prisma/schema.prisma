@@ -162,6 +162,7 @@ model Publication {
   title         String
   subtitle      String?
   description   String?
+  category     String? @default("Religioso")           // ex: "Espiritualidade", "Família"
 
   // capa da publicação
   coverUrl      String?

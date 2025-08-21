@@ -38,19 +38,26 @@ export default function DailyPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-5">
-            <Link href="/writer/dashboard" className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg">
-                <FiArrowLeft size={24}/>
+        <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center py-10 px-5">
+            <Link
+                href="/writer/dashboard"
+                className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg hover:text-indigo-900 transition-colors"
+            >
+                <FiArrowLeft size={24} />
                 Voltar
             </Link>
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Daily Page</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
-                {itemsNav.map(item => (
+            <h1 className="text-4xl font-extrabold mb-8 text-gray-800 text-center">
+                Daily Page
+            </h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl">
+                {itemsNav.map((item) => (
                     <Link key={item.id} href={item.href} className="group">
-                        <Card className="cursor-pointer transition-transform group-hover:-translate-y-1 group-hover:shadow-2xl flex flex-col items-center">
+                        <Card className="cursor-pointer transition-transform transform group-hover:-translate-y-2 group-hover:shadow-xl flex flex-col items-center bg-white border border-gray-200 rounded-lg">
                             <CardContent className="flex flex-col items-center p-6">
-                                <div className="mb-4 text-indigo-600">{item.icon}</div>
-                                <CardTitle className="text-lg font-semibold text-gray-700 text-center">
+                                <div className="mb-4 text-indigo-600 group-hover:text-indigo-800 transition-colors">
+                                    {item.icon}
+                                </div>
+                                <CardTitle className="text-lg font-semibold text-gray-700 text-center group-hover:text-gray-900 transition-colors">
                                     {item.title}
                                 </CardTitle>
                             </CardContent>
