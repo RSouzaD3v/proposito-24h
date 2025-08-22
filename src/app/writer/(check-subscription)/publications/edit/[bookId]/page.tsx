@@ -1,8 +1,10 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import S3UploaderPdf from "@/components/S3UploaderPdf";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { is } from "zod/v4/locales";
 
 const publicationTypes = [
     { value: "DEVOTIONAL", label: "Devocional" },
@@ -33,6 +35,8 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
         coverUrl: "",
         body: "",
         tags: "",
+        isPdf: false,
+        pdfUrl: "",
     });
 
     const [loading, setLoading] = useState(false);
@@ -140,6 +144,42 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                             </div>
                         </div>
                     )}
+
+
+          {/* Upload PDF */}
+          <div className="sm:col-span-2">
+            <label className="block font-semibold mb-1 text-gray-700">
+              É PDF?
+            </label>
+            <select
+              name="isPdf"
+              value={form.isPdf ? "true" : "false"}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2"
+            >
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </div>
+
+            {form.isPdf && (
+                <div className="sm:col-span-2">
+                <label className="block font-semibold mb-1 text-gray-700">
+                    Upload do PDF
+                </label>
+                <S3UploaderPdf
+                    folder="ebook"
+                    onUploaded={({ publicUrl }) =>
+                    setForm((prev) => ({ ...prev, pdfUrl: publicUrl, isPdf: true }))
+                    }
+                />
+                {form.pdfUrl && (
+                    <p className="text-sm text-green-600 mt-2">
+                    PDF enviado com sucesso.
+                    </p>
+                )}
+                </div>
+            )}
                     <div>
                         <label className="block font-semibold text-gray-700 mb-1">Tags (separadas por vírgula)</label>
                         <input

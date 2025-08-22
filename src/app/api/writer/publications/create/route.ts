@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     price, currency,
     slug, title, subtitle, description,
     coverUrl, body: content, tags,
+    isPdf, pdfUrl
   } = body;
 
   // slug único POR writer
@@ -77,6 +78,8 @@ export async function POST(req: NextRequest) {
       coverUrl: coverUrl ?? null,
       body: content ?? null,
       tags: Array.isArray(tags) ? tags : [],
+      isPdf: isPdf ?? false,
+      pdfUrl: pdfUrl ?? null,
     },
   });
 

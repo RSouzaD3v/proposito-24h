@@ -125,6 +125,16 @@ model User {
   userCompletationDevotional UserCompletationDevotional[]
   userCompletationVerse UserCompletationVerse[]
   userCompletationPrayer UserCompletationPrayer[]
+
+  achievements Achievements[]
+}
+
+model Achievements {
+  id String @id @default(uuid())
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  completed String[]
+  createdAt DateTime @default(now())
 }
 
 model ClientSubscription {
@@ -183,6 +193,9 @@ model Publication {
   currency      String?           // ex: "BRL"
   stripeProductId String?         // <--- novo
   stripePriceId   String?         // <--- novo
+  
+  isPdf          Boolean          @default(false)
+  pdfUrl        String?           // <--- novo
 
   // SEO / rota
   slug          String            // único por writer

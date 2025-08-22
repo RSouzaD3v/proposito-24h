@@ -5,12 +5,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { FaMedal, FaQuoteRight, FaBible } from "react-icons/fa";
-
-type AchievementType = "devotional" | "verse" | "quote" | "all";
-
-interface Achievements {
-  completed: AchievementType[];
-}
+import { Achievements } from "@prisma/client";
 
 export default async function JourneyPage() {
   const session = await getServerSession(authOptions);
@@ -29,7 +24,9 @@ export default async function JourneyPage() {
   });
 
   // Simulação de achievements (substituir por lógica real depois)
-  const achievements: Achievements = { completed: [] };
+  const achievements: Achievements | null = await db.achievements.findFirst({
+    where: { userId: session.user.id },
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white py-6 px-2 flex items-center justify-center">
@@ -81,7 +78,7 @@ export default async function JourneyPage() {
             </h3>
           </CardHeader>
           <CardContent className="flex flex-wrap justify-center gap-6 py-6">
-            {achievements.completed.length > 0 ? (
+            {achievements && achievements.completed.length > 0 ? (
               <>
                 {achievements.completed.includes("devotional") && (
                   <AchievementCard

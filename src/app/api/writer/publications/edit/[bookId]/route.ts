@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ book
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, description, tags, coverUrl, visibility, price, subtitle, status } = await req.json();
+    const { title, description, tags, coverUrl, visibility, price, subtitle, status, isPdf, pdfUrl } = await req.json();
 
     if (!title || !description || !tags || !coverUrl || !visibility || !status) {
         return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -43,7 +43,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ book
                 visibility,
                 price,
                 subtitle,
-                status
+                status,
+                isPdf,
+                pdfUrl
             }
         });
         return NextResponse.json({ message: "Publication updated successfully" });
