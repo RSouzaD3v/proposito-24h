@@ -375,3 +375,42 @@ model UserCompletationVerse {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Biblia
+model BibleVersion {
+  id        String   @id @default(uuid())
+  code      String   @unique   // "ACF"
+  name      String             // "Almeida Corrigida Fiel"
+  language  String             // "pt-BR"
+  createdAt DateTime @default(now())
+  verses    BibleVerse[]
+}
+
+model BibleBook {
+  id        Int      @id       // 1..66
+  abbrev    String   @unique   // "gn", "mt", ...
+  name      String              // "Gênesis", ...
+  order     Int      @unique   // posição canônica
+  createdAt DateTime @default(now())
+  verses    BibleVerse[]
+
+  @@index([order])
+}
+
+model BibleVerse {
+  id         String       @id @default(uuid())
+  versionId  String
+  bookId     Int
+  chapter    Int
+  verse      Int
+  text       String
+
+  version    BibleVersion @relation(fields: [versionId], references: [id])
+  book       BibleBook    @relation(fields: [bookId], references: [id])
+
+  createdAt  DateTime     @default(now())
+
+  @@unique([versionId, bookId, chapter, verse]) // 1 versículo por versão
+  @@index([bookId, chapter, verse])
+  @@index([versionId])
+}
