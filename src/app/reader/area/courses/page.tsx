@@ -70,7 +70,7 @@ export default async function CoursesPage() {
 
       <header className="z-10">
         <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow">Ebooks</h1>
-        <p className="text-neutral-300 mt-2">Explore os seus livros</p>
+        <p className="text-neutral-300 mt-2">Explore os melhores livros</p>
       </header>
 
       {categories.length === 0 && (

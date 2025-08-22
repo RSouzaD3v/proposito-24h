@@ -42,13 +42,13 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
             // If no purchase found, handle accordingly (e.g., redirect to payment page)
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-                    <Link className="absolute underline top-5 left-5" href={"/reader/area/courses"}>Voltar aos cursos</Link>
+                    <Link className="absolute underline top-5 left-5" href={"/reader/area/courses"}>Voltar aos ebooks</Link>
                     <h2 className="text-2xl md:text-3xl flex flex-col items-center font-bold mb-4 text-white">
                         <FaCrown className="inline mb-2" />
-                        Este curso é pago
+                        Este ebook é pago
                     </h2>
                     <p className="text-gray-500 mb-6">
-                        Por favor, adquira o curso para acessar o conteúdo.
+                        Por favor, adquira o ebook para acessar o conteúdo.
                     </p>
                     {/* <Link
                         href={`/purchase/book/${bookId}`} // Adjust this link to your pricing or purchase page

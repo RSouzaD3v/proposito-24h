@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ prayerId: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ prayerId: string }> }) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -23,14 +23,27 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ praye
             return NextResponse.json("Oração não encontrada", { status: 404 });
         }
 
-        await db.prayer.delete({
+        const userCompletationPrayerExisting = await db.userCompletationPrayer.findFirst({
             where: {
-                id: prayerId
+                userId: session.user.id,
+                prayerId: existingPrayer.id
             }
         });
 
-        return  NextResponse.json("Oração deletada com sucesso", { status: 200 });
+        if (userCompletationPrayerExisting) {
+            return NextResponse.json("Oração já completada", { status: 400 });
+        }
+
+        const userCompletationPrayer = await db.userCompletationPrayer.create({
+            data: {
+                userId: session.user.id,
+                prayerId: existingPrayer.id
+            }
+        });
+
+        return  NextResponse.json(userCompletationPrayer, { status: 200 });
     } catch (error) {
         return NextResponse.json(error, { status: 500 });
     }
 }
+

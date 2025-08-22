@@ -75,6 +75,7 @@ model Writer {
   quotes         Quote[]
   devotionals    Devotional[]
   verses         Verse[]
+  prayers       Prayer[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -115,23 +116,52 @@ model User {
   writer     Writer?   @relation(fields: [writerId], references: [id])
 
   purchases  Purchase[]
-  prayers    Prayer[]
+  clientSubscriptions ClientSubscription[]
+
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
   userCompletationQuote UserCompletationQuote[]
   userCompletationDevotional UserCompletationDevotional[]
   userCompletationVerse UserCompletationVerse[]
+  userCompletationPrayer UserCompletationPrayer[]
 }
+
+model ClientSubscription {
+  id         String   @id @default(uuid())
+  clientId   String
+  client     User   @relation(fields: [clientId], references: [id])
+  startedAt  DateTime @default(now())
+  endedAt    DateTime
+  amount     Float
+  description String?
+  stripeCustomerId String? @unique
+  stripeSubscriptionId String? @unique
+  stripeId   String? @unique
+  stripe     Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 
 model Prayer {
   id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId], references: [id])
   title String
   content String
+  writerId String
+  writer   Writer @relation(fields: [writerId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  userCompletationPrayer UserCompletationPrayer[]
+}
+
+model UserCompletationPrayer {
+  id String @id @default(uuid())
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  prayerId String
+  prayer   Prayer @relation(fields: [prayerId], references: [id])
 }
 
 /**
