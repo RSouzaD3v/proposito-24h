@@ -29,7 +29,7 @@ export const config = {
     "/writer/:path*",
     "/reader/area/:path*",
     "/app/:path*",
-    "/api/:path*", // mantém as rotas API, mas o webhook tem exceção no callback
+    // "/api/:path*", // mantém as rotas API, mas o webhook tem exceção no callback
     "/redirector",
   ],
 };
