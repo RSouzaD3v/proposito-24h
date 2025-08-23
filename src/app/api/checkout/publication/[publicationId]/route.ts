@@ -63,6 +63,7 @@ export async function POST(
       metadata: {
         publicationId: pub.id,
         writerId: pub.writerId,
+        userId: user.id,
       },
       // taxa da plataforma (se quiser cobrar)
       payment_intent_data: PLATFORM_FEE > 0 ? {
