@@ -1,82 +1,25 @@
 'use client';
-
+import { Header } from '@/components/Header';
 import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 to-white dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 font-sans">
-      {/* Header */}
-      <header className="w-full flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-slate-800 shadow-sm">
-        <span className="text-lg font-bold tracking-tight text-sky-600 dark:text-sky-400">
-          p24h
-        </span>
-        <Link
-          href="/register-writer"
-          className="bg-sky-600 hover:bg-sky-700 text-white rounded-full px-4 py-2 text-sm transition shadow-md"
-        >
-          Seja escritor
-        </Link>
-      </header>
+    <section>
+      <Header />
 
-      {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 leading-tight">
-          Sua página de escritor, pronta{' '}
-          <span className="text-sky-600 dark:text-sky-400">24h</span>
-        </h1>
-        <p className="text-lg text-slate-500 dark:text-slate-300 mb-8 max-w-lg">
-          Crie sua vitrine personalizada e receba pedidos diretamente dos seus clientes.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/register-writer"
-            className="bg-sky-600 hover:bg-sky-700 text-white rounded-full px-6 py-3 text-lg transition shadow-lg"
-          >
-            Comece agora
-          </Link>
-          <a
-            href="#beneficios"
-            className="border border-slate-200 dark:border-slate-700 rounded-full px-6 py-3 text-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-md"
-          >
-            Saiba mais
-          </a>
+      <section className='h-screen max-h-[650px]'>
+        <div className='absolute top-0 left-0 -z-10 w-full min-h-screen flex items-center justify-center flex-col gap-4'>
+            <video autoPlay={true} muted loop className='absolute w-full h-full object-cover'>
+              <source src="/video/man-woman.mp4" type="video/mp4" />
+            </video>
+            <div className='bg-black absolute top-0 left-0 w-full h-full opacity-70' />
+            <div className='relative z-10 flex flex-col items-center justify-center'>
+              <h1 className='text-white md:text-4xl text-2xl font-bold'>Seja bem vindo ao <b>propósito24h</b></h1>
+              <p className='text-white md:text-lg'>Onde você vai criar mais conexão com Deus!</p>
+              <Link href="/register-writer" className='mt-4 px-10 py-2 bg-amber-400 text-black font-bold rounded-md'>Começar</Link>
+            </div>
         </div>
-      </main>
-
-      {/* Benefícios */}
-      <section
-        id="beneficios"
-        className="grid gap-6 sm:grid-cols-3 px-6 py-12 max-w-5xl mx-auto"
-      >
-        <BenefitCard
-          title="Devocionais"
-          desc="Compartilhe devocionais com seus leitores."
-        />
-        <BenefitCard
-          title="Ebooks"
-          desc="Venda e distribua seus ebooks facilmente."
-        />
-        <BenefitCard
-          title="Suporte"
-          desc="Conte com nosso suporte sempre."
-        />
       </section>
-
-      {/* Footer */}
-      <footer className="w-full py-6 text-center text-slate-400 text-sm border-t border-slate-100 dark:border-slate-800">
-        © {new Date().getFullYear()} Propósito 24h. Todos os direitos reservados.
-      </footer>
-    </div>
-  );
-}
-
-function BenefitCard({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 text-center border border-slate-100 dark:border-slate-700 hover:shadow-xl transition">
-      <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-400 mb-2">
-        {title}
-      </h3>
-      <p className="text-slate-500 dark:text-slate-300 text-sm">{desc}</p>
-    </div>
+    </section>
   );
 }
