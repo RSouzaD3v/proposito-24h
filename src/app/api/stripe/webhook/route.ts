@@ -3,9 +3,9 @@ import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
 
-export const config = {
-  api: { bodyParser: false },
-};
+// export const config = {
+//   api: { bodyParser: false },
+// };
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature")!;
