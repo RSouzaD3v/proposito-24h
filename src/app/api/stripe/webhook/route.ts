@@ -1,24 +1,47 @@
+// app/api/stripe/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
 
-// export const config = {
-//   api: { bodyParser: false },
-// };
+// Garante Node runtime para ler raw body com req.text()
+export const runtime = "nodejs";
+
+function tryConstructEvent(body: string, sig: string | null) {
+  if (!sig) throw new Error("Missing Stripe signature");
+
+  const secrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,            // master (Conta)
+    process.env.STRIPE_WEBHOOK_SECRET_CONNECT,    // Connect (contas conectadas)
+  ].filter(Boolean) as string[];
+
+  if (!secrets.length) {
+    throw new Error("Webhook secrets not configured");
+  }
+
+  let lastErr: unknown = null;
+
+  for (const secret of secrets) {
+    try {
+      return stripe.webhooks.constructEvent(body, sig, secret);
+    } catch (err) {
+      lastErr = err;
+      // tenta próximo secret
+    }
+  }
+
+  throw lastErr ?? new Error("Unable to verify event");
+}
 
 export async function POST(req: NextRequest) {
-  const sig = req.headers.get("stripe-signature")!;
+  const sig = req.headers.get("stripe-signature");
   const body = await req.text();
 
   try {
-    const event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    const event = tryConstructEvent(body, sig);
+    const fromAccount = (event as any).account as string | undefined; // presente quando vier de connected account
 
-    console.log("🔔 Evento:", event.type);
+    console.log("🔔 Evento:", event.type, "| account:", fromAccount ?? "master");
 
     switch (event.type) {
       /**
@@ -26,19 +49,38 @@ export async function POST(req: NextRequest) {
        */
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log("✅ Checkout finalizado:", session.id);
 
-        // --- ASSINATURA DO WRITER ---
+        console.log("✅ Checkout finalizado:", {
+          id: session.id,
+          mode: session.mode,
+          account: fromAccount ?? "master",
+          metadata: session.metadata,
+        });
+
+        // --- ASSINATURA DO WRITER (criada no master OU na connected) ---
         if (session.mode === "subscription") {
           const customerId = session.customer as string;
           const subscriptionId = session.subscription as string;
 
-          const writer = await db.writer.findFirst({
-            where: { stripeCustomerId: customerId },
-          });
+          // Se vier de connected, preferimos localizar pelo stripeAccountId.
+          let writer = null;
+          if (fromAccount) {
+            writer = await db.writer.findFirst({
+              where: { stripeAccountId: fromAccount },
+            });
+          }
+          // Fallback: tenta por customer salvo (útil quando a assinatura é feita no master)
+          if (!writer && customerId) {
+            writer = await db.writer.findFirst({
+              where: { stripeCustomerId: customerId },
+            });
+          }
 
           if (!writer) {
-            console.log("⚠️ Nenhum writer encontrado para o customerId:", customerId);
+            console.log("⚠️ Nenhum writer encontrado (account/customer):", {
+              account: fromAccount,
+              customerId,
+            });
             break;
           }
 
@@ -55,22 +97,30 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          console.log("💾 Writer vinculado ao customer e assinatura criada:", writer.id);
+          console.log("💾 Assinatura vinculada ao writer:", writer.id);
         }
 
-        // --- COMPRA DE LIVRO ---
+        // --- COMPRA DE LIVRO (pagamento único) ---
         if (session.mode === "payment") {
           const customerId = session.customer as string;
           const paymentIntentId = session.payment_intent as string;
+
           const publicationId = session.metadata?.publicationId;
           const writerId = session.metadata?.writerId;
+
+          // aceita tanto client_reference_id quanto metadata.userId
           const userId =
             (session.client_reference_id as string | null) ||
             (session.metadata?.userId as string | undefined) ||
             null;
 
           if (!publicationId || !writerId || !userId) {
-            console.log("⚠️ Dados faltando:", { publicationId, writerId, userId });
+            console.log("⚠️ Metadados faltando para criar purchase:", {
+              publicationId,
+              writerId,
+              userId,
+              sessionId: session.id,
+            });
             break;
           }
 
@@ -100,7 +150,7 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          console.log("💾 Purchase criada:", { userId, publicationId });
+          console.log("💾 Purchase criada:", { userId, publicationId, writerId });
         }
 
         break;
@@ -108,12 +158,14 @@ export async function POST(req: NextRequest) {
 
       /**
        * 2) Invoice paga → atualiza assinatura do writer
+       *    (pode vir do master OU de uma connected; se for connected, usamos event.account)
        */
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
 
-        let subscriptionId = (invoice as any).subscription as string | null;
+        let subscriptionId = (invoice as any).subscription ?? null;
 
+        // fallback raro: tenta buscar a subscription pelo customer
         if (!subscriptionId && invoice.customer) {
           const subs = await stripe.subscriptions.list({
             customer: invoice.customer as string,
@@ -128,34 +180,50 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        const writer = await db.writer.findFirst({
-          where: { stripeCustomerId: invoice.customer as string },
+        // Preferir account quando vier de connected
+        let writer = null;
+        if (fromAccount) {
+          writer = await db.writer.findFirst({
+            where: { stripeAccountId: fromAccount },
+          });
+        }
+        // Fallback pelo customer (útil quando sua assinatura roda no master)
+        if (!writer && invoice.customer) {
+          writer = await db.writer.findFirst({
+            where: { stripeCustomerId: invoice.customer as string },
+          });
+        }
+
+        if (!writer) {
+          console.log("⚠️ Nenhum writer encontrado p/ invoice:", {
+            account: fromAccount,
+            customer: invoice.customer,
+          });
+          break;
+        }
+
+        const firstLine = invoice.lines?.data?.[0];
+        const period = firstLine?.period ?? { end: Math.floor(Date.now() / 1000) };
+
+        await db.writerSubscription.upsert({
+          where: { stripeId: subscriptionId },
+          update: {
+            amount: (invoice.amount_paid ?? 0) / 100,
+            endedAt: new Date((period.end ?? Math.floor(Date.now() / 1000)) * 1000),
+            stripe: invoice as any,
+          },
+          create: {
+            writerId: writer.id,
+            stripeId: subscriptionId,
+            description: "Assinatura ativa",
+            amount: (invoice.amount_paid ?? 0) / 100,
+            endedAt: new Date((period.end ?? Math.floor(Date.now() / 1000)) * 1000),
+            stripe: invoice as any,
+          },
+          // se você tiver unique em (stripeId) já garante idempotência
         });
 
-        if (writer) {
-          const period = invoice.lines.data[0].period;
-
-          await db.writerSubscription.upsert({
-            where: { stripeId: subscriptionId },
-            update: {
-              amount: invoice.amount_paid / 100,
-              endedAt: new Date(period.end * 1000),
-              stripe: invoice as any,
-            },
-            create: {
-              writerId: writer.id,
-              stripeId: subscriptionId,
-              description: "Assinatura ativa",
-              amount: invoice.amount_paid / 100,
-              endedAt: new Date(period.end * 1000),
-              stripe: invoice as any,
-            },
-          });
-
-          console.log("💾 WriterSubscription atualizada:", writer.id);
-        } else {
-          console.log("⚠️ Nenhum writer encontrado para customer:", invoice.customer);
-        }
+        console.log("💾 WriterSubscription atualizada:", { writerId: writer.id, subscriptionId });
         break;
       }
 
@@ -176,7 +244,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (err: any) {
-    console.error("❌ Erro no webhook:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    console.error("❌ Erro no webhook:", err?.message ?? err);
+    return NextResponse.json({ error: String(err?.message ?? err) }, { status: 400 });
   }
 }
