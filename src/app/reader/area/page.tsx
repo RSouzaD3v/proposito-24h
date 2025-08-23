@@ -17,14 +17,14 @@ export default function AreaReader() {
       name: "Biblioteca",
       type: "Ebooks",
       link: "/reader/area/courses",
-      primaryColor: "from-gray-900 to-gray-500",
+      primaryColor: "from-[#202020] to-[#404040]",
     },
     {
       id: 2,
       name: "Oração de Hoje",
       type: "Oração",
       link: "/reader/area/prayer",
-      primaryColor: "from-indigo-500 to-purple-500",
+      primaryColor: "from-[#202020] to-[#404040]",
     }
   ];
 
@@ -59,7 +59,7 @@ export default function AreaReader() {
           >
             <div>
               <h2 className="text-2xl font-extrabold mb-2">{item.name}</h2>
-              <p className="bg-white/90 text-green-900 text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
+              <p className="bg-white/10 text-amber-300 text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
                 {item.type}
               </p>
             </div>

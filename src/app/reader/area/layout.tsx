@@ -1,6 +1,7 @@
-import { HeaderReader } from "./_components/HeaderReader";
-import { MenuPainel } from "./_components/MenuPainel";
+// import { HeaderReader } from "./_components/HeaderReader";
+// import { MenuPainel } from "./_components/MenuPainel";
 import { AuthReaderProvider } from "./_contexts/AuthContext";
+import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
 
 export default function RootLayout({
   children,
@@ -9,13 +10,15 @@ export default function RootLayout({
 }>) {
   return (
     <AuthReaderProvider>
-        <section>
-            {/* <HeaderReader /> */}
-            <div>
-                {children}
-            </div>
-            {/* <MenuPainel /> */}
-        </section>
+      <ThemeWriterProvider>
+          <section>
+              {/* <HeaderReader /> */}
+              <div>
+                  {children}
+              </div>
+              {/* <MenuPainel /> */}
+          </section>
+      </ThemeWriterProvider>
     </AuthReaderProvider>
   );
 }

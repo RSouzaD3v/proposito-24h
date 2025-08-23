@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Merriweather } from "next/font/google";
 import "./globals.css";
 
 // const geistSans = Geist({
@@ -11,7 +11,7 @@ import "./globals.css";
 //   variable: "--font-geist-mono",
 //   subsets: ["latin"],
 // });
-const font = Inter({
+const font = Merriweather({
   weight: '400',
   subsets: ['latin']
 })

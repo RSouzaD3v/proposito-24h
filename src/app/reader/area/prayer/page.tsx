@@ -16,7 +16,7 @@ export default async function PrayerPage() {
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     if (!user?.writerId) return null;
 
-        const startOfToday = new Date();
+    const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
     const endOfToday = new Date();
@@ -33,19 +33,21 @@ export default async function PrayerPage() {
         }
     });
 
-    if (!prayer) return null;
+    let userCompletionPrayer;
+    if (prayer) {
+        userCompletionPrayer = await db.userCompletationPrayer.findFirst({
+            where: {
+                userId: user.id,
+                prayerId: prayer.id
+            }
+        });
+    };
 
-    const userCompletionPrayer = await db.userCompletationPrayer.findFirst({
-        where: {
-            userId: user.id,
-            prayerId: prayer.id
-        }
-    });
 
     return (
         <section className="container mx-auto max-w-2xl py-10 px-4">
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-extrabold text-indigo-800 drop-shadow-sm">Minha Oração</h2>
+                <h2 className="text-4xl font-extrabold text-black drop-shadow-sm">Minha Oração</h2>
             </div>
             {!prayer ? (
                 <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-10 shadow-md text-gray-500 text-center">
