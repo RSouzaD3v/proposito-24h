@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { FaCrown } from "react-icons/fa";
 import { BuyButton } from "./_components/BuyButton";
+import PdfViewer from "@/app/writer/(check-subscription)/publications/my-vitrine/[bookId]/_components/PdfViewer";
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -17,6 +18,8 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
         },
         select: {
             visibility: true,
+            isPdf: true,
+            pdfUrl: true,
             chapters: {
                 select: {
                     title: true,
@@ -63,21 +66,30 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
     }
 
     return (
-        <div>
-            <Link className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit" href={"/reader/area/courses"}>
+        <div className="bg-gray-950 min-h-screen relative">
+            <Link
+                className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
+                href={"/writer/publications/my-vitrine"}
+            >
                 <FiArrowLeft className="inline mr-2" />
                 Voltar
             </Link>
-            {bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
+
+            {/* Se for PDF */}
+            {bookDetails?.isPdf && bookDetails?.pdfUrl ? (
+                <div className="p-4 md:p-8">
+                    <PdfViewer url={bookDetails.pdfUrl} />
+                </div>
+            ) : bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
                 <ChapterSlider
-                    chapters={bookDetails.chapters.map(chapter => ({
+                    chapters={bookDetails.chapters.map((chapter) => ({
                         ...chapter,
                         subtitle: chapter.subtitle ?? "",
-                        coverUrl: chapter.coverUrl ?? undefined
+                        coverUrl: chapter.coverUrl ?? undefined,
                     }))}
                 />
             ) : (
-                <div>Nenhum capítulo encontrado.</div>
+                <div className="text-center text-white py-20">Nenhum capítulo encontrado.</div>
             )}
         </div>
     );
