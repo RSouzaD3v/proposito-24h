@@ -39,7 +39,7 @@ export default function AreaReader() {
           day: "numeric",
         })}
 
-        <h2 className="text-xl font-bold">Deus seja sempre louvado! 🙌</h2>
+        <h2 className="md:text-xl text-lg font-bold">Deus seja sempre louvado! 🙌</h2>
       </div>
 
       <h3 className="mt-5 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
@@ -58,8 +58,8 @@ export default function AreaReader() {
             className={`flex items-center justify-between bg-gradient-to-r ${item.primaryColor} text-white p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group`}
           >
             <div>
-              <h2 className="text-2xl font-extrabold mb-2">{item.name}</h2>
-              <p className="bg-white/10 text-amber-300 text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
+              <h2 className="md:text-2xl text-xl font-extrabold mb-2">{item.name}</h2>
+              <p className="bg-white/10 text-propositoBlue text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
                 {item.type}
               </p>
             </div>

@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme static {
+  --color-propositoWhite: #ff9f9a;
+  --color-propositoBlack: #212529;
+  --color-propositoBlue: #0dcaf0;
+  --color-propositoGray: #040b0f;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

@@ -54,7 +54,7 @@ export default function RegistrarEscritorPage() {
     };
 
     return (
-        <div className="min-h-screen py-8 flex items-center justify-center bg-gradient-to-br from-blue-200 via-white to-blue-400">
+        <div className="min-h-screen py-8 flex md:px-0 px-3 items-center justify-center bg-gradient-to-br from-blue-200 via-white to-blue-400">
             <div className="w-full max-w-lg bg-white/95 rounded-3xl shadow-2xl p-10 border border-blue-200 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-6">
                     <Link className="text-blue-600 hover:text-blue-800 font-medium transition" href="/">
@@ -71,7 +71,7 @@ export default function RegistrarEscritorPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
                         </svg>
                     </div>
-                    <h1 className="text-4xl font-extrabold text-blue-700 mb-2 drop-shadow">Registrar Escritor</h1>
+                    <h1 className="md:text-4xl text-2xl font-extrabold text-blue-700 mb-2 drop-shadow">Registrar Escritor</h1>
                     <p className="text-gray-500 text-base">Crie sua plataforma e comece agora!</p>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">

@@ -13,13 +13,13 @@ export const Header = () => {
                     {/* <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                         Início
                     </a> */}
-                    <a href="#" className="text-white hover:text-amber-400 transition-colors">
+                    <a href="#" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
                     </a>
-                    <a href="/login" className="text-white hover:text-amber-400 transition-colors">
+                    <a href="/login" className="text-white hover:text-propositoBlue transition-colors">
                         Leitor
                     </a>
-                    <a href="/register-writer" className="text-black bg-amber-400 hover:bg-amber-500 p-2 rounded-xl transition-colors">
+                    <a href="/register-writer" className="text-black bg-propositoBlue hover:bg-propositoBlue/80 p-2 rounded-xl transition-colors">
                         Quero ser escritor
                     </a>
                 </nav>
@@ -54,6 +54,9 @@ export const Header = () => {
                 </div>
                 {/* Logo */}
                 <div className="flex items-center">
+                    <i className="inline mr-2">
+                        <img src="/AppImages/ios/40.png" alt="Logo Proposito24h" />
+                    </i>
                     <span className="font-bold text-xl tracking-tight text-white">Proposito24h</span>
                 </div>
             </div>

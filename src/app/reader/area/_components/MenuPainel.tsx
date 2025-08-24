@@ -45,7 +45,7 @@ export const MenuPainel = () => {
                             href={item.link}
                             className={`flex flex-col items-center justify-center px-3 py-1 rounded-xl transition-all duration-150
                                 ${isActive
-                                    ? "bg-gradient-to-b from-amber-600 to-amber-400 text-white shadow-lg scale-110"
+                                    ? "bg-gradient-to-b from-blue-600 to-blue-400 text-white shadow-lg scale-110"
                                     : "text-gray-700 hover:bg-gray-100 hover:scale-105"
                                 }`}
                         >

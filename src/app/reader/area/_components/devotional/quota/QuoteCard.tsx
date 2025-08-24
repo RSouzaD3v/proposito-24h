@@ -48,7 +48,7 @@ export const QuoteCard = async () => {
 
     if (!quota) {
       return (
-        <Card className="bg-gradient-to-r from-amber-50 to-amber-100">
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
           <CardContent className="flex items-center justify-center flex-col text-center h-full">
             <h4>Nenhuma citação ainda.</h4>
           </CardContent>
@@ -57,7 +57,7 @@ export const QuoteCard = async () => {
     }
 
     return (
-        <Card className="bg-gradient-to-r from-amber-50 to-amber-100">
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
             <CardHeader className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <FiActivity size={25} />
