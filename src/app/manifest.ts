@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Uma plataforma para escritores e leitores',
     start_url: '/',
     display: 'standalone',
-    background_color: '#252527',
-    theme_color: '#29DDEC',
+    background_color: '#212529',
+    theme_color: '#ffffff',
     icons: [
       {
         src: '/AppImages/ios/192.png',

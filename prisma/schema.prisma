@@ -427,3 +427,18 @@ model BibleVerse {
   @@index([bookId, chapter, verse])
   @@index([versionId])
 }
+
+model PushSubscription {
+  id             String    @id @default(cuid())
+  endpoint       String    @unique
+  p256dh         String
+  auth           String
+  expirationTime DateTime?
+  userId         String?
+  writerId       String?   // sua white-label
+  topics         String[]  // ex.: ["new-book", "devotional"]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([writerId])
+}

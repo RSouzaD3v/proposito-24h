@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { notifyNewBook } from "@/lib/push/send";
 
 function assertPaidInputs(visibility: string, price?: number | null, currency?: string | null) {
   if (visibility !== "PAID") return;
@@ -82,6 +83,8 @@ export async function POST(req: NextRequest) {
       pdfUrl: pdfUrl ?? null,
     },
   });
+
+  await notifyNewBook(writer.id, { id: created.id, title: created.title, slug: created.slug });
 
   // se for FREE, retorna sem criar catálogo
   if (created.visibility !== "PAID") {
