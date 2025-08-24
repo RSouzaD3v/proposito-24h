@@ -33,6 +33,26 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
+  if (!session) {
+    return null;
+  };
+
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      writer: {
+        select: {
+          id: true,
+        }
+      }
+    }
+  });
+
+  if (!user || !user.writer) {
+    return null;
+  }
+
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
@@ -41,7 +61,7 @@ export default async function RootLayout({
             - pergunta permissão 1x (marca em localStorage)
             - se "granted", assina e salva via /api/push/subscribe
             - topics: ["new-book"] (padrão para novo livro do writer) */}
-        <PushBootstrap writerId={writerId} userId={userId} />
+        <PushBootstrap writerId={user?.writer.id} userId={user?.id} />
 
         <section>
           {/* <HeaderReader /> */}
