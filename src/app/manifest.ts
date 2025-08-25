@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Propósito24h',
     description: 'Uma plataforma para escritores e leitores',
     start_url: '/',
-    display: 'standalone',
+    display: 'fullscreen',
     background_color: '#212529',
     theme_color: '#ffffff',
     icons: [
@@ -40,6 +40,31 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '128x128',
         type: 'image/png',
       },
+      {
+        src: '/AppImages/ios/76.png',
+        sizes: '76x76',
+        type: 'image/png',
+      },
+      {
+        src: '/AppImages/ios/60.png',
+        sizes: '60x60',
+        type: 'image/png',
+      },
+      {
+        src: '/AppImages/ios/32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        src: '/AppImages/ios/20.png',
+        sizes: '20x20',
+        type: 'image/png',
+      },
+      {
+        src: '/AppImages/ios/16.png',
+        sizes: '16x16',
+        type: 'image/png',
+      }
     ],
   }
 }

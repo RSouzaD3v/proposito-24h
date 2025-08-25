@@ -20,7 +20,7 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
   const nav = await getPrevNextChapter(book, cap);
 
   return (
-    <section>
+    <section className="min-h-screen">
       <header className="mb-4">
         <h2 className="text-2xl font-semibold">{b.name} {cap}</h2>
         <p className="text-sm text-muted-foreground">ACF</p>
@@ -66,7 +66,7 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm text-primary underline">← todos os livros</Link>
+        <Link href="/reader/area/bible" className="text-sm text-blue-500 underline">← todos os livros</Link>
       </div>
     </section>
   );

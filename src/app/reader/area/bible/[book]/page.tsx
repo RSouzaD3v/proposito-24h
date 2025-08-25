@@ -17,7 +17,7 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
   const chapters = await getChaptersOfBook(book);
 
   return (
-    <section>
+    <section className="min-h-screen">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold">{b.name}</h2>
         <p className="text-sm text-muted-foreground">Escolha um capítulo</p>
@@ -25,14 +25,14 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
 
       <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
         {chapters.map((c) => (
-          <Link key={c} href={`/reader/area/bible/${b.abbrev}/${c}`} className="rounded-md border px-3 py-2 text-center hover:bg-accent">
+          <Link key={c} href={`/reader/area/bible/${b.abbrev}/${c}`} className="rounded-md border px-3 py-2 hover:text-propositoGray text-center hover:bg-accent">
             {c}
           </Link>
         ))}
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm text-primary underline">← todos os livros</Link>
+        <Link href="/reader/area/bible" className="text-sm text-blue-500 underline">← todos os livros</Link>
       </div>
     </section>
   );

@@ -54,8 +54,8 @@ export const Header = () => {
                 </div>
                 {/* Logo */}
                 <div className="flex items-center">
-                    <i className="inline mr-2">
-                        <img src="/AppImages/ios/40.png" alt="Logo Proposito24h" />
+                    <i className="inline mr-2 w-16">
+                        <img src="/AppImages/ios/512.png" alt="Logo Proposito24h" />
                     </i>
                     <span className="font-bold text-xl tracking-tight text-white">Proposito24h</span>
                 </div>

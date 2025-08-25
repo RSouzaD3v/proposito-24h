@@ -45,9 +45,9 @@ export default async function PrayerPage() {
 
 
     return (
-        <section className="container mx-auto max-w-2xl py-10 px-4">
+        <section className="container mx-auto max-w-2xl py-10 px-4 min-h-screen">
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-extrabold text-black drop-shadow-sm">Minha Oração</h2>
+                <h2 className="text-4xl font-extrabold drop-shadow-sm">Minha Oração</h2>
             </div>
             {!prayer ? (
                 <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-10 shadow-md text-gray-500 text-center">

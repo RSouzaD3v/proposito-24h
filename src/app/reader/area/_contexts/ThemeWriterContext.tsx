@@ -12,6 +12,8 @@ interface ThemeWriterContextProps {
         colorPrimary:   string;
         colorSecondary: string;
     }>>;
+    mode: "light" | "dark";
+    setMode: React.Dispatch<React.SetStateAction<"light" | "dark">>;
 }
 
 export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
@@ -20,7 +22,9 @@ export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
         colorPrimary:   "",
         colorSecondary: ""
     },
-    setTheme: () => {}
+    setTheme: () => {},
+    mode: "light",
+    setMode: () => {}
 });
 
 export const ThemeWriterProvider = ({ children }: { children: React.ReactNode }) => {
@@ -30,8 +34,14 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
         colorSecondary: ""
     });
 
+    const [mode, setMode] = useState<"light" | "dark">("light");
+
     useEffect(() => {
         const fetchTheme = async () => {
+            if (localStorage.getItem("themeMode")) {
+                setMode(localStorage.getItem("themeMode") as "light" | "dark");
+            };
+
             if (localStorage.getItem("themeWriter")) {
                 setTheme(JSON.parse(localStorage.getItem("themeWriter")!));
             }
@@ -54,8 +64,10 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
     }, []);
 
     return (
-        <ThemeWriterContext.Provider value={{ theme, setTheme }}>
-            {children}
+        <ThemeWriterContext.Provider value={{ theme, setTheme, mode, setMode }}>
+            <section className={`${mode === "dark" ? "bg-propositoGray text-white" : "bg-white text-black"} transition-colors duration-300`}>
+                {children}
+            </section>
         </ThemeWriterContext.Provider>
     );
 };
