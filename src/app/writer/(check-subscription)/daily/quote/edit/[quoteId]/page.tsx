@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -139,7 +140,11 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
                         URL da Imagem (opcional)
                     </label>
-                    <input
+                    {form.imageUrl && (
+                        <img src={form.imageUrl} alt="" />
+                    )}
+                    <S3Uploader folder="quotes" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                    {/* <input
                         type="url"
                         id="imageUrl"
                         name="imageUrl"
@@ -147,7 +152,7 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
                         onChange={handleChange}
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="https://exemplo.com/imagem.jpg"
-                    />
+                    /> */}
                 </div>
                 <button
                     type="submit"

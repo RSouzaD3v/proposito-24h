@@ -55,7 +55,7 @@ export default function VerseNewPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="content">
-                        Citação
+                        Passagem
                     </label>
                     <textarea
                         id="content"
@@ -65,7 +65,7 @@ export default function VerseNewPage() {
                         required
                         rows={4}
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Digite a citação"
+                        placeholder="Digite a passagem"
                     />
                 </div>
                 <div>
@@ -88,11 +88,11 @@ export default function VerseNewPage() {
                     disabled={loading}
                     className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
                 >
-                    {loading ? "Salvando..." : "Salvar Citação"}
+                    {loading ? "Salvando..." : "Salvar Passagem"}
                 </button>
                 {success && (
                     <div className="text-green-600 text-center font-medium mt-2">
-                        Citação criada com sucesso!
+                        Passagem criada com sucesso!
                     </div>
                 )}
             </form>

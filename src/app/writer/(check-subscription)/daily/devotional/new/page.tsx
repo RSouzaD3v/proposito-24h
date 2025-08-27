@@ -8,7 +8,6 @@ export default function DevotionalNewPage() {
         title: "",
         content: "",
         verse: "",
-        imageUrl: "",
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -35,7 +34,7 @@ export default function DevotionalNewPage() {
             }
 
             setSuccess(true);
-            setForm({ title: "", content: "", verse: "", imageUrl: "" });
+            setForm({ title: "", content: "", verse: "" });
         } catch (error) {
             console.error("Error creating devotional:", error);
         } finally {
@@ -96,7 +95,7 @@ export default function DevotionalNewPage() {
                         placeholder="Ex: João 3:16"
                     />
                 </div>
-                <div>
+                {/* <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
                         URL da Imagem (opcional)
                     </label>
@@ -109,7 +108,7 @@ export default function DevotionalNewPage() {
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="https://exemplo.com/imagem.jpg"
                     />
-                </div>
+                </div> */}
                 <button
                     type="submit"
                     disabled={loading}

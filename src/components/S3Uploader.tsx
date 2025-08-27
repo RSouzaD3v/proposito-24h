@@ -46,25 +46,43 @@ export default function S3Uploader({ folder, onUploaded }: Props) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 p-4 border rounded-lg shadow bg-white">
+      <label className="block">
+      <span className="block text-sm font-medium text-gray-700 mb-2">
+        Selecione uma imagem para upload
+      </span>
       <input
         type="file"
         accept="image/*"
         onChange={handleFile}
         disabled={uploading}
-        className="block w-full text-sm"
+        className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition"
       />
+      </label>
 
       {uploading && (
-        <div className="w-full bg-gray-200 rounded h-2">
-          <div
-            className="h-2 rounded bg-blue-500 transition-all"
-            style={{ width: `${progress}%` }}
-          />
+      <div>
+        <div className="flex justify-between mb-1">
+        <span className="text-xs font-medium text-blue-700">Enviando...</span>
+        <span className="text-xs font-medium text-blue-700">{progress}%</span>
         </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div
+          className="h-2.5 rounded-full bg-blue-500 transition-all"
+          style={{ width: `${progress}%` }}
+        />
+        </div>
+      </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+      <div className="flex items-center space-x-2 text-sm text-red-600 bg-red-50 rounded p-2">
+        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span>{error}</span>
+      </div>
+      )}
     </div>
   );
 }
