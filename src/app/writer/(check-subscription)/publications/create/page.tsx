@@ -37,6 +37,7 @@ export default function WriterPublicationCreatePage() {
     tags: "",
     isPdf: false,
     pdfUrl: "",
+    category: "Outros"
   });
 
   const [loading, setLoading] = useState(false);
@@ -104,6 +105,7 @@ export default function WriterPublicationCreatePage() {
         tags: "",
         isPdf: false,
         pdfUrl: "",
+        category: "Outros"
       });
 
       router.push("/writer/publications");
@@ -283,6 +285,20 @@ export default function WriterPublicationCreatePage() {
               type="text"
               name="subtitle"
               value={form.subtitle}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2"
+            />
+          </div>
+
+          {/* Categoria */}
+          <div>
+            <label className="block font-semibold mb-1 text-gray-700">
+              Categoria
+            </label>
+            <input
+              type="text"
+              name="category"
+              value={form.category}
               onChange={handleChange}
               className="w-full border rounded-lg p-2"
             />

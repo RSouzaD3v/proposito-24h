@@ -69,7 +69,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
         <div className="bg-gray-950 min-h-screen relative">
             <Link
                 className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
-                href={"/writer/publications/my-vitrine"}
+                href={"/reader/area/courses"}
             >
                 <FiArrowLeft className="inline mr-2" />
                 Voltar
