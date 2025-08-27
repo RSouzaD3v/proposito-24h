@@ -442,3 +442,37 @@ model PushSubscription {
 
   @@index([writerId])
 }
+
+// Biblia Plano de leitura
+model BibleReadingPlan {
+  id        String   @id @default(uuid())
+  name      String   // Ex: "Plano Bíblia em 365 dias"
+  days      ReadingDay[]
+  createdAt DateTime @default(now())
+
+  UserReadingProgress UserReadingProgress[]
+}
+
+model ReadingDay {
+  id        String   @id @default(uuid())
+  dayNumber Int      // 1 até 365
+  passages  String   // Ex: "Gênesis 1-3; Mateus 1"
+  planId    String
+  plan      BibleReadingPlan @relation(fields: [planId], references: [id])
+
+  UserReadingProgress UserReadingProgress[]
+}
+
+model UserReadingProgress {
+  id        String   @id @default(uuid())
+  userId    String   // referência ao usuário (Writer/Client)
+  planId    String
+  dayId     String
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  
+  plan BibleReadingPlan @relation(fields: [planId], references: [id])
+  day  ReadingDay       @relation(fields: [dayId], references: [id])
+
+  @@unique([userId, planId, dayId])
+}

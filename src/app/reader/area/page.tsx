@@ -26,7 +26,14 @@ export default function AreaReader() {
       type: "Oração",
       link: "/reader/area/prayer",
       primaryColor: "from-[#202020] to-[#404040]",
-    }
+    },
+    {
+      id: 3,
+      name: "Plano Bíblia em 365 Dias",
+      type: "Plano de Leitura",
+      link: "/reader/area/reading/plan/365",
+      primaryColor: "from-[#202020] to-[#404040]",
+    },
   ];
 
   return (
