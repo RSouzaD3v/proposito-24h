@@ -1,5 +1,6 @@
 'use client';
 import { useState, createContext, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
 
 interface ThemeWriterContextProps {
     theme: {
@@ -14,6 +15,7 @@ interface ThemeWriterContextProps {
     }>>;
     mode: "light" | "dark";
     setMode: React.Dispatch<React.SetStateAction<"light" | "dark">>;
+    changeMode: () => void;
 }
 
 export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
@@ -24,10 +26,12 @@ export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
     },
     setTheme: () => {},
     mode: "light",
-    setMode: () => {}
+    setMode: () => {},
+    changeMode: () => null
 });
 
 export const ThemeWriterProvider = ({ children }: { children: React.ReactNode }) => {
+    const router = useRouter();
     const [theme, setTheme] = useState({
         logoUrl:        "",
         colorPrimary:   "",
@@ -63,8 +67,20 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
         fetchTheme();
     }, []);
 
+    const changeMode = () => {
+        setMode(prev => { 
+            if (prev === 'dark') {
+                localStorage.setItem('themeMode', 'light')
+                return 'light'
+            } else {
+                localStorage.setItem('themeMode', 'dark')
+                return 'dark'
+            }
+         });
+    }
+
     return (
-        <ThemeWriterContext.Provider value={{ theme, setTheme, mode, setMode }}>
+        <ThemeWriterContext.Provider value={{ theme, setTheme, mode, setMode, changeMode }}>
             <section className={`${mode === "dark" ? "bg-propositoGray text-white" : "bg-white text-black"} transition-colors duration-300`}>
                 {children}
             </section>

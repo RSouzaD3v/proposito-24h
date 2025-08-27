@@ -56,9 +56,14 @@ export default function PlanClient({
 
   return (
     <section className="mx-auto max-w-3xl p-4">
-        <Link href="/reader/area" className="text-blue-600 hover:text-blue-800 underline flex items-center mb-4">
-            Voltar para área do leitor
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+            <Link href="/reader/area" className="text-blue-600 hover:text-blue-800 underline flex items-center mb-4">
+                Voltar para área do leitor
+            </Link>
+            <Link href="/reader/area/bible" className="text-blue-600 hover:text-blue-800 underline flex items-center mb-4">
+                Vamos ler a Bíblia 📖
+            </Link>
+        </div>
       <header className="mb-4">
         <h1 className="text-2xl font-bold">{planName}</h1>
         <div className="mt-2">

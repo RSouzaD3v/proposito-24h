@@ -36,7 +36,7 @@ export const MenuPainel = () => {
 
     return (
         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 shadow-2xl rounded-full px-6 py-3 z-50 border border-gray-200 backdrop-blur-md">
-            <ul className="flex items-center gap-6">
+            <ul className="flex items-center md:gap-6 gap-3">
                 {itemsNav.map(item => {
                     const isActive = pathname === item.link;
                     return (
@@ -50,7 +50,7 @@ export const MenuPainel = () => {
                                 }`}
                         >
                             <span className="mb-1">{item.icon}</span>
-                            <span className="text-xs font-semibold">{item.name}</span>
+                            <span className="text-xs md:block hidden font-semibold">{item.name}</span>
                         </Link>
                     );
                 })}
