@@ -38,9 +38,9 @@ export default function AreaReader() {
 
   return (
     <ThemeWriterProvider>
-      <section className="container mx-auto min-h-screen md:px-1 px-5 ">
+      <section className="container mx-auto min-h-screen md:px-1 px-5 py-36">
         <HeaderReader />
-        <div className="pt-32 px-2">
+        <div className="px-2">
           {date.toLocaleDateString("pt-BR", {
             weekday: "long",
             year: "numeric",
@@ -59,7 +59,7 @@ export default function AreaReader() {
         </div>
 
         <h3 className="mt-5 px-2 my-2">FUNCIONALIDADES & OUTROS</h3>
-        <div className="space-y-6 md:p-0 py-6 px-2 mb-36">
+        <div className="space-y-6 md:p-0 py-6 px-2">
           {items.map((item) => (
             <Link
               key={item.id}

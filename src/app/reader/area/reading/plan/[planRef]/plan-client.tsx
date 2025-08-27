@@ -56,7 +56,7 @@ export default function PlanClient({
 
   return (
     <section className="mx-auto max-w-3xl p-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-1">
             <Link href="/reader/area" className="text-blue-600 hover:text-blue-800 underline flex items-center mb-4">
                 Voltar para área do leitor
             </Link>

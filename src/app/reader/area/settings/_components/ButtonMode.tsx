@@ -1,16 +1,27 @@
 'use client';
+
 import { useContext } from "react";
 import { ThemeWriterContext } from "../../_contexts/ThemeWriterContext";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export const ButtonMode = () => {
     const { mode, changeMode } = useContext(ThemeWriterContext);
 
+    const isDarkMode = mode === "dark";
+    const label = isDarkMode ? "Dark Mode" : "Light Mode";
+
     return (
-        <button
-            onClick={changeMode}
-            className="px-4 py-2 my-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-        >
-            {mode === "light" ? "Dark Mode" : "Light Mode"}
-        </button>
+        <div className="flex items-center my-3 gap-2">
+            <Switch
+            id="theme-switch"
+            checked={isDarkMode}
+            onCheckedChange={changeMode}
+            className="transition-colors scale-120"
+            />
+            <Label htmlFor="theme-switch" className="text-xl font-medium">
+            {label}
+            </Label>
+        </div>
     );
-}
+};
