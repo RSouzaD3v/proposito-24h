@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Propósito24h',
     description: 'Uma plataforma para escritores e leitores',
     start_url: '/',
-    display: 'fullscreen',
+    display: 'standalone',
     background_color: '#212529',
     theme_color: '#ffffff',
     icons: [
