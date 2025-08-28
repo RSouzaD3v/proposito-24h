@@ -7,9 +7,9 @@ export const runtime = "nodejs";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { writerId: string } }
+  { params }: { params: Promise<{ writerId: string }> }
 ) {
-  const { writerId } = params;
+  const { writerId } = await params;
 
   const plans = await db.writerSubscriptionPlan.findMany({
     where: { writerId },

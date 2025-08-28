@@ -11,9 +11,9 @@ export const runtime = "nodejs";
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { writerId: string; planId: string } }
+  { params }: { params: Promise<{ writerId: string; planId: string }> }
 ) {
-  const { writerId, planId } = params;
+  const { writerId, planId } = await params;
   await assertWriterAdmin(writerId);
 
   const body = await req.json();
