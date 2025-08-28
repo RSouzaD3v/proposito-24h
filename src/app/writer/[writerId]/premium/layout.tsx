@@ -8,10 +8,10 @@ export default async function PremiumLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { writerId: string };
+  params: Promise<{ writerId: string }>;
 }) {
   const session = await getServerSession(authOptions);
-  const { writerId } = params;
+  const { writerId } = await params;
 
   if (!session) {
     return (

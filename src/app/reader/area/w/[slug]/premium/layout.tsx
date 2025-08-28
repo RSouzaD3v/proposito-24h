@@ -9,11 +9,12 @@ export default async function PremiumLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const session = await getServerSession(authOptions);
   const writer = await db.writer.findUnique({
-    where: { slug: params.slug },
+    where: { slug: slug },
     select: { id: true, name: true },
   });
 
