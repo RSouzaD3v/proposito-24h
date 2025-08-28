@@ -69,9 +69,9 @@ export async function PUT(
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { writerId: string; planId: string } }
+  { params }: { params: Promise<{ writerId: string; planId: string }> }
 ) {
-  const { writerId, planId } = params;
+  const { writerId, planId } = await params;
   await assertWriterAdmin(writerId);
 
   const { isActive } = await req.json();
