@@ -76,6 +76,9 @@ model Writer {
   devotionals    Devotional[]
   verses         Verse[]
   prayers       Prayer[]
+  writerSubscriptionPlans WriterSubscriptionPlan[]
+  readerSubscriptions ReaderSubscription[]
+  
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -86,8 +89,8 @@ model WriterSubscription {
   writerId   String
   writer     Writer   @relation(fields: [writerId], references: [id])
   startedAt  DateTime @default(now())
-  endedAt    DateTime
-  amount     Float
+  endedAt    DateTime?
+  amount     Int      // em centavos
   description String?
   stripeId   String? @unique
   stripe     Json?
@@ -98,7 +101,7 @@ model WriterSubscription {
 model Domain {
   id        String  @id @default(uuid())
   host      String  @unique  // ex: igreja1.seudominio.com ou dominio-proprio.com
-  subdomain String  @unique
+  subdomain String?  @unique
   writerId  String
   writer    Writer  @relation(fields: [writerId], references: [id])
   isPrimary Boolean @default(false)
@@ -114,9 +117,9 @@ model User {
   // Para ADMIN pode ser null; para WRITER_ADMIN/CLIENT deve apontar p/ o writer
   writerId   String?
   writer     Writer?   @relation(fields: [writerId], references: [id])
+  stripeCustomerId String?
 
   purchases  Purchase[]
-  clientSubscriptions ClientSubscription[]
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -125,8 +128,11 @@ model User {
   userCompletationDevotional UserCompletationDevotional[]
   userCompletationVerse UserCompletationVerse[]
   userCompletationPrayer UserCompletationPrayer[]
+  userReadingProgress UserReadingProgress[]
 
   achievements Achievements[]
+
+  readerSubscriptions ReaderSubscription[]
 }
 
 model Achievements {
@@ -137,21 +143,68 @@ model Achievements {
   createdAt DateTime @default(now())
 }
 
-model ClientSubscription {
-  id         String   @id @default(uuid())
-  clientId   String
-  client     User   @relation(fields: [clientId], references: [id])
-  startedAt  DateTime @default(now())
-  endedAt    DateTime
-  amount     Float
-  description String?
-  stripeCustomerId String? @unique
-  stripeSubscriptionId String? @unique
-  stripeId   String? @unique
-  stripe     Json?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+// Subscription Reader to Writer
+enum SubscriptionInterval { 
+  DAY 
+  WEEK 
+  MONTH 
+  YEAR 
 }
+enum SubscriptionStatus { 
+  INCOMPLETE 
+  INCOMPLETE_EXPIRED
+  TRIALING 
+  ACTIVE 
+  PAST_DUE 
+  CANCELED 
+  UNPAID 
+  PAUSED 
+}
+
+model WriterSubscriptionPlan {
+  id                 String   @id @default(cuid())
+  writerId           String
+  writer             Writer   @relation(fields: [writerId], references: [id])
+  stripeProductId    String
+  stripePriceId      String
+  interval           SubscriptionInterval @default(MONTH)
+  amountCents        Int
+  currency           String   @default("BRL")
+  trialDays          Int      @default(0)
+  applicationFeePct  Float?   // sua taxa (%)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  @@index([writerId])
+    @@index([writerId, isActive]) // ✅ comum listar planos ativos por escritor
+}
+
+model ReaderSubscription {
+  id                     String   @id @default(cuid())
+  readerId               String
+  reader                 User     @relation(fields: [readerId], references: [id])
+  writerId               String
+  writer                 Writer   @relation(fields: [writerId], references: [id])
+  stripeCustomerId       String
+  stripeSubscriptionId   String?
+  priceId                String
+  status                 SubscriptionStatus @default(INCOMPLETE)
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAt               DateTime?
+  cancelAtPeriodEnd      Boolean  @default(false)
+  latestInvoiceId        String?
+  metadata               Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@unique([readerId, writerId], name: "reader_writer_unique")
+  @@index([writerId])                // consultas por escritor
+  @@index([readerId])                // consultas por leitor
+  @@index([writerId, status])        // status por escritor
+  @@index([writerId, createdAt])     // lista de novos assinantes
+}
+
 
 
 model Prayer {
@@ -466,6 +519,7 @@ model ReadingDay {
 model UserReadingProgress {
   id        String   @id @default(uuid())
   userId    String   // referência ao usuário (Writer/Client)
+  user     User     @relation(fields: [userId], references: [id])
   planId    String
   dayId     String
   completed Boolean  @default(false)
