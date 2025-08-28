@@ -26,9 +26,9 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { writerId: string } }
+  { params }: { params: Promise<{ writerId: string }> }
 ) {
-  const { writerId } = params;
+  const { writerId } = await params;
   try {
     await assertWriterAdmin(writerId);
 
