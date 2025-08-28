@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function OnboardingReturnPage() {
   return (
     <main className="flex flex-col items-center justify-center h-screen text-center">
@@ -6,12 +8,12 @@ export default function OnboardingReturnPage() {
         Sua conta no Stripe foi conectada com sucesso.  
         Agora você já pode cadastrar publicações pagas e receber seus ganhos.
       </p>
-      <a
+      <Link
         href="/writer/dashboard"
         className="mt-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
       >
         Ir para o Dashboard
-      </a>
+      </Link>
     </main>
   );
 }
