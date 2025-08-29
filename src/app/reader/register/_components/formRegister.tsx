@@ -143,7 +143,7 @@ export function ReaderRegister({
             onCheckedChange={(c) => setForm((f) => ({ ...f, agree: Boolean(c) }))}
           />
           <Label htmlFor="agree" className="text-sm text-muted-foreground">
-            Eu li e concordo com a {" "}
+            Eu li e concordo com a 
             <a href="/terms" className="underline">Política e Termos</a>.
           </Label>
         </div>
@@ -158,7 +158,7 @@ export function ReaderRegister({
       </Button>
 
       <CardFooter className="-mt-2 flex justify-center p-0 text-xs text-muted-foreground">
-        Já tem uma conta? {" "}
+        Já tem uma conta? 
         <a href="/login" className="ml-1 font-medium underline">Entrar</a>
       </CardFooter>
     </form>
