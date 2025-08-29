@@ -14,7 +14,7 @@ export default async function BibleHomePage() {
                     <Link
                     key={b.id}
                     href={`/reader/area/bible/${b.abbrev}`}
-                    className="rounded-xl border p-4 hover:shadow-sm transition"
+                    className="rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
                     >
                         <div className="text-sm text-muted-foreground">{b.order}</div>
                         <div className="font-semibold">{b.name}</div>

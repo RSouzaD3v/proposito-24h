@@ -28,13 +28,13 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
 
       <div className="mb-4 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
@@ -53,20 +53,20 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
 
       <div className="mt-6 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border px-3 py-2" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm text-blue-500 underline">← todos os livros</Link>
+        <Link href="/reader/area/bible" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
       </div>
     </section>
   );

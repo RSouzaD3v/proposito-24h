@@ -57,7 +57,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
     }
 
     return (
-        <div className="bg-gray-950 min-h-screen relative">
+        <div className="bg-yellow-50 min-h-screen relative">
             <Link
                 className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
                 href={"/writer/publications/my-vitrine"}
@@ -80,7 +80,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
                     }))}
                 />
             ) : (
-                <div className="text-center text-white py-20">Nenhum capítulo encontrado.</div>
+                <div className="text-center text-black py-20">Nenhum capítulo encontrado.</div>
             )}
         </div>
     );

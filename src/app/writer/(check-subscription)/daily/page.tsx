@@ -37,7 +37,7 @@ export default function DailyPage() {
         },
         {
             id: 6,
-            title: "Gerenciamento Daily",
+            title: "Gerenciamento Diário",
             href: "/writer/daily/management",
             icon: <FaDailymotion size={32} />
         }
@@ -53,7 +53,7 @@ export default function DailyPage() {
                 Voltar
             </Link>
             <h1 className="text-4xl font-extrabold mb-8 text-gray-800 text-center">
-                Daily Page
+                Painel Diário
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl">
                 {itemsNav.map((item) => (

@@ -75,7 +75,7 @@ export default async function CoursesPage() {
 
       <Link
         href="/reader/area"
-        className="z-10 sticky top-4 inline-flex items-center gap-2 self-start text-sm text-neutral-200 hover:text-white transition"
+        className="z-10 my-2 inline-flex items-center bg-white/10 backdrop-blur-sm border rounded-xl border-white p-2 px-5 gap-2 self-start text-sm text-neutral-200 hover:text-white transition"
       >
         <FiChevronLeft className="text-xl" />
         Voltar

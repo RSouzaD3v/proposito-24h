@@ -10,7 +10,7 @@ export default async function WriterDashboardPage() {
   const session = await getServerSession(authOptions);
 
   const itemsNav = [
-    { id: 2, title: "Daily", href: "/writer/daily" },
+    { id: 2, title: "Diário", href: "/writer/daily" },
     { id: 1, title: "Minhas Publicações", href: "/writer/publications" },
     { id: 3, title: "Configurações", href: "/writer/settings" },
   ];

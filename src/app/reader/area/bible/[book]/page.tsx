@@ -25,14 +25,14 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
 
       <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
         {chapters.map((c) => (
-          <Link key={c} href={`/reader/area/bible/${b.abbrev}/${c}`} className="rounded-md border px-3 py-2 hover:text-propositoGray text-center hover:bg-accent">
+          <Link key={c} href={`/reader/area/bible/${b.abbrev}/${c}`} className="rounded-md bg-gray-100 hover:bg-gray-200 border px-3 py-2 hover:text-propositoGray text-center hover:bg-accent">
             {c}
           </Link>
         ))}
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm text-blue-500 underline">← todos os livros</Link>
+        <Link href="/reader/area/bible" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
       </div>
     </section>
   );
