@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
-import { FiActivity, FiBook, FiChevronRight } from "react-icons/fi";
+import { FiChevronRight } from "react-icons/fi";
 import { MenuPainel } from "./_components/MenuPainel";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { FaCheck, FaComments } from "react-icons/fa";
 import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";

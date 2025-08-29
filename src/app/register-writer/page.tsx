@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function RegistrarEscritorPage() {
     const router = useRouter();
@@ -183,7 +184,9 @@ export default function RegistrarEscritorPage() {
                 </div>
             </div>
             {/* Lado direito: Gradiente */}
-            <div className="hidden md:block flex-1 min-h-screen bg-gradient-to-br from-propositoBlue via-blue-400 to-blue-200" />
+            <div className="hidden overflow-hidden md:block flex-1 min-h-screen bg-gradient-to-br from-propositoBlue via-blue-400 to-blue-200">
+                <Image src={"/writer.jpg"} alt="Escritor" width={1000} height={1000} className="w-full h-full object-cover" />
+            </div>
         </div>
     );
 }

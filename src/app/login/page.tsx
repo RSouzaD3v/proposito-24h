@@ -51,13 +51,13 @@ function LoginInner() {
   return (
     <div className="min-h-screen flex">
       {/* Lado esquerdo: Imagem com gradiente */}
-      <div className="hidden md:flex flex-1 items-center justify-center  bg-propositoBlue relative">
+      <div className="hidden overflow-hidden md:flex flex-1 items-center justify-center  bg-propositoBlue relative">
         {/* Substitua a imagem abaixo pela sua imagem desejada */}
-        {/* <img
-          src="/login-illustration.png"
+        <img
+          src="/bible3d.webp"
           alt="Login Illustration"
-          className="max-w-[70%] max-h-[70%] object-contain drop-shadow-2xl"
-        /> */}
+          className="w-full h-full object-cover"
+        />
         {/* Gradiente extra opcional */}
         {/* <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-gray-800/60 to-gray-700/70 pointer-events-none" /> */}
       </div>

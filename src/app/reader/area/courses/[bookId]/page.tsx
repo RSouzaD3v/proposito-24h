@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { FaCrown } from "react-icons/fa";
 import { BuyButton } from "./_components/BuyButton";
 import PdfViewer from "@/app/writer/(check-subscription)/publications/my-vitrine/[bookId]/_components/PdfViewer";
+import { Plans } from "../../settings/_components/Plans";
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -40,8 +41,14 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
                 }
             }
         });
+        const subscription = await db.readerSubscription.findFirst({
+            where: {
+                readerId: session?.user.id,
+                status: 'ACTIVE'
+            }
+        })
 
-        if (!purchase) {
+        if (!purchase && !subscription) {
             // If no purchase found, handle accordingly (e.g., redirect to payment page)
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
@@ -59,7 +66,10 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
                     >
                         Comprar Livro
                     </Link> */}
-                    <BuyButton publicationId={bookId} />
+                    <div className="flex flex-col gap-2 items-center justify-center">
+                        <BuyButton publicationId={bookId} />
+                        <Plans />
+                    </div>
                 </div>
             );
         }
