@@ -48,7 +48,7 @@ export default async function ReaderRegisterPage() {
             <div className="mx-auto mb-4 size-12 rounded-full bg-red-100" />
             <h1 className="text-2xl font-bold text-red-600">Subdomínio inválido</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              O subdomínio "{subdomain || "(vazio)"}" não está registrado para nenhum escritor.
+              O subdomínio <b>{subdomain || "vazio"}</b> não está registrado para nenhum escritor.
             </p>
           </CardContent>
         </Card>
@@ -85,8 +85,8 @@ export default async function ReaderRegisterPage() {
             <ReaderRegister writer={{ id: writer.id, name: writer.name }} />
             <Separator className="my-6" />
             <p className="text-center text-xs text-muted-foreground">
-              Ao continuar, você concorda com nossa {" "}
-              <a className="underline hover:text-foreground" href="/privacy">Política de Privacidade</a> e {" "}
+              Ao continuar, você concorda com nossa 
+              <a className="underline hover:text-foreground" href="/privacy">Política de Privacidade</a> e 
               <a className="underline hover:text-foreground" href="/terms">Termos de Uso</a>.
             </p>
           </CardContent>
