@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import S3Uploader from "@/components/S3Uploader";
 
 export default function RegistrarEscritorPage() {
     const router = useRouter();
@@ -129,12 +130,18 @@ export default function RegistrarEscritorPage() {
                             <label className="block text-sm font-semibold text-gray-700 mb-1">
                                 URL do logo <span className="text-gray-400 font-normal">(opcional)</span>
                             </label>
-                            <input
+                            <S3Uploader
+                              folder="logos"
+                              onUploaded={({ publicUrl }) =>
+                                setForm((prev) => ({ ...prev, logoUrl: publicUrl }))
+                              }
+                            />
+                            {/* <input
                                 name="logoUrl"
                                 placeholder="URL do logo"
                                 onChange={handleChange}
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
+                            /> */}
                         </div>
                         <div className="flex gap-4">
                             <div className="flex-1">
