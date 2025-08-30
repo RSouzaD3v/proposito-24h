@@ -1,5 +1,6 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import WriterAiButton from "@/components/WriterAi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,7 +12,7 @@ export default function WriterPublicationChapterNewPage({
 }) {
     const [slug, setSlug] = useState("");
     const router = useRouter();
-    const [form, setForm] = useState<{ coverUrl?: string }>({});
+    const [form, setForm] = useState<{ coverUrl?: string, content?: string }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,6 +29,7 @@ export default function WriterPublicationChapterNewPage({
         const payload = {
             ...data,
             coverUrl: form.coverUrl,
+            content: form.content
         }
 
         try {
@@ -127,17 +129,32 @@ export default function WriterPublicationChapterNewPage({
                         /> */}
                     </div>
                     <div>
+                    <div className="flex items-center justify-between mb-1">
                         <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-1">
-                            Conteúdo
+                        Conteúdo
                         </label>
-                        <textarea
-                            id="content"
-                            name="content"
-                            rows={6}
-                            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-blue-400 outline-none resize-y"
-                            placeholder="Digite o conteúdo do capítulo"
-                            required
+                        <WriterAiButton
+                        onInsert={(text) =>
+                            setForm((f) => ({
+                            ...f,
+                            content: (f.content ? f.content + "\n" : "") + text, // concatena
+                            }))
+                        }
                         />
+                    </div>
+                    <textarea
+                        id="content"
+                        name="content"
+                        value={form.content || ""}               // evita undefined
+                        onChange={(e) =>                         // mantém controlado
+                        setForm((f) => ({ ...f, content: e.target.value }))
+                        }
+                        rows={6}
+                        className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-blue-400 outline-none resize-y"
+                        placeholder="Digite o conteúdo do capítulo"
+                        required
+                    />
+
                     </div>
                     <button
                         type="submit"

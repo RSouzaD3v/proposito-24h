@@ -67,6 +67,7 @@ export async function PUT(
  * PATCH: ativa/desativa plano
  * body: { isActive: boolean }
  */
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ writerId: string; planId: string }> }
@@ -74,10 +75,50 @@ export async function PATCH(
   const { writerId, planId } = await params;
   await assertWriterAdmin(writerId);
 
-  const { isActive } = await req.json();
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const { isActive: isActiveRaw, isReaderVisible: isReaderVisibleRaw } = body;
+
+  // Converte com segurança e só seta se for realmente boolean
+  const data: Record<string, any> = {};
+
+  if (typeof isActiveRaw === "boolean") {
+    data.isActive = isActiveRaw;
+  } else if (typeof isActiveRaw === "string") {
+    if (isActiveRaw === "true" || isActiveRaw === "false") {
+      data.isActive = isActiveRaw === "true";
+    }
+  }
+
+  if (typeof isReaderVisibleRaw === "boolean") {
+    data.isReaderVisible = isReaderVisibleRaw;
+  } else if (typeof isReaderVisibleRaw === "string") {
+    if (isReaderVisibleRaw === "true" || isReaderVisibleRaw === "false") {
+      data.isReaderVisible = isReaderVisibleRaw === "true";
+    }
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "Nada para atualizar" }, { status: 400 });
+  }
+
+  // Garante que o plano pertence ao writer
+  const existing = await db.writerSubscriptionPlan.findFirst({
+    where: { id: planId, writerId },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Plano não encontrado" }, { status: 404 });
+  }
+
   const updated = await db.writerSubscriptionPlan.update({
     where: { id: planId },
-    data: { isActive: !!isActive },
+    data,
   });
+
   return NextResponse.json(updated);
 }

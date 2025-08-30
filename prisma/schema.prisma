@@ -145,6 +145,7 @@ model Achievements {
 
 // Subscription Reader to Writer
 enum SubscriptionInterval { 
+  LIFETIME
   DAY 
   WEEK 
   MONTH 
