@@ -32,6 +32,13 @@ export default function AreaReader() {
       link: "/reader/area/reading/plan/365",
       primaryColor: "from-[#202020] to-[#404040]",
     },
+    {
+      id: 4,
+      name: "Dashboard Biblico",
+      type: "Conquistas",
+      link: "/reader/area/dashboard",
+      primaryColor: "from-[#202020] to-[#404040]",
+    },
   ];
 
   return (
