@@ -108,12 +108,8 @@ export default async function PentateucoProgress() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <span>Gênesis -</span>
-                <span>Êxodo -</span>
-                <span>Levítico -</span>
-                <span>Números -</span>
-                <span>Deuteronômio</span>
+              <div className="flex items-center gap-2 px-2">
+                <p>Gênesis, Êxodo, Levítico, Números, Deuteronômio</p>
               </div>
               <Badge>{pentateuchPct}%</Badge>
             </div>
