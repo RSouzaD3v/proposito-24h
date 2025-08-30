@@ -57,7 +57,11 @@ export async function POST(
   const URL_WITH_SUBDOMAIN = new URL(APP_URL);
   const userSlug = userReader.writer?.slug;
   if (userSlug) {
-    URL_WITH_SUBDOMAIN.hostname = `${userSlug}.${URL_WITH_SUBDOMAIN.hostname}`;
+    const hostnameParts = URL_WITH_SUBDOMAIN.hostname.split(".");
+    if (hostnameParts[0] === "www") {
+      hostnameParts.shift(); // Remove "www"
+    }
+    URL_WITH_SUBDOMAIN.hostname = `${userSlug}.${hostnameParts.join(".")}`;
   }
 
   // 2) (Opcional) taxa da plataforma em centavos
