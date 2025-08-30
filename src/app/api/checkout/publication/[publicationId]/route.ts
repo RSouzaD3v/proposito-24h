@@ -10,6 +10,22 @@ export async function POST(
   { params }: { params: Promise<{ publicationId: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
+  const userReader = await db.user.findUnique({
+    where: { id: session?.user.id },
+    select: {
+      writer: {
+        select: {
+          slug: true
+        }
+      }
+    }
+  });
+
+  if (!userReader) {
+    return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+  }
+
   const { publicationId } = await params;
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,6 +53,12 @@ export async function POST(
   }
 
   const APP_URL = process.env.BASE_URL || "http://localhost:3000";
+
+  const URL_WITH_SUBDOMAIN = new URL(APP_URL);
+  const userSlug = userReader.writer?.slug;
+  if (userSlug) {
+    URL_WITH_SUBDOMAIN.hostname = `${userSlug}.${URL_WITH_SUBDOMAIN.hostname}`;
+  }
 
   // 2) (Opcional) taxa da plataforma em centavos
   const PLATFORM_FEE = 0; // ex.: 10% -> Math.round((pub.price ?? 0) * 0.10)
@@ -70,8 +92,8 @@ export async function POST(
         application_fee_amount: PLATFORM_FEE,
       } : undefined,
 
-      success_url: `${APP_URL}/reader/area/courses/${publicationId}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${APP_URL}/reader/purchase/cancel`,
+      success_url: `${URL_WITH_SUBDOMAIN}/reader/area/courses/${publicationId}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${URL_WITH_SUBDOMAIN}/reader/purchase/cancel`,
       allow_promotion_codes: true,
     },
     {
