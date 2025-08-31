@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import S3Uploader from "@/components/S3Uploader";
+import { WhatIsSlug } from "./_components/WhatIsSlug";
 
 export default function RegistrarEscritorPage() {
     const router = useRouter();
@@ -85,7 +86,10 @@ export default function RegistrarEscritorPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Slug</label>
+                            <div className="relative flex items-center justify-between w-16">
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Slug</label>
+                                <WhatIsSlug />
+                            </div>
                             <input
                                 name="slug"
                                 placeholder="ex: igreja-vida"
@@ -128,7 +132,7 @@ export default function RegistrarEscritorPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                URL do logo <span className="text-gray-400 font-normal">(opcional)</span>
+                                Logo <span className="text-gray-400 font-normal">(opcional)</span>
                             </label>
                             <S3Uploader
                               folder="logos"

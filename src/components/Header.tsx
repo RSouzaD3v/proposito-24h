@@ -13,7 +13,7 @@ export const Header = () => {
                     {/* <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                         Início
                     </a> */}
-                    <a href="#" className="text-white hover:text-propositoBlue transition-colors">
+                    <a href="/docs" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
                     </a>
                     <a href="/login" className="text-white hover:text-propositoBlue transition-colors">
