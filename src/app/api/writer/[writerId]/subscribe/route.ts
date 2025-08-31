@@ -6,10 +6,10 @@ import { authOptions } from "@/lib/authOption";
 
 export const runtime = "nodejs";
 
-function absoluteUrl(path: string) {
-  const base = process.env.APP_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
-}
+// function absoluteUrl(path: string) {
+//   const base = process.env.APP_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+//   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+// }
 
 export async function POST(
   req: NextRequest,
@@ -17,6 +17,21 @@ export async function POST(
 ) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const userReader = await db.user.findUnique({
+    where: { id: session?.user.id },
+    select: {
+      writer: {
+        select: {
+          slug: true
+        }
+      }
+    }
+  });
+
+  if (!userReader) {
+    return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+  }
 
   const userId = session.user.id;
   const { writerId } = await params;
@@ -69,13 +84,25 @@ export async function POST(
     },
   });
 
+  const APP_URL = process.env.BASE_URL || "http://localhost:3000";
+
+  const URL_WITH_SUBDOMAIN = new URL(APP_URL);
+  const userSlug = userReader.writer?.slug;
+  if (userSlug) {
+    const hostnameParts = URL_WITH_SUBDOMAIN.hostname.split(".");
+    if (hostnameParts[0] === "www") {
+      hostnameParts.shift(); // Remove "www"
+    }
+    URL_WITH_SUBDOMAIN.hostname = `${userSlug}.${hostnameParts.join(".")}`;
+  }
+
   // 4) Checkout de assinatura com destination charges
   const checkout = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: stripeCustomerId!,
     line_items: [{ price: plan.stripePriceId, quantity: 1 }],
-    success_url: successUrl ?? absoluteUrl(`/writers/${writerId}/subscribe/success`),
-    cancel_url: cancelUrl ?? absoluteUrl(`/writers/${writerId}`),
+    success_url: `${URL_WITH_SUBDOMAIN}/reader/area/`,
+    cancel_url: `${URL_WITH_SUBDOMAIN}/reader/area/w/${writer.slug}`,
     allow_promotion_codes: true,
     subscription_data: {
       transfer_data: { destination: writer.stripeAccountId! },
