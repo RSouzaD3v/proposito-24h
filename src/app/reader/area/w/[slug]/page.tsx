@@ -93,7 +93,7 @@ export default async function WriterPublicPage({
             {publications.map((p) => (
               <Link
                 key={p.id}
-                href={`/reader/publications/${p.id}`}
+                href={`/reader/area/courses/${p.id}`}
                 className="border rounded-lg overflow-hidden hover:shadow-sm"
               >
                 {p.coverUrl ? (
