@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     let stripeCustomerId = (writer as any).stripeCustomerId;
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
-        email: writer.emailFrom ?? "writer@exemplo.com",
-        name: writer.name,
+        email: userWriter.email ?? "writer@exemplo.com",
+        name: userWriter.name ?? "Writer",
         metadata: { writerId: userWriter?.writerId },
       });
       stripeCustomerId = customer.id;
