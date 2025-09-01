@@ -24,7 +24,7 @@ export default async function PrayerPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center py-10">
-            <Link href="/writer/prayer" className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg">
+            <Link href="/writer/daily" className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg">
                 <FiArrowLeft size={24}/>
                 Voltar
             </Link>
