@@ -47,6 +47,7 @@ export async function PUT(
       isPdf,
       pdfUrl,
       currency: bodyCurrency,
+      category
     } = body ?? {};
 
     if (!title || !description || !coverUrl || !visibility || !status) {
@@ -100,6 +101,7 @@ export async function PUT(
         isPdf,
         pdfUrl,
         currency: currencyUpper,
+        category: category ?? "Outros"
       },
     });
 

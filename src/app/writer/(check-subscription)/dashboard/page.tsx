@@ -13,6 +13,7 @@ export default async function WriterDashboardPage() {
     { id: 2, title: "Diário", href: "/writer/daily" },
     { id: 1, title: "Minhas Publicações", href: "/writer/publications" },
     { id: 3, title: "Configurações", href: "/writer/settings" },
+    { id: 4, title: "Meu Perfil & Personalizações", href: "/writer/profile" },
   ];
 
   if (!session?.user || session.user.role !== "WRITER_ADMIN") {
@@ -25,21 +26,7 @@ export default async function WriterDashboardPage() {
   });
 
   return (
-    <div className={`max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-xl mt-12`}>
-      {/* Navigation */}
-      <nav className="mb-10 flex flex-wrap gap-6 items-center border-b pb-4">
-        {itemsNav.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className="text-blue-700 hover:text-blue-900 font-semibold transition-colors"
-          >
-            {item.title}
-          </Link>
-        ))}
-        <Logout />
-      </nav>
-
+    <div className={`max-w-4xl mx-auto mt-20 md:px-0 px-4`}>
       {/* Header */}
       <div className="flex items-center gap-6 mb-8">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
@@ -55,30 +42,19 @@ export default async function WriterDashboardPage() {
 
       {/* Writer Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-        <div className="bg-blue-50 flex items-center gap-2 rounded-lg p-6 border border-blue-200 shadow-sm">
-          <span className="text-gray-500 text-xs uppercase">Plataforma</span>
-          <span className="font-bold text-xl text-gray-800">{writer?.name}</span>
-        </div>
-        <div className="bg-blue-50 flex items-center gap-2 rounded-lg p-6 border border-blue-200 shadow-sm">
-          <span className="text-gray-500 text-xs uppercase">Subdomínio</span>
-          <span className="font-bold text-xl text-gray-800">{writer?.slug}</span>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 shadow-sm flex items-center gap-4">
-          <span className="text-gray-500 text-xs uppercase">Cor primária</span>
-          <span
-            className="inline-block w-8 h-8 rounded-full border"
-            style={{ backgroundColor: writer?.colorPrimary ?? "#e5e7eb" }}
-          />
-          <span className="text-sm text-gray-700">{writer?.colorPrimary}</span>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 shadow-sm flex items-center gap-4">
-          <span className="text-gray-500 text-xs uppercase">Cor secundária</span>
-          <span
-            className="inline-block w-8 h-8 rounded-full border"
-            style={{ backgroundColor: writer?.colorSecondary ?? "#e5e7eb" }}
-          />
-          <span className="text-sm text-gray-700">{writer?.colorSecondary}</span>
-        </div>
+        {itemsNav.map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+          >
+            <div className="bg-blue-50 hover:scale-105 flex
+            transition-all duration-200 items-center gap-2 rounded-lg p-6 border border-blue-200 shadow-sm">
+              <span className="font-bold text-xl text-gray-800">{item.title}</span>
+            </div>
+          </Link>
+        ))}
+
+        <Logout />
       </div>
 
       {/* Clipboard Link */}

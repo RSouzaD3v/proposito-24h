@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -8,6 +9,7 @@ export default function DevotionalNewPage() {
         title: "",
         content: "",
         verse: "",
+        imageUrl: "",
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -34,7 +36,7 @@ export default function DevotionalNewPage() {
             }
 
             setSuccess(true);
-            setForm({ title: "", content: "", verse: "" });
+            setForm({ title: "", content: "", verse: "", imageUrl: "" });
         } catch (error) {
             console.error("Error creating devotional:", error);
         } finally {
@@ -95,20 +97,12 @@ export default function DevotionalNewPage() {
                         placeholder="Ex: João 3:16"
                     />
                 </div>
-                {/* <div>
+                <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
-                        URL da Imagem (opcional)
+                        Imagem
                     </label>
-                    <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        value={form.imageUrl}
-                        onChange={handleChange}
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="https://exemplo.com/imagem.jpg"
-                    />
-                </div> */}
+                    <S3Uploader folder="devotional" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                </div>
                 <button
                     type="submit"
                     disabled={loading}

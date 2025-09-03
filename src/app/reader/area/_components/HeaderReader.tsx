@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useAuth } from "../_contexts/AuthContext";
 
-export const HeaderReader = () => {
+export const HeaderReader = ({ titleHeader }: { titleHeader?: string }) => {
   const { user } = useAuth();
 
   return (
@@ -13,8 +13,8 @@ export const HeaderReader = () => {
       </Link>
 
       <div>
-        <h1 className="md:text-3xl text-lg text-white font-bold">Olá, {user?.name || "Usuário"}</h1>
-        <p className="text-white md:text-lg text-sm">Vamos passar tempo com Deus?</p>
+        <h1 className="md:text-3xl text-lg text-white font-bold">Olá, {user?.name.split(' ')[0] || "Usuário"}</h1>
+        <p className="text-white md:text-lg text-sm">{titleHeader}</p>
       </div>
     </header>
   );

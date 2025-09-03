@@ -15,3 +15,4 @@ const base = {
 export const devotionalQueue = new Queue("devotional_import", base);
 export const quoteQueue      = new Queue("quote_import", base);
 export const verseQueue      = new Queue("verse_import", base);
+export const prayerQueue     = new Queue("prayer_import", base);

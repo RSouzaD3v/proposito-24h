@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -10,6 +11,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
         title: "",
         content: "",
         verse: "",
+        imageUrl: "",
     });
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -28,6 +30,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 title: data.devotional.title,
                 content: data.devotional.content,
                 verse: data.devotional.verse,
+                imageUrl: data.devotional.imageUrl || "",
             });
             setLoadingData(false);
         };
@@ -135,16 +138,9 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
-                        URL da Imagem (opcional)
+                        Imagem
                     </label>
-                    <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        onChange={handleChange}
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="https://exemplo.com/imagem.jpg"
-                    />
+                    <S3Uploader folder="devotional" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"

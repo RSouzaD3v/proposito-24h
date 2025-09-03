@@ -55,6 +55,9 @@ model Writer {
   logoUrl        String?
   colorPrimary   String?
   colorSecondary String?
+  
+  titleApp      String? @default("Deus seja sempre louvado!")
+  titleHeader   String? @default("Vamos passar um tempo com Deus?")
 
   // Configurações white label
   branding       Json?
@@ -215,6 +218,7 @@ model Prayer {
   title String
   content String
   writerId String
+  imageUrl String?
   writer   Writer @relation(fields: [writerId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -426,6 +430,7 @@ model Verse {
   id String @id @default(uuid())
   content String
   reference String
+  imageUrl String?
   writerId String
   writer Writer @relation(fields: [writerId], references: [id])
   createdAt DateTime @default(now())

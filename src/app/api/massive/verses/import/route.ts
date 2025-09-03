@@ -15,6 +15,7 @@ const RowSchema = z.object({
   writerId: z.string().min(1).optional(),
   content: z.string().min(1),
   reference: z.string().min(1),
+  imageUrl: z.string().url().optional().or(z.literal("")).transform(v => v || undefined),
 createdAt: z.union([z.string(), z.number(), z.date()]).optional().transform((v) => {
     if (!v) return undefined;
 
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
         const parsed = RowSchema.parse({
           content: r.content ?? r.conteudo ?? r.texto,
           reference: r.reference ?? r.referencia ?? r.verso,
+          imageUrl: r.imageUrl ?? r.imagem ?? r.image,
         });
         valid.push({...parsed, writerId: userWriter.writerId as string});
       } catch (e: any) {
@@ -87,8 +89,8 @@ export async function POST(req: NextRequest) {
 
     const jobs = await Promise.all(
       valid.map((data) => {
-        const key = crypto.createHash("sha1").update(`${userWriter.writerId}|${data.reference}`).digest("hex");
-        return verseQueue.add("create-verse", data, { jobId: key });
+        // const key = crypto.createHash("sha1").update(`${userWriter.writerId}|${data.reference}`).digest("hex");
+        return verseQueue.add("create-verse", data);
       })
     );
 

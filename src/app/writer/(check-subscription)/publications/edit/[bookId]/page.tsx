@@ -37,6 +37,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
         tags: "",
         isPdf: false,
         pdfUrl: "",
+        category: "Outros"
     });
 
     const [loading, setLoading] = useState(false);
@@ -239,6 +240,19 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                         {form.coverUrl && (
                             <img src={form.coverUrl} alt="Capa" className="mt-2 h-32 w-full object-cover rounded-lg border border-gray-200" />
                         )}
+                    </div>
+                              {/* Categoria */}
+                    <div>
+                        <label className="block font-semibold mb-1 text-gray-700">
+                        Categoria
+                        </label>
+                        <input
+                        type="text"
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-2"
+                        />
                     </div>
                     <div>
                         <label className="block font-semibold text-gray-700 mb-1">Conteúdo</label>

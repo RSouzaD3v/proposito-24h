@@ -16,8 +16,8 @@ export const Header = () => {
                     <a href="/docs" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
                     </a>
-                    <a href="/login" className="text-white hover:text-propositoBlue transition-colors">
-                        Leitor
+                    <a href="/login" className="text-black bg-white p-2 rounded-xl transition-colors">
+                        Sou Leitor
                     </a>
                     <a href="/register-writer" className="text-black bg-propositoBlue hover:bg-propositoBlue/80 p-2 rounded-xl transition-colors">
                         Quero ser escritor

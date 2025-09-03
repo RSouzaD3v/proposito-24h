@@ -26,7 +26,7 @@ export default async function WriterPublicationPage() {
         <div className="max-w-4xl mx-auto py-10 px-6">
             <Link
                 href="/writer/dashboard"
-                className="text-blue-600 hover:underline mb-6 inline-block text-sm font-medium"
+                className="bg-blue-600 text-white mb-6 px-2 rounded-sm inline-block text-sm font-medium"
             >
                 ← Voltar ao Painel
             </Link>
@@ -42,13 +42,13 @@ export default async function WriterPublicationPage() {
                 </div>
                 <div className="flex items-center gap-4 flex-wrap">
                     <Link href={"/writer/publications/my-vitrine"}>
-                        <span className="text-blue-600 hover:underline font-medium">
+                        <span className="bg-blue-600 py-2 px-4 text-white rounded-sm">
                             Minha Vitrine
                         </span>
                     </Link>
                     <Link
                         href="/writer/publications/create"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-sm shadow hover:bg-blue-700 transition"
                     >
                         + Nova Publicação
                     </Link>
@@ -68,13 +68,13 @@ export default async function WriterPublicationPage() {
                         <div className="flex items-center gap-4 mt-4">
                             <Link
                                 href={`/writer/publications/edit/${pub.id}`}
-                                className="text-blue-600 hover:underline font-medium"
+                                className="bg-blue-600 text-white p-2 rounded-sm"
                             >
                                 Editar
                             </Link>
                             <Link
                                 href={`/writer/publications/${pub.slug}/chapters`}
-                                className="text-blue-600 hover:underline font-medium"
+                                className="bg-blue-100 text-black p-2 rounded-sm"
                             >
                                 Ver Capítulos
                             </Link>

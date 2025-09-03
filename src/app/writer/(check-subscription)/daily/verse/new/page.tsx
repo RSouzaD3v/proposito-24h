@@ -1,4 +1,5 @@
 "use client";
+import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -9,6 +10,7 @@ export default function VerseNewPage() {
     const [form, setForm] = useState({
         content: "",
         reference: "",
+        imageUrl: "",
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -37,7 +39,7 @@ export default function VerseNewPage() {
             const data = await response.json();
             console.log("Quote created successfully:", data);
             setSuccess(true);
-            setForm({ content: "", reference: "" });
+            setForm({ content: "", reference: "", imageUrl: "" });
         } catch (error) {
             console.error("Error creating quote:", error);
         } finally {
@@ -82,6 +84,12 @@ export default function VerseNewPage() {
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
                     />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
+                        Imagem
+                    </label>
+                    <S3Uploader folder="verse" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"

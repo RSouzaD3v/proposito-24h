@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
 
     const jobs = await Promise.all(
       valid.map((data) => {
-        const key = crypto.createHash("sha1").update(`${userWriter.writerId}|${data.title}`).digest("hex");
-        return devotionalQueue.add("create-devotional", data, { jobId: key });
+        // const key = crypto.createHash("sha1").update(`${userWriter.writerId}|${data.title}`).digest("hex");
+        return devotionalQueue.add("create-devotional", data);
       })
     );
 
