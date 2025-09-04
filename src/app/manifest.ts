@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Propósito24h | Escritores e Leitores',
-    short_name: 'Propósito24h',
+    name: 'DevotionalApp | Escritores e Leitores',
+    short_name: 'DevotionalApp',
     description: 'Uma plataforma para escritores e leitores',
     start_url: '/',
     display: 'standalone',

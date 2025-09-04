@@ -53,7 +53,7 @@ export default async function Home() {
         </div>
       )}
 
-      {!subdomain && (
+      {!subdomain || subdomain === "www" && (
         <section>
           <Header />
 

@@ -70,7 +70,7 @@ export default async function AreaReader() {
               key={item.id}
               href={item.link}
               className={`flex items-center justify-between bg-gradient-to-r ${item.primaryColor} text-white p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group`}
-            >
+            >git 
               <div>
                 <h2 className="md:text-2xl text-xl font-extrabold mb-2">{item.name}</h2>
                 <p className="bg-white/10 text-propositoBlue text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
