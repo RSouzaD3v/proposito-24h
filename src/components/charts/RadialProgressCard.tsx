@@ -43,16 +43,12 @@ export function RadialProgressCard({
     { key: "progress", value: clamped, fill: "var(--color-progress)" },
   ];
 
-  const chartConfig = {
+  const chartConfig: ChartConfig = {
     progress: {
       label: "Progresso",
-    },
-
-    ["progress-color"]: {
-      label: "color-token",
       color: colorVar,
     },
-  } satisfies ChartConfig;
+  };
 
   return (
     <Card className="flex flex-col">
@@ -83,12 +79,22 @@ export function RadialProgressCard({
             <RadialBar dataKey="value" background cornerRadius={10} />
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
-                content={({ viewBox }: { viewBox: any }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    const cx = viewBox.cx as number;
-                    const cy = viewBox.cy as number;
+                content={(props) => {
+                  const viewBox = (props as any)?.viewBox as
+                    | { cx?: number; cy?: number }
+                    | undefined;
+
+                  const cx = viewBox?.cx;
+                  const cy = viewBox?.cy;
+
+                  if (typeof cx === "number" && typeof cy === "number") {
                     return (
-                      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+                      <text
+                        x={cx}
+                        y={cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
                         <tspan
                           x={cx}
                           y={cy}
