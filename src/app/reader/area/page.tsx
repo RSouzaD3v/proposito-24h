@@ -6,36 +6,9 @@ import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
 import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
-import { authOptions } from "@/lib/authOption";
-import { getServerSession } from "next-auth";
-import { db } from "@/lib/db";
 
 export default async function AreaReader() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return <div>Acesso negado</div>;
-  }
-
   const date = new Date();
-
-  const userReader = await db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      writer: {
-        select: {
-          colorPrimary: true,
-          colorSecondary: true,
-          id: true,
-          logoUrl: true,
-          titleApp: true,
-          titleHeader: true,
-        }
-      }
-    },
-  });
 
   const items = [
     {
@@ -71,7 +44,7 @@ export default async function AreaReader() {
   return (
     <ThemeWriterProvider>
       <section className="container mx-auto min-h-screen md:px-1 px-5 py-36">
-        <HeaderReader titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}/>
+        <HeaderReader titleHeader={"Vamos passar tempo com Deus ?"}/>
         <div className="px-2">
           {date.toLocaleDateString("pt-BR", {
             weekday: "long",
@@ -80,7 +53,7 @@ export default async function AreaReader() {
             day: "numeric",
           })}
 
-          <h2 className="md:text-xl text-lg font-bold">{userReader?.writer?.titleApp}</h2>
+          <h2 className="md:text-xl text-lg font-bold">Deus seja sempre louvado!</h2>
         </div>
 
         <h3 className="mt-5 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>

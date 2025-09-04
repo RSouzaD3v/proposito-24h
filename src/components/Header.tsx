@@ -3,8 +3,9 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { write } from "fs";
 
-export const Header = () => {
+export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
     return (
         <header className="w-full text-white">
             <div className="container mx-auto flex items-center justify-between py-4 px-4">
@@ -55,9 +56,9 @@ export const Header = () => {
                 {/* Logo */}
                 <div className="flex items-center">
                     <i className="inline mr-2 w-16">
-                        <img src="/AppImages/ios/512.png" alt="Logo Proposito24h" />
+                        <img src={logo || "/AppImages/ios/512.png" }alt="Logo Proposito24h" />
                     </i>
-                    <span className="font-bold text-xl tracking-tight text-white">Proposito24h</span>
+                    <span className="font-bold text-xl tracking-tight text-white">{name || "DevotionalApp"}</span>
                 </div>
             </div>
         </header>

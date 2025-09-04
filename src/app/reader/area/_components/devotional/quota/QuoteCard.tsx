@@ -39,6 +39,10 @@ export const QuoteCard = async () => {
       },
     });
 
+    if (!quota) {
+      return (null);
+    }
+
     const userCompletionQuote = await db.userCompletationQuote.findFirst({
       where: {
       userId: user.id,

@@ -79,20 +79,19 @@ export default async function Home() {
       )}
 
       {subdomain && writer && (
-        <section className='absolute top-0 left-0 -z-10 w-full min-h-screen flex items-center justify-center flex-col gap-4' style={{background: writer.colorPrimary || '#000'}}>
+        <section>
+        <Header logo={writer.logoUrl || "DevotionalApp"} name={writer.name} />
+
+        <section className='absolute top-0 left-0 -z-10 w-full min-h-screen flex items-center justify-center flex-col gap-4'>
+            <video autoPlay={true} muted loop className='absolute w-full h-full object-cover'>
+              <source src="/video/man-woman.mp4" type="video/mp4" />
+            </video>
             <div className='bg-black absolute top-0 left-0 w-full h-full opacity-70' />
             <div className='z-10 flex flex-col items-center justify-center'>
-              {writer.logoUrl && (
-                <img 
-                  src={writer.logoUrl} 
-                  alt={`${writer.name} Logo`} 
-                  className='w-32 h-32 object-contain rounded-lg mb-4'
-                />
-              )}
               <h1 className='text-white md:text-4xl text-xl font-bold'>Seja bem vindo ao <b>{writer.name}</b></h1>
               <p className='text-white md:text-lg'>Onde você vai criar mais conexão com Deus!</p>
               <div className='flex gap-4 flex-col md:flex-row items-center justify-center mt-4'>
-                <Link href="/reader/register" className='mt-4 px-10 py-2' style={{background: writer.colorSecondary || '#fff', color: writer.colorPrimary || '#000', fontWeight: 'bold', borderRadius: '0.375rem'}}>
+                <Link href="/reader/register" className='mt-4 px-10 py-2 bg-propositoBlue text-propositoBlack font-bold rounded-md'>
                   Começar
                 </Link>
                 <Link href="/login" className='mt-4 px-10 py-2 bg-white text-propositoBlack font-bold rounded-md'>
@@ -101,6 +100,7 @@ export default async function Home() {
               </div>
             </div>
         </section>
+      </section>
       )}
     </section>
   );

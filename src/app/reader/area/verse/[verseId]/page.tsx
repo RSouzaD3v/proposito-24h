@@ -9,7 +9,7 @@ export default async function VerseDetails({ params }: { params: Promise<{ verse
     });
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
+        <div style={{ backgroundImage: verse?.imageUrl ? `url(${verse.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
             <div className="bg-white/80 rounded-2xl shadow-xl p-8 max-w-xl w-full flex flex-col items-center space-y-8 border border-gray-200">
                 <span className="text-gray-500 italic text-lg tracking-wide font-serif">
                     {verse?.reference}
