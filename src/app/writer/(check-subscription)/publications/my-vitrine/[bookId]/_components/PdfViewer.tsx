@@ -1,12 +1,12 @@
+// components/PdfViewer.tsx
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Props = { url: string; className?: string };
-// use "any" p/ compat imediata; se quiser strong typing, use o .d.ts que te passei
 type PDFDocumentProxy = any;
 
-/** HEAD helper para checar existência do worker */
+// HEAD helper para checar existência do worker
 async function headOk(src: string) {
   try {
     const r = await fetch(src, { method: "HEAD" });
@@ -28,7 +28,11 @@ export default function PdfViewer({ url, className }: Props) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   const pages = useMemo(() => Array.from({ length: numPages }, (_, i) => i + 1), [numPages]);
 
-  /** Detecta iOS/Safari (iPadOS desktop incluso) */
+  // ⚠️ Usa proxy p/ mesma origem (evita CORS/Range no iOS)
+  const effectiveUrl = useMemo(() => {
+    return `/api/pdf-proxy?u=${encodeURIComponent(url)}`;
+  }, [url]);
+
   const isIOS = useMemo(() => {
     if (typeof navigator === "undefined") return false;
     return (
@@ -37,7 +41,7 @@ export default function PdfViewer({ url, className }: Props) {
     );
   }, []);
 
-  /** Escolhe worker disponível; iOS prioriza .js */
+  // Escolhe worker; prioriza .js (mais compatível no iOS)
   const pickWorker = useCallback(async () => {
     const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
     const jsFirst = [
@@ -46,21 +50,14 @@ export default function PdfViewer({ url, className }: Props) {
       `${base}/pdfjs/build/pdf.worker.min.mjs`,
       `${base}/pdfjs/build/pdf.worker.mjs`,
     ];
-    const mjsFirst = [
-      `${base}/pdfjs/build/pdf.worker.min.mjs`,
-      `${base}/pdfjs/build/pdf.worker.mjs`,
-      `${base}/pdfjs/build/pdf.worker.min.js`,
-      `${base}/pdfjs/build/pdf.worker.js`,
-    ];
-    const candidates = isIOS ? jsFirst : jsFirst; // se quiser priorizar .mjs no desktop, troque para mjsFirst
+    const candidates = isIOS ? jsFirst : jsFirst; // mude p/ mjs-first se quiser priorizar .mjs no desktop
     for (const src of candidates) {
       if (await headOk(src)) return src;
     }
-    // fallback final (tenta mesmo sem HEAD ok)
     return candidates[0];
   }, [isIOS]);
 
-  /** Observa largura do container para fit-width */
+  // Observa largura do container para fit-width
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -70,7 +67,6 @@ export default function PdfViewer({ url, className }: Props) {
     obs.observe(el);
     setContainerWidth(el.clientWidth);
 
-    // extra: tratar rotação/orientation no iOS
     const onResize = () => setContainerWidth(el.clientWidth);
     window.addEventListener("orientationchange", onResize);
     window.addEventListener("resize", onResize);
@@ -82,7 +78,7 @@ export default function PdfViewer({ url, className }: Props) {
     };
   }, []);
 
-  /** Carrega pdf.js + documento */
+  // Carrega pdf.js + documento
   useEffect(() => {
     let cancelled = false;
     let loadTask: any | null = null;
@@ -94,10 +90,10 @@ export default function PdfViewer({ url, className }: Props) {
         const pdfjs = await import("pdfjs-dist/build/pdf.mjs");
         pdfjs.GlobalWorkerOptions.workerSrc = await pickWorker();
 
-        // 1ª tentativa: URL (range requests)
+        // 1ª tentativa: URL (Range via proxy)
         try {
           loadTask = pdfjs.getDocument({
-            url,
+            url: effectiveUrl,
             cMapUrl: `${basePath}/pdfjs/cmaps/`,
             cMapPacked: true,
             standardFontDataUrl: `${basePath}/pdfjs/standard_fonts/`,
@@ -110,9 +106,9 @@ export default function PdfViewer({ url, className }: Props) {
           setReady(true);
           return;
         } catch {
-          // Fallback: baixa arquivo e usa data (resolve muitos casos de CORS/Range)
+          // Fallback: baixa via proxy e usa data (para qualquer variação de CORS/RANGE)
           try {
-            const resp = await fetch(url);
+            const resp = await fetch(effectiveUrl);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.arrayBuffer();
             loadTask = pdfjs.getDocument({
@@ -143,20 +139,19 @@ export default function PdfViewer({ url, className }: Props) {
       } catch {}
       try {
         docRef.current?.destroy?.();
+        // @ts-ignore
         docRef.current = null;
       } catch {}
     };
-  }, [url, basePath, pickWorker]);
+  }, [effectiveUrl, basePath, pickWorker]);
 
   return (
     <div className={`fixed inset-0 flex flex-col bg-background ${className ?? ""}`}>
-      {/* Header simples (status) — toolbar virá depois */}
       <div className="px-3 py-2 text-sm border-b flex items-center justify-between">
         <span>{ready ? `Páginas: ${numPages}` : "Carregando..."}</span>
         {error && <span className="text-red-600">{error}</span>}
       </div>
 
-      {/* Área de leitura (scroll contínuo) */}
       <div ref={containerRef} className="flex-1 overflow-auto">
         {ready && docRef.current ? (
           <div className="mx-auto max-w-[1100px] px-2 sm:px-4 py-4">
@@ -179,7 +174,7 @@ export default function PdfViewer({ url, className }: Props) {
   );
 }
 
-/** Canvas de página com render sob demanda (só quando visível) + fit-width + HiDPI */
+/** Canvas de página com render sob demanda (IntersectionObserver) + fit-width + HiDPI */
 function PageCanvas({
   pageNumber,
   pdfDoc,
@@ -195,7 +190,6 @@ function PageCanvas({
   const [visible, setVisible] = useState(false);
   const [lastScale, setLastScale] = useState<number | null>(null);
 
-  // observar visibilidade com prefetch (rootMargin)
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
@@ -209,7 +203,6 @@ function PageCanvas({
     return () => io.disconnect();
   }, []);
 
-  // renderiza quando visível ou quando mudar a largura disponível
   useEffect(() => {
     let cancelled = false;
 
@@ -217,15 +210,12 @@ function PageCanvas({
       if (!visible || !canvasRef.current) return;
       const page = await pdfDoc.getPage(pageNumber);
 
-      // calcula escala "fit-width"
       const vp1 = page.getViewport({ scale: 1 });
       const scale = Math.max(0.5, Math.min(fitWidth / vp1.width, 3));
       if (lastScale !== null && Math.abs(scale - lastScale) < 0.02) {
-        // evita render desnecessário se a variação de largura foi mínima
-        return;
+        return; // evita rerender mínimo
       }
 
-      // HiDPI
       const dpr = window.devicePixelRatio || 1;
       const viewport = page.getViewport({ scale });
       const canvas = canvasRef.current!;
@@ -236,9 +226,8 @@ function PageCanvas({
       canvas.style.width = `${Math.floor(viewport.width)}px`;
       canvas.style.height = `${Math.floor(viewport.height)}px`;
 
-      // Cancela render anterior (se houver)
       try {
-        renderTaskRef.current?.cancel();
+        renderTaskRef.current?.cancel?.();
       } catch {}
 
       const transform = [dpr, 0, 0, dpr, 0, 0] as any;
@@ -252,7 +241,7 @@ function PageCanvas({
         } catch {}
         if (!cancelled) setLastScale(scale);
       } catch {
-        // ignore se for cancel/falha
+        // ignore cancel/falha
       }
     }
 
@@ -261,7 +250,7 @@ function PageCanvas({
     return () => {
       cancelled = true;
       try {
-        renderTaskRef.current?.cancel();
+        renderTaskRef.current?.cancel?.();
       } catch {}
     };
   }, [visible, fitWidth, pageNumber, pdfDoc, lastScale]);
