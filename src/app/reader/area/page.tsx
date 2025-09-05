@@ -6,9 +6,36 @@ import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
 import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
+// import { authOptions } from "@/lib/authOption";
+// import { getServerSession } from "next-auth";
+// import { db } from "@/lib/db";
 
 export default async function AreaReader() {
+  // const session = await getServerSession(authOptions);
+
+  // if (!session) {
+  //   return <div>Acesso negado</div>;
+  // }
+
   const date = new Date();
+
+  // const userReader = await db.user.findUnique({
+  //   where: {
+  //     id: session.user.id,
+  //   },
+  //   select: {
+  //     writer: {
+  //       select: {
+  //         colorPrimary: true,
+  //         colorSecondary: true,
+  //         id: true,
+  //         logoUrl: true,
+  //         titleApp: true,
+  //         titleHeader: true,
+  //       }
+  //     }
+  //   },
+  // });
 
   const items = [
     {
@@ -53,7 +80,7 @@ export default async function AreaReader() {
             day: "numeric",
           })}
 
-          <h2 className="md:text-xl text-lg font-bold">Deus seja sempre louvado!</h2>
+          <h2 className="md:text-xl text-lg font-bold">{"Deus Seja Sempre Louvado!"}</h2>
         </div>
 
         <h3 className="mt-5 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
@@ -70,7 +97,7 @@ export default async function AreaReader() {
               key={item.id}
               href={item.link}
               className={`flex items-center justify-between bg-gradient-to-r ${item.primaryColor} text-white p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group`}
-            >git 
+            >
               <div>
                 <h2 className="md:text-2xl text-xl font-extrabold mb-2">{item.name}</h2>
                 <p className="bg-white/10 text-propositoBlue text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">

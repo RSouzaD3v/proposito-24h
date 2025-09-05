@@ -45,10 +45,11 @@ export default async function PrayerPage() {
 
 
     return (
-        <section className="container mx-auto max-w-2xl py-10 px-4 min-h-screen">
-            <div className="flex items-center justify-between mb-8">
+        <section style={{ backgroundImage: prayer?.imageUrl ? `url(${prayer?.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} 
+        className="w-screen flex items-center justify-center py-10 px-4 min-h-screen">
+            {/* <div className="flex items-center justify-between mb-8 w-fit bg-white/75 p-4 rounded-xl shadow-md">
                 <h2 className="text-4xl font-extrabold drop-shadow-sm">Minha Oração</h2>
-            </div>
+            </div> */}
             {!prayer ? (
                 <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-10 shadow-md text-gray-500 text-center">
                     <span className="block text-2xl mb-2">🙏</span>
@@ -57,9 +58,9 @@ export default async function PrayerPage() {
             ) : (
                 <div className="space-y-8">
                     <div
-                        className="bg-white rounded-2xl shadow-lg p-8 border border-indigo-100 hover:shadow-xl transition-shadow relative"
+                        className="bg-white/75 w-full px-5 md:w-[500px] flex items-center justify-center flex-col gap-4 rounded-2xl shadow-lg p-8 border border-indigo-100 hover:shadow-xl transition-shadow relative"
                     >
-                        <h3 className="text-2xl font-bold text-indigo-700 mb-3 flex items-center gap-2">
+                        <h3 className="text-2xl font-bold text-black mb-3 flex items-center gap-2">
                                 <span className="inline-block">🕊️</span>
                                 {prayer.title}
                             </h3>

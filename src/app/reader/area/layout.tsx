@@ -12,6 +12,7 @@ import { authOptions } from "@/lib/authOption";
 
 // 🔽 componente client que já criamos antes
 import PushBootstrap from "@/components/PushBootstrap";
+import PlaySong from "./_components/PlaySong";
 
 export default async function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default async function RootLayout({
             - se "granted", assina e salva via /api/push/subscribe
             - topics: ["new-book"] (padrão para novo livro do writer) */}
         <PushBootstrap writerId={user?.writer.id} userId={user?.id} />
+        <PlaySong />
 
         <section>
           {/* <HeaderReader /> */}
