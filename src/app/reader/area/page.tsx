@@ -5,7 +5,6 @@ import { MenuPainel } from "./_components/MenuPainel";
 import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
-import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
 
 export default function AreaReader() {
   const date = new Date();
@@ -42,7 +41,6 @@ export default function AreaReader() {
   ];
 
   return (
-    <ThemeWriterProvider>
       <section className="container mx-auto min-h-screen md:px-1 px-5 py-36">
         <HeaderReader titleHeader={"Vamos passar tempo com Deus ?"}/>
         <div className="px-2">
@@ -83,6 +81,5 @@ export default function AreaReader() {
         </div>
         <MenuPainel />
       </section>
-    </ThemeWriterProvider>
   );
 }
