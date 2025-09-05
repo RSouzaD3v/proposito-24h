@@ -1,3 +1,4 @@
+// app/reader/area/_components/devotional/devotional/DevotionalCard.tsx
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { authOptions } from "@/lib/authOption"
 import { db } from "@/lib/db"
@@ -6,81 +7,62 @@ import Link from "next/link"
 import { FaCheck, FaComments } from "react-icons/fa"
 
 export const DevotionalCard = async () => {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
+  if (!session) return null;
 
-    if (!session) {
-      return null;
-    }
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user?.writerId) return null;
 
-    const user = await db.user.findUnique({
-      where: {
-        id: session.user.id,
-      }
-    })
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
 
-    if (!user?.writerId) {
-      return null;
-    };
+  const devotional = await db.devotional.findFirst({
+    where: { writerId: user.writerId, createdAt: { gte: today, lt: tomorrow } },
+  });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    const devotional = await db.devotional.findFirst({
-      where: {
-      writerId: user.writerId,
-      createdAt: {
-        gte: today,
-        lt: tomorrow,
-      },
-      },
-    });
-
-    const userCompletationDevotional = devotional
-      ? await db.userCompletationDevotional.findFirst({
-        where: {
-        userId: user.id,
-        devotionalId: devotional.id,
-        },
-      })
-      : null;
-
-    if (!devotional) {
-      return (
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
-          <CardContent className="flex items-center justify-center flex-col text-center h-full">
-            <h4>Nenhum devocional ainda.</h4>
-          </CardContent>
-        </Card>
-      );
-    }
-
+  if (!devotional) {
     return (
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
-            <CardHeader className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FaComments size={25} />
-                <h2>Devocional</h2>
-              </div>
+      <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+        <CardContent className="flex items-center justify-center flex-col text-center h-full">
+          <h4>Nenhum devocional ainda.</h4>
+        </CardContent>
+      </Card>
+    );
+  }
 
-              {userCompletationDevotional ? (
-                <div className="w-6 h-6 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg">
-                  <FaCheck />
-                </div>
-              ) : null}
-            </CardHeader>
+  let userCompletationDevotional: { id: string } | null = null;
+  try {
+    userCompletationDevotional = await db.userCompletationDevotional.findFirst({
+      where: { userId: user.id, devotionalId: devotional.id },
+      select: { id: true },
+    });
+  } catch (e) {
+    console.error("userCompletationDevotional query failed:", e);
+  }
 
-            <CardContent>
-              <h2 className="text-xl font-bold">{devotional?.verse}</h2>
-            </CardContent>
+  return (
+    <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+      <CardHeader className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <FaComments size={25} />
+          <h2>Devocional</h2>
+        </div>
+        {userCompletationDevotional ? (
+          <div className="w-6 h-6 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg">
+            <FaCheck />
+          </div>
+        ) : null}
+      </CardHeader>
 
-            <CardFooter>
-              <Link href={`/reader/area/devotional/${devotional?.id}`} className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline">
-                Ler
-              </Link>
-            </CardFooter>
-        </Card>
-    )
-}
+      <CardContent>
+        <h2 className="text-xl font-bold">{devotional.verse}</h2>
+      </CardContent>
+
+      <CardFooter>
+        <Link href={`/reader/area/devotional/${devotional.id}`} className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline">
+          Ler
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+};
