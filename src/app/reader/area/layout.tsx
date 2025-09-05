@@ -10,7 +10,7 @@ import { authOptions } from "@/lib/authOption";
 import { redirect } from "next/navigation";
 
 import PushBootstrap from "@/components/PushBootstrap";
-import PlaySong from "./_components/PlaySong";
+import { PainelControl } from "./_components/PainelControl";
 
 export default async function ReaderLayout({
   children,
@@ -43,7 +43,7 @@ export default async function ReaderLayout({
     <AuthReaderProvider>
       <ThemeWriterProvider>
         <PushBootstrap writerId={user.writer.id} userId={user.id} />
-        <PlaySong />
+        <PainelControl />
         <section>{children}</section>
       </ThemeWriterProvider>
     </AuthReaderProvider>

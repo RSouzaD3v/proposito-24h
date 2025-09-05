@@ -77,6 +77,12 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
                 return 'dark'
             }
          });
+
+         if (window) {
+             window.location.reload();
+         } else {
+             router.refresh();
+         }
     }
 
     return (

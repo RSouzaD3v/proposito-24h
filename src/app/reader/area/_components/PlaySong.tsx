@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { Play, Pause } from "lucide-react";
 
 /**
  * Componente de música de fundo para leitura do devocional.
@@ -106,7 +107,7 @@ export default function PlaySong({
   }, [stopAndCleanup]);
 
   return (
-    <div className="fixed top-3 right-3 z-[999999]">
+    <div>
       <button
         type="button"
         onClick={handleToggle}
@@ -127,13 +128,9 @@ export default function PlaySong({
           "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500",
         ].join(" ")}
       >
-        <span className="inline-flex items-center gap-2 font-medium">
+        <span className="inline-flex items-center justify-center gap-2 font-medium">
           {/* Ícone simples sem dependências */}
-          <span
-            aria-hidden
-            className="inline-block w-2 h-2 rounded-full bg-current animate-pulse"
-          />
-          {isPlaying ? "Pausar" : "Tocar aleatório"}
+          {isPlaying ? <Pause /> : <Play />}
         </span>
       </button>
     </div>
