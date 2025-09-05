@@ -53,7 +53,7 @@ export default async function Home() {
               <h1 className='text-white md:text-4xl text-xl font-bold'>Seja bem vindo ao <b>{writer?.name || "DevotionalApp"}</b></h1>
               <p className='text-white md:text-lg'>Onde você vai criar mais conexão com Deus!</p>
               <div className='flex gap-4 flex-col md:flex-row items-center justify-center mt-4'>
-                <Link href="/reader/register" className='mt-4 px-10 py-2 bg-propositoBlue text-propositoBlack font-bold rounded-md'>
+                <Link href="/register-writer" className='mt-4 px-10 py-2 bg-propositoBlue text-propositoBlack font-bold rounded-md'>
                   Começar
                 </Link>
                 <Link href="/login" className='mt-4 px-10 py-2 bg-white text-propositoBlack font-bold rounded-md'>
