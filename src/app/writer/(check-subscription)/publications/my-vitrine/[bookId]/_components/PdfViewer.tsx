@@ -75,7 +75,7 @@ export default function PdfViewer({
           </button>
 
           {canShare && (
-            <button onClick={shareNow} className="px-4 py-2 rounded border font-medium">
+            <button onClick={shareNow} className="px-4 py-2 rogitunded border font-medium">
               Compartilhar…
             </button>
           )}
