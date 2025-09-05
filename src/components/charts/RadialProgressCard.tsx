@@ -4,8 +4,8 @@
 import { TrendingUp } from "lucide-react";
 import {
   Label,
-  PolarGrid,
   PolarRadiusAxis,
+  PolarAngleAxis,
   RadialBar,
   RadialBarChart,
 } from "recharts";
@@ -23,10 +23,12 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 type Props = {
   title: string;
   description?: string;
-  value: number; // 0..100
-  centerLabel?: string; // ex.: "Velho Testamento"
+  value: number;            // 0..100
+  centerLabel?: string;
   footerNote?: string;
-  colorVar?: string; // ex.: "var(--chart-2)"
+  colorVar?: string;        // ex.: "var(--chart-2)"
+  thickness?: number;       // LARGURA do anel (px) — padrão 18
+  outerRadius?: number;     // Raio externo (px) — padrão 110
 };
 
 export function RadialProgressCard({
@@ -36,19 +38,19 @@ export function RadialProgressCard({
   centerLabel = "Progresso",
   footerNote,
   colorVar = "var(--chart-2)",
+  thickness = 18,          // <- ajuste aqui
+  outerRadius = 110,       // <- ajuste aqui
 }: Props) {
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const outer = outerRadius;
+  const inner = Math.max(outer - thickness, 0);
 
-  const chartData = [
-    { key: "progress", value: clamped, fill: "var(--color-progress)" },
-  ];
+  // A cor do progresso vem daqui (ChartContainer -> --color-progress)
+  const chartConfig = {
+    progress: { label: "Progresso", color: colorVar },
+  } satisfies ChartConfig;
 
-  const chartConfig: ChartConfig = {
-    progress: {
-      label: "Progresso",
-      color: colorVar,
-    },
-  };
+  const data = [{ key: "progress", value: clamped, fill: "var(--color-progress)" }];
 
   return (
     <Card className="flex flex-col">
@@ -60,53 +62,34 @@ export function RadialProgressCard({
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[260px]"
         >
           <RadialBarChart
-            data={chartData}
+            data={data}
             startAngle={90}
             endAngle={450}
-            innerRadius={80}
-            outerRadius={110}
+            innerRadius={inner}
+            outerRadius={outer}
           >
-            <PolarGrid
-              gridType="circle"
-              radialLines={false}
-              stroke="none"
-              className="first:fill-muted last:fill-background"
-              polarRadius={[86, 74]}
-            />
-            <RadialBar dataKey="value" background cornerRadius={10} />
+            {/* Garante que 100 = círculo completo e 20 = 20% */}
+            <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+
+            {/* A barra e seu trilho (mesma espessura) */}
+            <RadialBar dataKey="value" background cornerRadius={Math.min(12, thickness / 2)} />
+
+            {/* Rótulo central */}
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
-                content={(props) => {
-                  const viewBox = (props as any)?.viewBox as
-                    | { cx?: number; cy?: number }
-                    | undefined;
-
-                  const cx = viewBox?.cx;
-                  const cy = viewBox?.cy;
-
-                  if (typeof cx === "number" && typeof cy === "number") {
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    const cx = viewBox.cx as number;
+                    const cy = viewBox.cy as number;
                     return (
-                      <text
-                        x={cx}
-                        y={cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={cx}
-                          y={cy}
-                          className="fill-foreground text-4xl font-bold"
-                        >
+                      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+                        <tspan x={cx} y={cy} className="fill-foreground text-4xl font-bold">
                           {clamped}%
                         </tspan>
-                        <tspan
-                          x={cx}
-                          y={cy + 24}
-                          className="fill-muted-foreground"
-                        >
+                        <tspan x={cx} y={cy + 24} className="fill-muted-foreground">
                           {centerLabel}
                         </tspan>
                       </text>

@@ -10,6 +10,8 @@ export function OldTestamentRadial({ value }: { value: number }) {
       value={value}
       centerLabel="VT"
       colorVar="var(--chart-3)"
+      thickness={45}
+      outerRadius={120}
     />
   );
 }

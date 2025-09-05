@@ -10,6 +10,8 @@ export function NewTestamentRadial({ value }: { value: number }) {
       value={value}
       centerLabel="NT"
       colorVar="var(--chart-1)"
+      thickness={45}
+      outerRadius={120}
     />
   );
 }

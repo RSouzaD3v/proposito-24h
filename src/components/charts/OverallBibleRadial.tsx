@@ -10,6 +10,8 @@ export function OverallBibleRadial({ value }: { value: number }) {
       value={value}
       centerLabel="Geral"
       colorVar="var(--chart-2)"
+      thickness={45}
+      outerRadius={120}
     />
   );
 }
