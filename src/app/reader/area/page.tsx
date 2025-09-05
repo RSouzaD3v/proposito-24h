@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
 import { FiChevronRight } from "react-icons/fi";
