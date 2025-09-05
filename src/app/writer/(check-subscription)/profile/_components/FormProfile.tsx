@@ -120,7 +120,7 @@ export const FormProfile = (data: DataTypes) => {
                     </label>
                     <S3Uploader
                         folder="logos"
-                        onUploaded={(url: any) => setForm({ ...form, logoUrl: url })}
+                        onUploaded={({ publicUrl }) => setForm({ ...form, logoUrl: publicUrl })}
                     />
                 </div>
 
