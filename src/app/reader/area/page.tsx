@@ -6,36 +6,9 @@ import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
 import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
-// import { authOptions } from "@/lib/authOption";
-// import { getServerSession } from "next-auth";
-// import { db } from "@/lib/db";
 
-export default async function AreaReader() {
-  // const session = await getServerSession(authOptions);
-
-  // if (!session) {
-  //   return <div>Acesso negado</div>;
-  // }
-
+export default function AreaReader() {
   const date = new Date();
-
-  // const userReader = await db.user.findUnique({
-  //   where: {
-  //     id: session.user.id,
-  //   },
-  //   select: {
-  //     writer: {
-  //       select: {
-  //         colorPrimary: true,
-  //         colorSecondary: true,
-  //         id: true,
-  //         logoUrl: true,
-  //         titleApp: true,
-  //         titleHeader: true,
-  //       }
-  //     }
-  //   },
-  // });
 
   const items = [
     {
