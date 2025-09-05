@@ -60,17 +60,17 @@ export default function PdfViewer({
   return (
     <div className={`min-h-[60vh] flex items-center justify-center ${className ?? ""}`}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <h2 className="text-lg font-semibold">Abrir PDF no leitor do dispositivo</h2>
+        <h2 className="text-lg font-semibold text-black">Abrir PDF no leitor do dispositivo</h2>
         <p className="text-sm text-muted-foreground max-w-[420px]">
           Estamos redirecionando para o leitor nativo. Se não abrir automaticamente, use os botões abaixo.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-          <button onClick={openNow} className="px-4 py-2 rounded border font-medium">
+          <button onClick={openNow} className="px-4 py-2 text-black bg-white rounded border font-medium">
             Abrir agora
           </button>
 
-          <button onClick={downloadNow} className="px-4 py-2 rounded border font-medium">
+          <button onClick={downloadNow} className="px-4 py-2 text-black bg-white rounded border font-medium">
             Baixar PDF
           </button>
 
