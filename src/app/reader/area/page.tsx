@@ -40,23 +40,23 @@ export default async function AreaReader() {
   const items = [
     {
       id: 1,
-      name: "Biblioteca",
-      type: "Ebooks",
-      link: "/reader/area/courses",
-      primaryColor: "from-[#202020] to-[#404040]",
-    },
-    {
-      id: 2,
       name: "Oração de Hoje",
       type: "Oração",
       link: "/reader/area/prayer",
       primaryColor: "from-[#202020] to-[#404040]",
     },
     {
-      id: 3,
+      id: 2,
       name: "Plano Bíblia em 365 Dias",
       type: "Plano de Leitura",
       link: "/reader/area/reading/plan/365",
+      primaryColor: "from-[#202020] to-[#404040]",
+    },
+    {
+      id: 3,
+      name: "Biblioteca",
+      type: "Ebooks",
+      link: "/reader/area/courses",
       primaryColor: "from-[#202020] to-[#404040]",
     },
     {
