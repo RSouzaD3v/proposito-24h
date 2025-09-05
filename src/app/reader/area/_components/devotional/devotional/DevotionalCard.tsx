@@ -55,7 +55,7 @@ export const DevotionalCard = async () => {
       </CardHeader>
 
       <CardContent>
-        <h2 className="text-xl font-bold">{devotional.verse}</h2>
+        <h2 className="text-xl font-bold">{devotional.title}</h2>
       </CardContent>
 
       <CardFooter>

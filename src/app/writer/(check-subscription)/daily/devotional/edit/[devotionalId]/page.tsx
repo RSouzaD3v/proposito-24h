@@ -93,7 +93,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="nameAuthor">
-                        Autor
+                        Título
                     </label>
                     <input
                         type="text"
@@ -108,7 +108,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="content">
-                        Citação
+                        Conteúdo
                     </label>
                     <textarea
                         id="content"
