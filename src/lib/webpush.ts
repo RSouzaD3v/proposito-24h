@@ -2,7 +2,7 @@ import webpush from 'web-push';
 
 const PUBLIC = process.env.VAPID_PUBLIC_KEY!;
 const PRIVATE = process.env.VAPID_PRIVATE_KEY!;
-const SUBJECT = process.env.WEB_PUSH_SUBJECT || 'mailto:contato@proposito24h.com';
+const SUBJECT = process.env.WEB_PUSH_SUBJECT || 'mailto:contato@devotionalapp.com';
 
 if (!PUBLIC || !PRIVATE) throw new Error('Configure VAPID_PUBLIC_KEY/PRIVATE_KEY');
 

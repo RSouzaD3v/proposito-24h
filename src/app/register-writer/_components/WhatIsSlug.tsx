@@ -18,7 +18,7 @@ export const WhatIsSlug = () => {
                         <p>
                             <strong>slug</strong> é uma parte única e personalizada da URL usada como subdomínio. 
                             Por exemplo, ao escolher <b>meu-escritorio</b>, sua URL será: 
-                            https://meu-escritorio.proposito24h.com.br. 
+                            https://meu-escritorio.devotionalapp.com.br. 
                             Isso ajuda a identificar seu espaço de forma exclusiva.
                         </p>
                     </CardContent>
