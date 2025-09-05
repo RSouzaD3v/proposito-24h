@@ -139,7 +139,7 @@ export default function PdfViewer({ url, className }: Props) {
       } catch {}
       try {
         docRef.current?.destroy?.();
-        // @ts-ignore
+
         docRef.current = null;
       } catch {}
     };
