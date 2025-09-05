@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // ✅ Liste aqui os hosts de origem dos seus PDFs (S3/CloudFront)
 const ALLOWED_HOSTS = new Set<string>([
-  "proposito24h.s3.us-east-2.amazonaws.com",
+  "proposito24h-bucket.s3.us-east-1.amazonaws.com",
   // "cdn.proposito24h.com.br", // se usar CloudFront, adicione
 ]);
 
