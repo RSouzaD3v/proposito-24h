@@ -22,7 +22,7 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
                 </div>
                 {devotional?.id && (
                     <div className="flex justify-center">
-                        <CompleteDevotional devotionalId={devotional.id} />
+                        <CompleteDevotional devotionalId={devotional.id} devotionalContent={devotional?.content} />
                     </div>
                 )}
             </div>

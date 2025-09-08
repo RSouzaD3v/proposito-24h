@@ -1,9 +1,10 @@
 'use client';
+import TTSReader from "@/components/TTSReader";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export const CompleteDevotional = ({ devotionalId }: { devotionalId: string }) => {
+export const CompleteDevotional = ({ devotionalId, devotionalContent }: { devotionalId: string, devotionalContent: string }) => {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -29,6 +30,7 @@ export const CompleteDevotional = ({ devotionalId }: { devotionalId: string }) =
 
     return (
         <div>
+            <TTSReader text={devotionalContent}/>
             <Button className="cursor-pointer hover:scale-105" onClick={handleCompleteDevotional}>
                 {loading ? "CONCLUINDO..." : "TOQUE AQUI PARA CONCLUIR"}
             </Button>
