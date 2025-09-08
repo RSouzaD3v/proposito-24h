@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
+import TTSReader from "@/components/TTSReader";
 
 type RouteParams = { book: string; chapter: string };
 
@@ -50,6 +51,8 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
           </li>
         ))}
       </ol>
+
+      <TTSReader text={verses.map(v => v.text).join(' ')} />
 
       <div className="mt-6 flex items-center gap-2">
         {nav.prev ? (

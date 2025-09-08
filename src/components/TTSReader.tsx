@@ -185,7 +185,7 @@ export default function TTSReader({
           aria-label={isPlaying ? "Pausar leitura" : "Tocar leitura"}
         >
           {loading ? "Carregando…" : isPlaying ? <div className="flex items-center gap-1 text-white">
-            <Pause /> Pausar
+            <Pause /> Parar
             </div> : <div className="flex items-center gap-1 text-white">
               <Play /> Escutar
               </div>}
