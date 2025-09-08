@@ -17,7 +17,7 @@ export default async function AreaReader() {
     return <div>Acesso negado</div>;
   }
 
-  const date = new Date();
+  const date = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
 
   const userReader = await db.user.findUnique({
     where: {
@@ -73,12 +73,15 @@ export default async function AreaReader() {
       <section className="container mx-auto min-h-screen md:px-1 px-5 py-36">
         <HeaderReader titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}/>
         <div className="px-2">
-          {date.toLocaleDateString("pt-BR", {
+            {date.toLocaleDateString("pt-BR", {
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric",
-          })}
+            })} - {date.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            })}
 
           <h2 className="md:text-xl text-lg font-bold">{userReader?.writer?.titleApp}</h2>
         </div>

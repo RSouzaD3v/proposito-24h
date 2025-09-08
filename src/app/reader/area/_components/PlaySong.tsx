@@ -16,7 +16,7 @@ export default function PlaySong({
 }: {
   volume?: number;
 }) {
-  const TRACKS = [1, 2, 3, 4, 5].map((n) => `/song/music${n}.mp3`);
+  const TRACKS = [1, 2, 3, 4, 5].map((n) => `/song/music.mp3`);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isPlayingRef = useRef(false);               // estado "ao vivo" p/ callbacks
