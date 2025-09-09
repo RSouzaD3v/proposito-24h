@@ -11,6 +11,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
         content: "",
         title: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -29,6 +30,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                 content: data.prayer.content,
                 title: data.prayer.title,
                 imageUrl: data.prayer.imageUrl || "",
+                date: new Date(data.prayer.createdAt).toISOString().split("T")[0],
             });
             setLoadingData(false);
         };
@@ -117,6 +119,20 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                         required
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Título da Oração"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
                 <div>

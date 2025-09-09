@@ -31,12 +31,23 @@ export default async function VersePage() {
 
             <div className="w-full max-w-xl mx-auto mb-8 flex items-center justify-between bg-white/90 rounded-xl shadow p-6">
                 <span className="text-lg font-semibold text-indigo-700">Versículo do Dia</span>
-                <Link
-                    href={`/writer/daily/verse/${verse?.id ? `edit/${verse.id}` : "new"}`}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                >
-                    {verse ? "Editar" : "Novo"}
-                </Link>
+                <div className="flex gap-4">
+                    {verse && (
+                        <Link
+                            href={`/writer/daily/verse/edit/${verse.id}`}
+                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                        >
+                            Editar
+                        </Link>
+                    )}
+                    <Link
+                        href={`/writer/daily/verse/new`}
+                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                    >
+                       Novo
+                    </Link>
+
+                </div>
             </div>
 
             {verse ? (

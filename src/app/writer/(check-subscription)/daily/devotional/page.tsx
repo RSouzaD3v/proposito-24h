@@ -31,12 +31,23 @@ export default async function DevotionalPage() {
 
             <div className="w-full max-w-xl mx-auto mb-8 flex items-center justify-between bg-white/90 rounded-xl shadow p-6">
                 <span className="text-lg font-semibold text-indigo-700">Devocional do Dia</span>
-                <Link
-                    href={`/writer/daily/devotional/${devotional?.id ? `edit/${devotional.id}` : "new"}`}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                >
-                    {devotional ? "Editar" : "Novo"}
-                </Link>
+                <div className="flex items-center gap-4">
+                    {devotional && (
+                        <Link
+                            href={`/writer/daily/devotional/edit/${devotional.id}`}
+                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                        >
+                            Editar
+                        </Link>
+                    )}
+                    <Link
+                        href={`/writer/daily/devotional/new`}
+                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                    >
+                        Novo
+                    </Link>
+
+                </div>
             </div>
 
             {devotional ? (

@@ -11,6 +11,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
         content: "",
         reference: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0],
     });
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -29,6 +30,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
                 content: data.verse.content,
                 reference: data.verse.reference,
                 imageUrl: data.verse.imageUrl || "",
+                date: data.verse.date ? new Date(data.verse.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
             });
             setLoadingData(false);
         };
@@ -117,6 +119,20 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
                         required
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
                 <div>

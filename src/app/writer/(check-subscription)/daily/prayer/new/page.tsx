@@ -9,6 +9,7 @@ export default function PrayerNewPage() {
         content: "",
         title: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -37,7 +38,7 @@ export default function PrayerNewPage() {
             const data = await response.json();
             console.log("Prayer created successfully:", data);
             setSuccess(true);
-            setForm({ content: "", title: "", imageUrl: "" });
+            setForm({ content: "", title: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating prayer:", error);
         } finally {
@@ -81,6 +82,20 @@ export default function PrayerNewPage() {
                         required
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Título..."
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
                 <div>

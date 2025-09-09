@@ -12,6 +12,7 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
         content: "",
         verse: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0],
     });
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -31,6 +32,7 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
                 content: data.quote.content,
                 verse: data.quote.verse,
                 imageUrl: data.quote.imageUrl,
+                date: new Date(data.quote.createdAt).toISOString().split("T")[0],
             });
             setLoadingData(false);
         };
@@ -136,6 +138,22 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
                         placeholder="Ex: João 3:16"
                     />
                 </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={new Date(form.date).toISOString().split("T")[0]}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                </div>
+
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
                         URL da Imagem (opcional)

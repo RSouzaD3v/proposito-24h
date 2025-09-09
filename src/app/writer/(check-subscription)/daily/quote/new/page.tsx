@@ -12,6 +12,7 @@ export default function QuoteNewPage() {
         content: "",
         verse: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0],
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -40,7 +41,7 @@ export default function QuoteNewPage() {
             const data = await response.json();
             console.log("Quote created successfully:", data);
             setSuccess(true);
-            setForm({ nameAuthor: "", content: "", verse: "", imageUrl: "" });
+            setForm({ nameAuthor: "", content: "", verse: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating quote:", error);
         } finally {
@@ -99,6 +100,20 @@ export default function QuoteNewPage() {
                         required
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={new Date(form.date).toISOString().split("T")[0]}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
                 <div>

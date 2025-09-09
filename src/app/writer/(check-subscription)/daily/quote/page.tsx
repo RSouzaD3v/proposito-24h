@@ -31,12 +31,22 @@ export default async function QuotePage() {
 
             <div className="w-full max-w-xl mx-auto mb-8 flex items-center justify-between bg-white/90 rounded-xl shadow p-6">
                 <span className="text-lg font-semibold text-indigo-700">Citação do Dia</span>
-                <Link
-                    href={`/writer/daily/quote/${quote?.id ? `edit/${quote.id}` : "new"}`}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                >
-                    {quote ? "Editar" : "Nova"}
-                </Link>
+                <div className="flex gap-4">
+                    {quote && (
+                        <Link
+                            href={`/writer/daily/quote/edit/${quote.id}`}
+                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                        >
+                            Editar
+                        </Link>
+                    )}
+                    <Link
+                        href={`/writer/daily/quote/new`}
+                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                    >
+                       Nova
+                    </Link>
+                </div>
             </div>
 
             {quote ? (

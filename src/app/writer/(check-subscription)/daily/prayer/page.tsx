@@ -31,12 +31,23 @@ export default async function PrayerPage() {
 
             <div className="w-full max-w-xl mx-auto mb-8 flex items-center justify-between bg-white/90 rounded-xl shadow p-6">
                 <span className="text-lg font-semibold text-indigo-700">Oração do Dia</span>
-                <Link
-                    href={`/writer/daily/prayer/${prayer?.id ? `edit/${prayer.id}` : "new"}`}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                >
-                    {prayer ? "Editar" : "Novo"}
-                </Link>
+                <div className="flex items-center gap-4">
+                    {prayer && (
+                        <Link
+                            href={`/writer/daily/prayer/edit/${prayer.id}`}
+                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                        >
+                            Editar
+                        </Link>
+                    )}
+                    <Link
+                        href={`/writer/daily/prayer/new`}
+                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+                    >
+                        Novo
+                    </Link>
+
+                </div>
             </div>
 
             {prayer ? (

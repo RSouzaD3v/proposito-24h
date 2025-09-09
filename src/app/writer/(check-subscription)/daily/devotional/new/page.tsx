@@ -3,6 +3,7 @@ import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
+import { date } from "zod";
 
 export default function DevotionalNewPage() {
     const [form, setForm] = useState({
@@ -10,6 +11,7 @@ export default function DevotionalNewPage() {
         content: "",
         verse: "",
         imageUrl: "",
+        date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -36,7 +38,7 @@ export default function DevotionalNewPage() {
             }
 
             setSuccess(true);
-            setForm({ title: "", content: "", verse: "", imageUrl: "" });
+            setForm({ title: "", content: "", verse: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating devotional:", error);
         } finally {
@@ -95,6 +97,20 @@ export default function DevotionalNewPage() {
                         required
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date">
+                        Data
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        required
+                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
                 <div>

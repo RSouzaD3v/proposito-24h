@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
-    const { nameAuthor, content, verse, imageUrl } = await req.json();
+    const { nameAuthor, content, verse, imageUrl, date } = await req.json();
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
             content,
             verse,
             imageUrl,
-            writerId: userWriter.writerId
+            writerId: userWriter.writerId,
+            createdAt: date ? new Date(date + 'T00:00:00') : new Date(),
         },
     });
 

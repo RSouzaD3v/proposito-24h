@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ quot
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ quoteId: string }> }) {
     const session = await getServerSession(authOptions);
-    const { nameAuthor, content, verse, imageUrl } = await req.json();
+    const { nameAuthor, content, verse, imageUrl, date } = await req.json();
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,6 +77,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ quot
             content,
             verse,
             imageUrl,
+            createdAt: date ? new Date(date + 'T00:00:00') : quote.createdAt,
         },
     });
 

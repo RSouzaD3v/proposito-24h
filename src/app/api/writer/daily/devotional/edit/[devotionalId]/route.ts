@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ devo
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ devotionalId: string }> }) {
     const session = await getServerSession(authOptions);
-    const { title, content, verse, imageUrl } = await req.json();
+    const { title, content, verse, imageUrl, date } = await req.json();
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,6 +77,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ devo
             content,
             verse,
             imageUrl,
+            createdAt: date ? new Date(date + "T12:00:00Z") : devotional.createdAt,
         },
     });
 
