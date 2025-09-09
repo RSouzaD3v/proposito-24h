@@ -19,7 +19,7 @@ export function AuthReaderProvider({ children }: { children: React.ReactNode }) 
                 const response = await fetch("/api/reader/me");
                 
                 if (!response.ok) {
-                    throw new Error("Network response was not ok");
+                    redirect("/login");
                 }
 
                 const data = await response.json();
@@ -31,6 +31,7 @@ export function AuthReaderProvider({ children }: { children: React.ReactNode }) 
                 setUser(data.user);
             } catch (error) {
                 console.error("Error fetching user:", error);
+                redirect("/login");
             } finally {
                 setLoading(false);
             }
