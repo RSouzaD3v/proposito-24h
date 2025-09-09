@@ -17,11 +17,8 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                     <a href="/docs" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
                     </a>
-                    <a href="/login" className="text-black bg-white p-2 rounded-xl transition-colors">
-                        Sou Leitor
-                    </a>
-                    <a href="/register-writer" className="text-black bg-propositoBlue hover:bg-propositoBlue/80 p-2 rounded-xl transition-colors">
-                        Quero ser escritor
+                    <a href="/bible" className="text-white hover:text-propositoBlue transition-colors">
+                        Bíblia
                     </a>
                 </nav>
                 {/* Mobile Menu */}
@@ -43,11 +40,8 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                                 <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                                     Documentação
                                 </a>
-                                <a href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
-                                    Leitor
-                                </a>
-                                <a href="/register-writer" className="text-muted-foreground hover:text-foreground transition-colors">
-                                    Quero ser escritor
+                                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                                    FAQ
                                 </a>
                             </nav>
                         </SheetContent>
