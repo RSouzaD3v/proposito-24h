@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { write } from "fs";
+import Link from "next/link";
 
 export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
     return (
@@ -13,13 +14,13 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                 <nav className="hidden md:flex gap-6 items-center">
                     {/* <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                         Início
-                    </a> */}
-                    <a href="/docs" className="text-white hover:text-propositoBlue transition-colors">
+                    </Link> */}
+                    <Link href="/docs" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
-                    </a>
-                    <a href="/bible" className="text-white hover:text-propositoBlue transition-colors">
+                    </Link>
+                    <Link href="/bible" className="text-white hover:text-propositoBlue transition-colors">
                         Bíblia
-                    </a>
+                    </Link>
                 </nav>
                 {/* Mobile Menu */}
                 <div className="md:hidden">
@@ -36,13 +37,13 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                             <nav className="flex flex-col gap-4 mt-10 px-5">
                                 {/* <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                                     Início
-                                </a> */}
-                                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                                </Link> */}
+                                <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
                                     Documentação
-                                </a>
-                                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                                </Link>
+                                <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
                                     FAQ
-                                </a>
+                                </Link>
                             </nav>
                         </SheetContent>
                     </Sheet>
