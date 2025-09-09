@@ -41,8 +41,8 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                                 <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
                                     Documentação
                                 </Link>
-                                <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
-                                    FAQ
+                                <Link href="/bible" className="text-muted-foreground hover:text-foreground transition-colors">
+                                    Bíblia
                                 </Link>
                             </nav>
                         </SheetContent>
