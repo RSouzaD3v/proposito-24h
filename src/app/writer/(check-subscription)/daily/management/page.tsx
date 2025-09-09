@@ -45,6 +45,11 @@ export default async function DailyManagementPage() {
             writerId: userWriter.writerId
         }
     });
+    const prayers = await db.prayer.findMany({
+        where: {
+            writerId: userWriter.writerId
+        }
+    })
 
     return (
         <div className="w-full max-w-4xl mx-auto p-6">
@@ -54,7 +59,7 @@ export default async function DailyManagementPage() {
             </Link>
             <h1 className="my-5 text-xl font-bold">Gerenciamento Daily</h1>
 
-            <SectionsDaily quotes={quotes} verses={verses} devotionals={devotionals} />
+            <SectionsDaily quotes={quotes} verses={verses} devotionals={devotionals} prayers={prayers} />
         </div>
     );
 }
