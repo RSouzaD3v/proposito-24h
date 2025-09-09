@@ -1,7 +1,8 @@
 import { FaBook, FaFileExcel, FaQuoteLeft, FaDailymotion, FaPray } from "react-icons/fa";
 import Link from "next/link";
 import { FiArrowLeft, FiBook } from "react-icons/fi";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function DailyPage() {
     const itemsNav = [
@@ -44,29 +45,31 @@ export default function DailyPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center py-10 px-5">
-            <Link
-                href="/writer/dashboard"
-                className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg hover:text-indigo-900 transition-colors"
-            >
-                <FiArrowLeft size={24} />
-                Voltar
-            </Link>
-            <h1 className="text-4xl font-extrabold mb-8 text-gray-800 text-center">
-                Painel Diário
-            </h1>
+        <div className="min-h-screen bg-gradient-to-b from-indigo-100 via-white to-indigo-50 flex flex-col items-center py-12 px-4">
+            <div className="w-full max-w-5xl flex items-center mb-10">
+                <Link href="/writer/dashboard">
+                    <Button variant="ghost" className="flex items-center gap-2 text-indigo-700 hover:text-indigo-900">
+                        <FiArrowLeft size={22} />
+                        Voltar
+                    </Button>
+                </Link>
+                <h1 className="flex-1 text-4xl font-extrabold text-center text-indigo-900 tracking-tight">
+                    Painel Diário
+                </h1>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl">
                 {itemsNav.map((item) => (
                     <Link key={item.id} href={item.href} className="group">
-                        <Card className="cursor-pointer transition-transform transform group-hover:-translate-y-2 group-hover:shadow-xl flex flex-col items-center bg-white border border-gray-200 rounded-lg">
-                            <CardContent className="flex flex-col items-center p-6">
-                                <div className="mb-4 text-indigo-600 group-hover:text-indigo-800 transition-colors">
+                        <Card className="transition-all duration-200 hover:scale-105 hover:shadow-2xl border-0 bg-gradient-to-br from-white via-indigo-50 to-indigo-100">
+                            <CardHeader className="flex flex-col items-center pt-8 pb-2">
+                                <span className="rounded-full bg-indigo-100 group-hover:bg-indigo-200 p-4 mb-4 text-indigo-700 group-hover:text-indigo-900 shadow-md transition-colors">
                                     {item.icon}
-                                </div>
-                                <CardTitle className="text-lg font-semibold text-gray-700 text-center group-hover:text-gray-900 transition-colors">
+                                </span>
+                                <CardTitle className="text-lg font-semibold text-center text-indigo-900 group-hover:text-indigo-700 transition-colors">
                                     {item.title}
                                 </CardTitle>
-                            </CardContent>
+                            </CardHeader>
+                            <CardContent />
                         </Card>
                     </Link>
                 ))}
