@@ -18,7 +18,7 @@ export const Header = ({ logo, name }: { logo?: string; name?: string }) => {
                     <Link href="/docs" className="text-white hover:text-propositoBlue transition-colors">
                         Documentação
                     </Link>
-                    <Link href="/bible-acf" className="text-white hover:text-propositoBlue transition-colors">
+                    <Link href="/bible-nvi" className="text-white hover:text-propositoBlue transition-colors">
                         Bíblia
                     </Link>
                 </nav>

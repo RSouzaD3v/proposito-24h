@@ -24,7 +24,7 @@ export const MenuPainel = () => {
             id: 3,
             name: "Bíblia",
             icon: <FiBook size={22} />,
-            link: "/reader/area/bible-acf"
+            link: "/reader/area/bible-nvi"
         },
         {
             id: 4,

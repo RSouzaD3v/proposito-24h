@@ -7,7 +7,7 @@ export default function BibleLayout({ children }: { children: ReactNode }) {
         <main className="mx-auto max-w-5xl px-4 py-8">
             <header className="mb-8">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <Link href="/" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+                    <Link href="/reader/area" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
                         ← Ir para início
                     </Link>
                     <Link href={"/reader/area/reading/plan/365"} className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">

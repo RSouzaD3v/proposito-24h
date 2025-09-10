@@ -154,6 +154,33 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
                     />
                 </div>
 
+                                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
+                        Escolher imagem (opcional)
+                    </label>
+                    <select
+                        className="w-52 mb-2"
+                        name="image"
+                        id="image"
+                        value={form.imageUrl}
+                        onChange={e => setForm({ ...form, imageUrl: `/background-images/${e.target.value}` })}
+                    >
+                        <option value="">Selecione uma imagem</option>
+                        {Array(30).fill(0).map((_, i) => (
+                            <option key={i} value={`${i + 1}.webp`}>
+                                {`${i + 1}.webp`}
+                            </option>
+                        ))}
+                    </select>
+                    {form.imageUrl && (
+                        <img
+                            src={form.imageUrl}
+                            alt="Imagem selecionada"
+                            className="mt-2 rounded shadow w-40 h-40 object-cover"
+                        />
+                    )}
+                </div>
+
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
                         URL da Imagem (opcional)
