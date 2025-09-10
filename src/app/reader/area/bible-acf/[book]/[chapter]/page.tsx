@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
 import TTSReader from "@/components/TTSReader";
+import NativeReaderAudio from "@/components/NativeReaderAudio";
 
 type RouteParams = { book: string; chapter: string };
 
@@ -25,6 +26,8 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
       <header className="mb-4">
         <h2 className="text-2xl font-semibold">{b.name} {cap}</h2>
         <p className="text-sm text-muted-foreground">ACF</p>
+              <NativeReaderAudio text={verses.map(v => v.text).join(' ')} />
+              <p></p>
       </header>
 
       <div className="mb-4 flex items-center gap-2">
@@ -52,7 +55,7 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
         ))}
       </ol>
 
-      <TTSReader text={verses.map(v => v.text).join(' ')} />
+      {/* <TTSReader text={verses.map(v => v.text).join(' ')} /> */}
 
       <div className="mt-6 flex items-center gap-2">
         {nav.prev ? (

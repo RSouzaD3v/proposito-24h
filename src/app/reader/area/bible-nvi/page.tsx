@@ -25,7 +25,7 @@ export default async function BibleNVIHomePage() {
       {items.map((b) => (
         <Link
           key={b.id ?? b.abbrev ?? b.name}
-          href={`/bible-nvi/${b.abbrev}`}
+          href={`/reader/area/bible-nvi/${b.abbrev}`}
           className="rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
         >
           <div className="text-sm text-black">{b.order}</div>
