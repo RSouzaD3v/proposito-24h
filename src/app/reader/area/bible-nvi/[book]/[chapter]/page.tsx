@@ -1,6 +1,6 @@
+// app/bible-nvi/[book]/[chapter]/page.tsx
 import Link from "next/link";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
-import TTSReader from "@/components/TTSReader";
 
 type RouteParams = { book: string; chapter: string };
 
@@ -8,34 +8,34 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
   const { book, chapter } = await params;
   const b = await getBookByAbbrev(book);
   const cap = Number(chapter);
-  return { title: b ? `${b.name} ${cap} — Versículos` : "Capítulo" };
+  return { title: b ? `${b.name} ${cap} — Versículos (NVI)` : "Capítulo (NVI)" };
 }
 
-export default async function ChapterVersesPage({ params }: { params: Promise<RouteParams> }) {
+export default async function ChapterVersesPageNVI({ params }: { params: Promise<RouteParams> }) {
   const { book, chapter } = await params;
   const cap = Number(chapter);
 
-  const { book: b, verses } = await getVerses(book, cap);
+  const { book: b, verses } = await getVerses(book, cap, "NVI");
   if (!b) return <div className="text-red-600">Livro não encontrado.</div>;
 
-  const nav = await getPrevNextChapter(book, cap);
+  const nav = await getPrevNextChapter(book, cap, "NVI");
 
   return (
     <section className="min-h-screen">
       <header className="mb-4">
         <h2 className="text-2xl font-semibold">{b.name} {cap}</h2>
-        <p className="text-sm text-muted-foreground">ACF</p>
+        <p className="text-sm text-muted-foreground">NVI</p>
       </header>
 
       <div className="mb-4 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border text-black px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md text-black border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md text-black border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border text-black px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border text-black px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
@@ -52,24 +52,23 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
         ))}
       </ol>
 
-      <TTSReader text={verses.map(v => v.text).join(' ')} />
-
       <div className="mt-6 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
       </div>
 
-      <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
+      <div className="mt-6 flex items-center gap-2">
+        <Link href={`/bible/${b.abbrev}/${cap}`} className="text-sm underline">Ver este capítulo em ACF</Link>
+        <Link href="/bible-nvi" className="text-sm underline">Livros (NVI)</Link>
       </div>
     </section>
   );

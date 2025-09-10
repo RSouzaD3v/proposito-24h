@@ -1,13 +1,13 @@
+// app/bible-nvi/page.tsx
 import Link from "next/link";
 import { getBooks } from "@/lib/bible";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-export const metadata = { title: "Bíblia — Livros" };
+export const metadata = { title: "Bíblia NVI — Livros" };
 
-export default async function BibleHomePage() {
+export default async function BibleNVIHomePage() {
   const books = await getBooks();
 
-  // Split por campo 'testament' (se existir) ou por 'order' (fallback)
   const otBooks = books.filter((b: any) =>
     typeof b.testament === "string"
       ? b.testament.toLowerCase().startsWith("old") || b.testament.toLowerCase().includes("velho")
@@ -25,7 +25,7 @@ export default async function BibleHomePage() {
       {items.map((b) => (
         <Link
           key={b.id ?? b.abbrev ?? b.name}
-          href={`/bible/${b.abbrev}`}
+          href={`/bible-nvi/${b.abbrev}`}
           className="rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
         >
           <div className="text-sm text-black">{b.order}</div>
@@ -38,8 +38,6 @@ export default async function BibleHomePage() {
 
   return (
     <section className="min-h-screen">
-      <h2 className="sr-only">Livros</h2>
-
       <Tabs defaultValue="ot" className="mt-2">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="ot">Velho Testamento ({otBooks.length})</TabsTrigger>

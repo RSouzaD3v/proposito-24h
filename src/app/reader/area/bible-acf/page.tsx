@@ -25,7 +25,7 @@ export default async function BibleHomePage() {
       {items.map((b) => (
         <Link
           key={b.id ?? b.abbrev ?? b.name}
-          href={`/reader/area/bible/${b.abbrev}`}
+          href={`/reader/area/bible-acf/${b.abbrev}`}
           className="rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
         >
           <div className="text-sm text-black">{b.order}</div>

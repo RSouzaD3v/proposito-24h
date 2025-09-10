@@ -1,3 +1,4 @@
+// bible/[book]/page.tsx
 import Link from "next/link";
 import { getBookByAbbrev, getChaptersOfBook } from "@/lib/bible";
 
@@ -25,15 +26,16 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
 
       <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
         {chapters.map((c) => (
-          <Link key={c} href={`/bible/${b.abbrev}/${c}`} className="rounded-md text-black bg-gray-100 hover:bg-gray-200 border px-3 py-2 hover:text-propositoGray text-center">
+          <Link key={c} href={`/bible-acf/${b.abbrev}/${c}`} className="rounded-md text-black bg-gray-100 hover:bg-gray-200 border px-3 py-2 hover:text-propositoGray text-center">
             {c}
           </Link>
         ))}
       </div>
 
       <div className="mt-6">
-        <Link href="/bible" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
+        <Link href="/bible-acf" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
       </div>
+      <Link href={`/bible-nvi/${b.abbrev}`} className="text-sm underline">Ver este livro em NVI</Link>
     </section>
   );
 }
