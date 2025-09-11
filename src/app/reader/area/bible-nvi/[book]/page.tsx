@@ -28,7 +28,7 @@ export default async function BookChaptersPageNVI({ params }: { params: Promise<
         {chapters.map((c) => (
           <Link
             key={c}
-            href={`/bible-nvi/${b.abbrev}/${c}`}
+            href={`/reader/area/bible-nvi/${b.abbrev}/${c}`}
             className="rounded-md text-black bg-gray-100 hover:bg-gray-200 border px-3 py-2 hover:text-propositoGray text-center"
           >
             {c}
@@ -37,10 +37,10 @@ export default async function BookChaptersPageNVI({ params }: { params: Promise<
       </div>
 
       <div className="mt-6 flex items-center gap-2">
-        <Link href="/bible-nvi" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+        <Link href="/reader/area/bible-nvi" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
           ← todos os livros (NVI)
         </Link>
-        <Link href={`/bible/${b.abbrev}`} className="text-sm underline">Ver este livro em ACF</Link>
+        <Link href={`/reader/area/bible-acf/${b.abbrev}`} className="text-sm underline">Ver este livro em ACF</Link>
       </div>
     </section>
   );

@@ -32,7 +32,7 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
+        <Link href="/reader/area/bible-acf" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
       </div>
     </section>
   );

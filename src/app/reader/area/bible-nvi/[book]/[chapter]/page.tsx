@@ -29,13 +29,13 @@ export default async function ChapterVersesPageNVI({ params }: { params: Promise
 
       <div className="mb-4 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border text-black px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md text-black border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md text-black border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border text-black px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border text-black px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
@@ -54,21 +54,21 @@ export default async function ChapterVersesPageNVI({ params }: { params: Promise
 
       <div className="mt-6 flex items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}/${nav.prev}`}>
             ← Cap. {nav.prev}
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
+        <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}`}>Capítulos</Link>
         {nav.next ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
+          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/reader/area/bible-nvi/${b.abbrev}/${nav.next}`}>
             Cap. {nav.next} →
           </Link>
         ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
       </div>
 
       <div className="mt-6 flex items-center gap-2">
-        <Link href={`/bible/${b.abbrev}/${cap}`} className="text-sm underline">Ver este capítulo em ACF</Link>
-        <Link href="/bible-nvi" className="text-sm underline">Livros (NVI)</Link>
+        <Link href={`/reader/area/bible-acf/${b.abbrev}/${cap}`} className="text-sm underline">Ver este capítulo em ACF</Link>
+        <Link href="/reader/area/bible-nvi" className="text-sm underline">Livros (NVI)</Link>
       </div>
     </section>
   );
