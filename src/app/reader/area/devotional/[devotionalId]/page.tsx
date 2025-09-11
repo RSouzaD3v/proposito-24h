@@ -37,7 +37,10 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
         }
     });
 
-    if (!verifyAccess?.devotional || !subscription) {
+        const isFree = verifyAccess?.verse === true;
+    const hasSubscription = !!subscription;
+
+    if (!isFree && !hasSubscription) {
         return (
             <div className="min-h-screen px-4 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
                 <div className="bg-white/80 shadow-xl rounded-2xl px-8 py-10 max-w-xl w-full flex flex-col items-center">
