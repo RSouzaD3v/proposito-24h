@@ -81,6 +81,7 @@ model Writer {
   prayers       Prayer[]
   writerSubscriptionPlans WriterSubscriptionPlan[]
   readerSubscriptions ReaderSubscription[]
+  readerAccess   WriterReaderAccess?
   
 
   createdAt      DateTime @default(now())
@@ -211,6 +212,21 @@ model ReaderSubscription {
   @@index([writerId, createdAt])     // lista de novos assinantes
 }
 
+model WriterReaderAccess {
+  id String @id @default(uuid())
+  writerId String
+  writer Writer @relation(fields: [writerId], references: [id])
+  quote Boolean @default(true)
+  devotional Boolean @default(true)
+  verse Boolean @default(true)
+  prayer Boolean @default(true)
+  biblePlan Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([writerId])
+  @@index([quote, devotional, verse, prayer, biblePlan])
+}
 
 
 model Prayer {
