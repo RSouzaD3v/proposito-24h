@@ -1,5 +1,6 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import S3AudioUploader from "@/components/S3UploaderAudio";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -11,6 +12,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
         content: "",
         title: "",
         imageUrl: "",
+        audioUrl: "",
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                 title: data.prayer.title,
                 imageUrl: data.prayer.imageUrl || "",
                 date: new Date(data.prayer.createdAt).toISOString().split("T")[0],
+                audioUrl: data.prayer.audioUrl || "",
             });
             setLoadingData(false);
         };
@@ -167,6 +170,12 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                         Imagem
                     </label>
                     <S3Uploader folder="prayer" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="audioUrl">
+                        Áudio
+                    </label>
+                    <S3AudioUploader folder="audios" onUploaded={(file) => setForm({ ...form, audioUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"

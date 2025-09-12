@@ -1,5 +1,6 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import S3AudioUploader from "@/components/S3UploaderAudio";
 import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -9,6 +10,7 @@ export default function PrayerNewPage() {
         content: "",
         title: "",
         imageUrl: "",
+        audioUrl: "",
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export default function PrayerNewPage() {
             const data = await response.json();
             console.log("Prayer created successfully:", data);
             setSuccess(true);
-            setForm({ content: "", title: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
+            setForm({ content: "", title: "", imageUrl: "", audioUrl: "", date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating prayer:", error);
         } finally {
@@ -130,6 +132,12 @@ export default function PrayerNewPage() {
                         Imagem
                     </label>
                     <S3Uploader folder="prayer" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="audioUrl">
+                        Áudio
+                    </label>
+                    <S3AudioUploader folder="audios" onUploaded={(file) => setForm({ ...form, audioUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"

@@ -104,6 +104,15 @@ export default async function PrayerPage() {
                                 ) : null}                               
                             </div>
 
+                                {prayer.audioUrl && (
+                                    <div className="mt-4 w-full">
+                                        <audio controls className="w-full">
+                                            <source src={prayer.audioUrl as string} type="audio/mpeg" />
+                                            Seu navegador não suporta o elemento de áudio.
+                                        </audio>
+                                    </div>
+                                )}
+
                             <div>
                                 <CompletePrayer prayerId={prayer.id} />
                             </div>
