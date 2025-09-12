@@ -49,7 +49,7 @@ export default function TeacherBibleAI({
         >
           <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold">
-                Professor Bíblico AI
+                Pergunte ao Professor
             </CardTitle>
 
             <div className="flex items-center gap-2">

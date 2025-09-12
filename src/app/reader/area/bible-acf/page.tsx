@@ -68,20 +68,21 @@ export default async function BibleHomePage() {
           <Link
             key={b.id ?? b.abbrev ?? b.name}
             href={`/reader/area/bible-acf/${b.abbrev}`}
-            className="relative rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
+            className="flex flex-col justify-between rounded-xl border p-4 hover:shadow-sm transition bg-gray-100 hover:bg-gray-200"
           >
+            <div>
+              <div className="text-sm text-black">{order}</div>
+              <div className="font-semibold text-black pr-16 line-clamp-2">{b.name}</div>
+              <div className="text-xs text-black">/{b.abbrev}</div>
+            </div>
             <Badge
               variant="default"
-              className={`absolute top-2 right-2 text-[10px] uppercase tracking-wide ${badgeClass}`}
+              className={`my-2 ${badgeClass}`}
               aria-label={`Subdivisão: ${subdiv}`}
               title={subdiv}
             >
               {subdiv}
             </Badge>
-
-            <div className="text-sm text-black">{order}</div>
-            <div className="font-semibold text-black pr-16 line-clamp-2">{b.name}</div>
-            <div className="text-xs text-black">/{b.abbrev}</div>
           </Link>
         );
       })}

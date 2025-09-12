@@ -1,6 +1,7 @@
 // app/bible-nvi/[book]/[chapter]/page.tsx
 import Link from "next/link";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
+import TeacherBibleAI from "@/components/TeacherBibleAi";
 
 type RouteParams = { book: string; chapter: string };
 
@@ -22,6 +23,7 @@ export default async function ChapterVersesPageNVI({ params }: { params: Promise
 
   return (
     <section className="min-h-screen">
+      <TeacherBibleAI />
       <header className="mb-4">
         <h2 className="text-2xl font-semibold">{b.name} {cap}</h2>
         <p className="text-sm text-muted-foreground">NVI</p>

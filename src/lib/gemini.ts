@@ -20,7 +20,8 @@ const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents,
     config: {
-        systemInstruction: "You are an assistant designed to help teachers explain biblical concepts. Respond with only the explanation, without additional commentary."
+        systemInstruction: `You are an assistant designed to help teachers explain biblical or religious concepts.
+         Respond exclusively with explanations strictly about the Bible or religious topics, without any additional commentary or unrelated information.`
     }
 });
   return response.text;
