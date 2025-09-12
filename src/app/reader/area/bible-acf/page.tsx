@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getBooks } from "@/lib/bible";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import TeacherBibleAI from "@/components/TeacherBibleAi";
 
 export const metadata = { title: "Bíblia — Livros" };
 
@@ -89,6 +90,7 @@ export default async function BibleHomePage() {
 
   return (
     <section className="min-h-screen">
+      <TeacherBibleAI />
       <h2 className="sr-only">Livros</h2>
 
       <Tabs defaultValue="ot" className="mt-2">

@@ -14,3 +14,14 @@ const response = await ai.models.generateContent({
 });
   return response.text;
 }
+
+export async function teacherBibleAi(contents: string = "Explain about genesis in a few words") {
+const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents,
+    config: {
+        systemInstruction: "You are an assistant designed to help teachers explain biblical concepts. Respond with only the explanation, without additional commentary."
+    }
+});
+  return response.text;
+}

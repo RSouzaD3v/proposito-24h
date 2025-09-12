@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
 import TTSReader from "@/components/TTSReader";
 import NativeReaderAudio from "@/components/NativeReaderAudio";
+import TeacherBibleAI from "@/components/TeacherBibleAi";
 
 type RouteParams = { book: string; chapter: string };
 
@@ -23,6 +24,7 @@ export default async function ChapterVersesPage({ params }: { params: Promise<Ro
 
   return (
     <section className="min-h-screen">
+      <TeacherBibleAI />
       <header className="mb-4">
         <h2 className="text-2xl font-semibold">{b.name} {cap}</h2>
         <p className="text-sm text-muted-foreground">ACF</p>
