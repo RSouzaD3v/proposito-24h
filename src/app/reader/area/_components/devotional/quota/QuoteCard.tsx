@@ -1,11 +1,25 @@
 // app/reader/area/_components/devotional/quota/QuoteCard.tsx
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { authOptions } from "@/lib/authOption"
-import { db } from "@/lib/db"
-import { getServerSession } from "next-auth"
-import Link from "next/link"
-import { FaCheck } from "react-icons/fa"
-import { FiActivity } from "react-icons/fi"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { authOptions } from "@/lib/authOption";
+import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { FaCheck } from "react-icons/fa";
+import { FiActivity } from "react-icons/fi";
+import { startOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const TZ = "America/Sao_Paulo";
+
+function brasiliaDayRange(now = new Date()) {
+  const localNow = toZonedTime(now, TZ);
+  const start = startOfDay(localNow);
+  const next = startOfDay(addDays(start, 1));
+  return {
+    gte: fromZonedTime(start, TZ),
+    lt: fromZonedTime(next, TZ), // use lt para evitar borda de 23:59:59.999
+  };
+}
 
 export const QuoteCard = async () => {
   const session = await getServerSession(authOptions);
@@ -14,14 +28,14 @@ export const QuoteCard = async () => {
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user?.writerId) return null;
 
-  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
-  const endOfToday = new Date();   endOfToday.setHours(23, 59, 59, 999);
+  const { gte, lt } = brasiliaDayRange();
 
-  const quota = await db.quote.findFirst({
-    where: { writerId: user.writerId, createdAt: { gte: startOfToday, lte: endOfToday } },
+  const quote = await db.quote.findFirst({
+    where: { writerId: user.writerId, createdAt: { gte, lt } },
+    orderBy: { createdAt: "desc" },
   });
 
-  if (!quota) {
+  if (!quote) {
     return (
       <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
         <CardContent className="flex items-center justify-center flex-col text-center h-full">
@@ -34,7 +48,7 @@ export const QuoteCard = async () => {
   let userCompletionQuote: { id: string } | null = null;
   try {
     userCompletionQuote = await db.userCompletationQuote.findFirst({
-      where: { userId: user.id, quoteId: quota.id },
+      where: { userId: user.id, quoteId: quote.id },
       select: { id: true },
     });
   } catch (e) {
@@ -57,11 +71,14 @@ export const QuoteCard = async () => {
 
       <CardContent>
         <h4>A CITAÇÃO DE HOJE É DE:</h4>
-        <h2 className="text-xl font-bold">{quota.nameAuthor}</h2>
+        <h2 className="text-xl font-bold">{quote.nameAuthor}</h2>
       </CardContent>
 
       <CardFooter>
-        <Link href={`/reader/area/quote/${quota.id}`} className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline">
+        <Link
+          href={`/reader/area/quote/${quote.id}`}
+          className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline"
+        >
           Ler
         </Link>
       </CardFooter>

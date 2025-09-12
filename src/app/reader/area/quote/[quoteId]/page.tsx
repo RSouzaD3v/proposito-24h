@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { CompleteQuote } from "./_components/CompleteQuote";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import Link from "next/link";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
 
 export default async function QuoteDetails({ params }: { params: Promise<{ quoteId: string }>}) {
