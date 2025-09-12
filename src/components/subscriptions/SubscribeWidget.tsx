@@ -180,8 +180,6 @@ export default function SubscribeWidget({
 
   return (
     <div className="border rounded-xl p-4 flex flex-col gap-4">
-      <h3 className="font-semibold text-lg">Assine este escritor</h3>
-
       <div className="grid gap-3">
         {plans.map((pl) => (
           <label
