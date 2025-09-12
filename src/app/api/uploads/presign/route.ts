@@ -11,6 +11,14 @@ const ALLOWED_TYPES = new Set([
   "image/png",
   "image/webp",
   "image/gif",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp3",
+  "audio/m4a",
+  "audio/aac",
+  "audio/webm",
+  "video/mpeg",
 ]);
 
 export async function POST(req: NextRequest) {

@@ -1,5 +1,6 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import S3AudioUploader from "@/components/S3UploaderAudio";
 import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -11,6 +12,7 @@ export default function DevotionalNewPage() {
         content: "",
         verse: "",
         imageUrl: "",
+        audioUrl: "",
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export default function DevotionalNewPage() {
             }
 
             setSuccess(true);
-            setForm({ title: "", content: "", verse: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
+            setForm({ title: "", content: "", verse: "", imageUrl: "", audioUrl: "", date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating devotional:", error);
         } finally {
@@ -144,6 +146,12 @@ export default function DevotionalNewPage() {
                         Imagem
                     </label>
                     <S3Uploader folder="devotional" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="audioUrl">
+                        Áudio (opcional)
+                    </label>
+                    <S3AudioUploader folder="audios" onUploaded={(file) => setForm({ ...form, audioUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"

@@ -1,5 +1,6 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import S3AudioUploader from "@/components/S3UploaderAudio";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
@@ -12,6 +13,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
         content: "",
         verse: "",
         imageUrl: "",
+        audioUrl: "",
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -32,6 +34,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 content: data.devotional.content,
                 verse: data.devotional.verse,
                 imageUrl: data.devotional.imageUrl || "",
+                audioUrl: data.devotional.audioUrl || "",
                 date: data.devotional.date || new Date().toISOString().split("T")[0],
             });
             setLoadingData(false);
@@ -183,6 +186,12 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                         Imagem
                     </label>
                     <S3Uploader folder="devotional" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="audioUrl">
+                        Áudio (opcional)
+                    </label>
+                    <S3AudioUploader folder="audios" onUploaded={(file) => setForm({ ...form, audioUrl: file.publicUrl })} />
                 </div>
                 <button
                     type="submit"
