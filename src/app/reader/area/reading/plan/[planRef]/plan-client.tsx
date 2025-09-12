@@ -156,7 +156,7 @@ export default function PlanClient({
           Voltar para área do leitor
         </Link>
         <Link
-          href="/reader/area/bible"
+          href="/reader/area/bible-nvi"
           className="bg-blue-600 text-white hover:bg-blue-800 p-2 rounded-sm flex items-center mb-4"
         >
           Vamos ler a Bíblia 📖
