@@ -57,12 +57,14 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
                         {devotional?.content}
                     </p>
                 </div>
-                <div>
-                    <audio controls preload="none" className="w-full">
-                        <source src={"https://proposito24h-bucket.s3.us-east-1.amazonaws.com/audios/devotional.mpeg"} type="audio/mpeg" />
-                        Seu navegador não suporta o player de áudio.
-                    </audio>
-                </div>
+                {devotional?.audioUrl && (
+                    <div>
+                        <audio controls preload="none" className="w-full">
+                            <source src={devotional?.audioUrl as string} type="audio/mpeg" />
+                            Seu navegador não suporta o player de áudio.
+                        </audio>
+                    </div>
+                )}
                 {devotional?.id && (
                     <div className="flex justify-center">
                         <CompleteDevotional devotionalId={devotional.id} devotionalContent={devotional?.content} />

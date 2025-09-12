@@ -235,6 +235,7 @@ model Prayer {
   content String
   writerId String
   imageUrl String?
+  audioUrl String?
   writer   Writer @relation(fields: [writerId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -423,6 +424,7 @@ model Devotional {
   content String
   verse String
   imageUrl String?
+  audioUrl String?
   writerId String
   writer Writer @relation(fields: [writerId], references: [id])
   createdAt DateTime @default(now())

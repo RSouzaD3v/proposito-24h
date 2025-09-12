@@ -1,6 +1,4 @@
 'use client';
-import NativeReaderAudio from "@/components/NativeReaderAudio";
-import TTSReader from "@/components/TTSReader";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -31,7 +29,6 @@ export const CompleteDevotional = ({ devotionalId, devotionalContent }: { devoti
 
     return (
         <div>
-            <NativeReaderAudio text={devotionalContent} />
             {/* <TTSReader text={devotionalContent}/> */}
             <Button className="cursor-pointer hover:scale-105" onClick={handleCompleteDevotional}>
                 {loading ? "CONCLUINDO..." : "TOQUE AQUI PARA CONCLUIR"}
