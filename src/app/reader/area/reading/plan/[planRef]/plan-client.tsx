@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 type Day = { id: string; dayNumber: number; passages: string };
 
 // Base da rota de leitura por livro
-const BIBLE_BASE = "/reader/area/bible"; // mude para "/reader/area/bible" se for o seu caso
+const BIBLE_BASE = "/reader/area/bible-nvi"; // mude para "/reader/area/bible" se for o seu caso
 
 // Remove acentos
 function stripDiacritics(s: string) {
