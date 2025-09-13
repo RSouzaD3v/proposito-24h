@@ -6,6 +6,20 @@ import { getServerSession } from "next-auth"
 import Link from "next/link"
 import { FaCheck } from "react-icons/fa"
 import { FiBook } from "react-icons/fi"
+import { startOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const TZ = "America/Sao_Paulo";
+
+function brasiliaDayRange(now = new Date()) {
+  const localNow = toZonedTime(now, TZ);
+  const start = startOfDay(localNow);
+  const next = startOfDay(addDays(start, 1));
+  return {
+    gte: fromZonedTime(start, TZ),
+    lt: fromZonedTime(next, TZ), // use lt para evitar borda de 23:59:59.999
+  };
+}
 
 export const VerseCard = async () => {
   const session = await getServerSession(authOptions);
@@ -14,11 +28,10 @@ export const VerseCard = async () => {
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user?.writerId) return null;
 
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const { gte, lt } = brasiliaDayRange();
 
   const verse = await db.verse.findFirst({
-    where: { writerId: user.writerId, createdAt: { gte: today, lt: tomorrow } },
+    where: { writerId: user.writerId, createdAt: { gte, lt } },
   });
 
   if (!verse) {

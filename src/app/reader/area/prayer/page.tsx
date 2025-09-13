@@ -9,6 +9,20 @@ import { FaCheck } from "react-icons/fa";
 import { CompletePrayer } from "./_components/CompletePrayer";
 import Link from "next/link";
 import { ScreenSubscription } from "../_components/ScreenSubscription";
+import { startOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const TZ = "America/Sao_Paulo";
+
+function brasiliaDayRange(now = new Date()) {
+  const localNow = toZonedTime(now, TZ);
+  const start = startOfDay(localNow);
+  const next = startOfDay(addDays(start, 1));
+  return {
+    gte: fromZonedTime(start, TZ),
+    lt: fromZonedTime(next, TZ), // use lt para evitar borda de 23:59:59.999
+  };
+}
 
 export default async function PrayerPage() {
     const session = await getServerSession(authOptions);
@@ -18,12 +32,10 @@ export default async function PrayerPage() {
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     if (!user?.writerId) return null;
 
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    const { gte, lt } = brasiliaDayRange();
 
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
-
+    const startOfToday = gte;
+    const endOfToday = lt;
 
     const prayer = await db.prayer.findFirst({
         where: {
