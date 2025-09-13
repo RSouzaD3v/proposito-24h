@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, X, Minus, Maximize2 } from "lucide-react";
+import { Loader2, Send, X, Minus, Maximize2, MessageCircle } from "lucide-react";
 
 export default function TeacherBibleAI({
   initialPrompt = "Explique Gênesis em poucas palavras",
@@ -12,6 +12,7 @@ export default function TeacherBibleAI({
   initialPrompt?: string;
 }) {
   const [open, setOpen] = useState(true);
+  const [minimized, setMinimized] = useState(false);
   const [prompt, setPrompt] = useState(initialPrompt);
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,25 @@ export default function TeacherBibleAI({
     }
   }
 
+  // Minimizado: mostra só um botão no canto direito
+  if (minimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          className="rounded-full shadow-lg"
+          size="icon"
+          onClick={() => {
+            setMinimized(false);
+            setOpen(true);
+          }}
+          aria-label="Abrir Professor"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Container flutuante centralizado no rodapé */}
@@ -49,7 +69,7 @@ export default function TeacherBibleAI({
         >
           <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold">
-                Pergunte ao Professor
+              Pergunte ao Professor
             </CardTitle>
 
             <div className="flex items-center gap-2">
@@ -65,7 +85,10 @@ export default function TeacherBibleAI({
                 size="icon"
                 variant="ghost"
                 aria-label="Fechar"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setMinimized(true);
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>
