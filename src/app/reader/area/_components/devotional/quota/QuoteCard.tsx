@@ -32,7 +32,7 @@ export const QuoteCard = async () => {
 
   const quote = await db.quote.findFirst({
     where: { writerId: user.writerId, createdAt: { gte, lt } },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
   if (!quote) {

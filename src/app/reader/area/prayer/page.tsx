@@ -43,8 +43,9 @@ export default async function PrayerPage() {
             createdAt: {
                 gte: startOfToday,
                 lte: endOfToday
-            }
+            },
         },
+            orderBy: { createdAt: "asc" },
         include: {
             writer: {
                 select: {

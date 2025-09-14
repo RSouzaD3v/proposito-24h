@@ -32,6 +32,7 @@ export const VerseCard = async () => {
 
   const verse = await db.verse.findFirst({
     where: { writerId: user.writerId, createdAt: { gte, lt } },
+    orderBy: { createdAt: "asc" },
   });
 
   if (!verse) {

@@ -10,10 +10,11 @@ export default async function WriterDashboardPage() {
   const session = await getServerSession(authOptions);
 
   const itemsNav = [
-    { id: 2, title: "Diário", href: "/writer/daily" },
-    { id: 1, title: "Minhas Publicações", href: "/writer/publications" },
-    { id: 3, title: "Configurações", href: "/writer/settings" },
-    { id: 4, title: "Mais Recursos", href: "/writer/profile" },
+    { id: 1, title: "Diário", href: "/writer/daily" },
+    { id: 2, title: "Minhas Publicações", href: "/writer/publications" },
+    { id: 3, title: "Meus Insights", href: "/writer/analytics" },
+    { id: 4, title: "Configurações", href: "/writer/settings" },
+    { id: 5, title: "Mais Recursos", href: "/writer/profile" },
   ];
 
   if (!session?.user || session.user.role !== "WRITER_ADMIN") {

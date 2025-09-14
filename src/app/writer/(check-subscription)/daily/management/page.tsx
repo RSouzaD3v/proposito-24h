@@ -33,22 +33,26 @@ export default async function DailyManagementPage() {
     const quotes = await db.quote.findMany({
         where: {
             writerId: userWriter.writerId
-        }
+        },
+        orderBy: { createdAt: 'desc' }
     });
     const verses = await db.verse.findMany({
         where: {
             writerId: userWriter.writerId
-        }
+        },
+        orderBy: { createdAt: 'desc' }
     });
     const devotionals = await db.devotional.findMany({
         where: {
             writerId: userWriter.writerId
-        }
+        },
+        orderBy: { createdAt: 'desc' }
     });
     const prayers = await db.prayer.findMany({
         where: {
             writerId: userWriter.writerId
-        }
+        },
+        orderBy: { createdAt: 'desc' }
     })
 
     return (

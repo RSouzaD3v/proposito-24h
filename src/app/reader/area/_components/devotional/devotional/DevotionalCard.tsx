@@ -31,6 +31,7 @@ export const DevotionalCard = async () => {
 
   const devotional = await db.devotional.findFirst({
     where: { writerId: user.writerId, createdAt: { gte, lt } },
+    orderBy: { createdAt: "asc" },
   });
 
   if (!devotional) {
