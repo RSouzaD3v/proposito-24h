@@ -1,4 +1,3 @@
-// app/reader/area/_components/devotional/devotional/DevotionalCard.tsx
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { authOptions } from "@/lib/authOption"
 import { db } from "@/lib/db"
@@ -7,6 +6,7 @@ import Link from "next/link"
 import { FaCheck, FaComments } from "react-icons/fa"
 import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import AudioButton from "./AudioButton"; // ⬅️ novo
 
 const TZ = "America/Sao_Paulo";
 
@@ -16,7 +16,7 @@ function brasiliaDayRange(now = new Date()) {
   const next = startOfDay(addDays(start, 1));
   return {
     gte: fromZonedTime(start, TZ),
-    lt: fromZonedTime(next, TZ), // use lt para evitar borda de 23:59:59.999
+    lt: fromZonedTime(next, TZ),
   };
 }
 
@@ -27,7 +27,7 @@ export const DevotionalCard = async () => {
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user?.writerId) return null;
 
-    const { gte, lt } = brasiliaDayRange();
+  const { gte, lt } = brasiliaDayRange();
 
   const devotional = await db.devotional.findFirst({
     where: { writerId: user.writerId, createdAt: { gte, lt } },
@@ -72,10 +72,21 @@ export const DevotionalCard = async () => {
         <h2 className="text-xl font-bold">{devotional.title}</h2>
       </CardContent>
 
-      <CardFooter>
-        <Link href={`/reader/area/devotional/${devotional.id}`} className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline">
+      <CardFooter className="grid grid-cols-2 gap-2 w-full">
+        <Link
+          href={`/reader/area/devotional/${devotional.id}`}
+          className="bg-black px-4 py-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline"
+        >
           Ler
         </Link>
+
+        {/* Botão Ouvir/Pausar – só aparece se existir audioUrl */}
+        <AudioButton
+          src={devotional.audioUrl}
+          className="bg-black text-white py-2 w-full rounded-xl"
+          labelPlay="Ouvir"
+          labelPause="Parar"
+        />
       </CardFooter>
     </Card>
   );
