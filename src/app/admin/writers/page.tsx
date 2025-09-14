@@ -78,7 +78,7 @@ export default async function AdminWritersPage() {
               {rows.map((r) => (
                 <TableRow key={r.writer_id}>
                   <TableCell>
-                    <Link href={`/writer/${r.writer_id}`} className="underline">
+                    <Link href={`/admin/writer/${r.writer_id}`} className="underline">
                       {r.writer_name}
                     </Link>
                   </TableCell>
