@@ -2,6 +2,10 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { addDays, startOfDay } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const TZ = process.env.APP_TZ || "America/Sao_Paulo";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ quoteId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -56,6 +60,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ quot
 
     const { quoteId } = await params;
 
+      const now = new Date();
+      const localNow = toZonedTime(now, TZ);      // << API atual
+      const startLocal = startOfDay(localNow);
+      const endLocal = addDays(startLocal, 1);
+    //   const startUtc = fromZonedTime(startLocal, TZ); // << API atual
+    //   const endUtc = fromZonedTime(endLocal, TZ);
+
     const quote = await db.quote.findUnique({
         where: {
             id: quoteId,
@@ -67,6 +78,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ quot
         return NextResponse.json({ error: "Quote not found" }, { status: 404 });
     }
 
+      const createdAt =
+        typeof date === "string" && date.length === 10
+          ? fromZonedTime(`${date}T00:00:00`, TZ) // << API atual
+          : now;
+
     await db.quote.update({
         where: {
             id: quoteId,
@@ -77,7 +93,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ quot
             content,
             verse,
             imageUrl,
-            createdAt: date ? new Date(date + 'T00:00:00') : quote.createdAt,
+            createdAt,
         },
     });
 

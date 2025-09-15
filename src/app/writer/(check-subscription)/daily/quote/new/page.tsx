@@ -4,172 +4,157 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 
-
+const TZ = "America/Sao_Paulo";
+const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: TZ }); // "yyyy-MM-dd"
 
 export default function QuoteNewPage() {
-    const [form, setForm] = useState({
+  const [form, setForm] = useState({
+    nameAuthor: "",
+    content: "",
+    verse: "",
+    imageUrl: "",
+    date: todayStr, // mantém string yyyy-MM-dd
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch("/api/writer/daily/quote/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to create quote");
+      setSuccess(true);
+      setForm({
         nameAuthor: "",
         content: "",
         verse: "",
         imageUrl: "",
-        date: new Date().toISOString().split("T")[0],
-    });
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-
-    function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        date: todayStr,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setLoading(true);
+  return (
+    <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+      <Link href="/writer/daily/quote" className="flex items-center gap-2 mb-6 text-blue-600">
+        <FaArrowLeft size={24} />
+        Voltar
+      </Link>
 
-        try {
-            const response = await fetch("/api/writer/daily/quote/new", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(form),
-            });
+      <h1 className="text-2xl font-bold mb-6 text-center">Criar Nova Citação</h1>
 
-            if (!response.ok) {
-                throw new Error("Failed to create quote");
-            }
-
-            const data = await response.json();
-            console.log("Quote created successfully:", data);
-            setSuccess(true);
-            setForm({ nameAuthor: "", content: "", verse: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
-        } catch (error) {
-            console.error("Error creating quote:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    return (
-        <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
-            <Link href="/writer/daily/quote" className="flex items-center gap-2 mb-6 text-blue-600">
-                <FaArrowLeft size={24} />
-                Voltar
-            </Link>
-            <h1 className="text-2xl font-bold mb-6 text-center">Criar Nova Citação</h1>
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="nameAuthor">
-                        Autor
-                    </label>
-                    <input
-                        type="text"
-                        id="nameAuthor"
-                        name="nameAuthor"
-                        value={form.nameAuthor}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Nome do autor"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="content">
-                        Citação
-                    </label>
-                    <textarea
-                        id="content"
-                        name="content"
-                        value={form.content}
-                        onChange={handleChange}
-                        required
-                        rows={4}
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Digite a citação"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="verse">
-                        Versículo
-                    </label>
-                    <input
-                        type="text"
-                        id="verse"
-                        name="verse"
-                        value={form.verse}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Ex: João 3:16"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="date">
-                        Data
-                    </label>
-                    <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        value={new Date(form.date).toISOString().split("T")[0]}
-                        onChange={handleChange}
-                        required
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
-                        Escolher imagem (opcional)
-                    </label>
-                    <select
-                        className="w-52 mb-2"
-                        name="image"
-                        id="image"
-                        value={form.imageUrl}
-                        onChange={e => setForm({ ...form, imageUrl: `/background-images/${e.target.value}` })}
-                    >
-                        <option value="">Selecione uma imagem</option>
-                        {Array(30).fill(0).map((_, i) => (
-                            <option key={i} value={`${i + 1}.webp`}>
-                                {`${i + 1}.webp`}
-                            </option>
-                        ))}
-                    </select>
-                    {form.imageUrl && (
-                        <img
-                            src={form.imageUrl}
-                            alt="Imagem selecionada"
-                            className="mt-2 rounded shadow w-40 h-40 object-cover"
-                        />
-                    )}
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="imageUrl">
-                        URL da Imagem (opcional)
-                    </label>
-                    <S3Uploader folder="quotes" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
-                    {/* <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        value={form.imageUrl}
-                        onChange={handleChange}
-                        className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="https://exemplo.com/imagem.jpg"
-                    /> */}
-                </div>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
-                >
-                    {loading ? "Salvando..." : "Salvar Citação"}
-                </button>
-                {success && (
-                    <div className="text-green-600 text-center font-medium mt-2">
-                        Citação criada com sucesso!
-                    </div>
-                )}
-            </form>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="nameAuthor">Autor</label>
+          <input
+            type="text"
+            id="nameAuthor"
+            name="nameAuthor"
+            value={form.nameAuthor}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Nome do autor"
+          />
         </div>
-    );
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="content">Citação</label>
+          <textarea
+            id="content"
+            name="content"
+            value={form.content}
+            onChange={handleChange}
+            required
+            rows={4}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Digite a citação"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="verse">Versículo</label>
+          <input
+            type="text"
+            id="verse"
+            name="verse"
+            value={form.verse}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Ex: João 3:16"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="date">Data</label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={form.date}        // usa "yyyy-MM-dd" direto (sem toISOString)
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="image">Escolher imagem (opcional)</label>
+          <select
+            className="w-52 mb-2"
+            id="image"
+            name="imageUrl"
+            value={form.imageUrl}
+            onChange={handleChange}
+          >
+            <option value="">Selecione uma imagem</option>
+            {Array(30).fill(0).map((_, i) => (
+              <option key={i} value={`/background-images/${i + 1}.webp`}>
+                {i + 1}.webp
+              </option>
+            ))}
+          </select>
+
+          {form.imageUrl && (
+            <img
+              src={form.imageUrl}
+              alt="Imagem selecionada"
+              className="mt-2 rounded shadow w-40 h-40 object-cover"
+            />
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">URL da Imagem (opcional)</label>
+          <S3Uploader folder="quotes" onUploaded={(file) => setForm((p) => ({ ...p, imageUrl: file.publicUrl }))} />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+        >
+          {loading ? "Salvando..." : "Salvar Citação"}
+        </button>
+
+        {success && <div className="text-green-600 text-center font-medium mt-2">Citação criada com sucesso!</div>}
+      </form>
+    </div>
+  );
 }
