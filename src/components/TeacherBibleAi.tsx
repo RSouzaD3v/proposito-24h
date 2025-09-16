@@ -7,12 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Send, X, Minus, Maximize2, MessageCircle } from "lucide-react";
 
 export default function TeacherBibleAI({
-  initialPrompt = "Explique Gênesis em poucas palavras",
+  initialPrompt = "",
 }: {
   initialPrompt?: string;
 }) {
-  const [open, setOpen] = useState(true);
-  const [minimized, setMinimized] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [minimized, setMinimized] = useState(true);
   const [prompt, setPrompt] = useState(initialPrompt);
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(false);
