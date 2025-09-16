@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(
   req: Request,
-  { params }: { params: { readerId: string } }
+  { params }: { params: Promise<{ readerId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -21,7 +21,7 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { readerId } = params;
+    const { readerId } = await params;
     const body = await req.json();
     const newPassword: string | undefined = body?.newPassword;
 
