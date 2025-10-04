@@ -3,11 +3,13 @@ import { MenuPainel } from "../_components/MenuPainel";
 import Logout from "../_components/Logout";
 import { ThemeWriterProvider } from "../_contexts/ThemeWriterContext";
 import { Plans } from "./_components/Plans";
+import { ChangePassword } from "./_components/ChangePassword";
 
 export default function SettingsPage() {
     return (
         <ThemeWriterProvider>
             <div className="flex flex-col space-y-2 items-center justify-center min-h-screen rounded-2xl shadow-2xl p-10">
+                <ChangePassword />
                 <Plans />
                 <Logout />
                 <MenuPainel />

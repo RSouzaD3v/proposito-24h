@@ -75,32 +75,40 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
         }
     }
 
-    return (
-        <div className="bg-yellow-50 min-h-screen relative">
-            <Link
-                className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
-                href={"/reader/area/courses"}
-            >
-                <FiArrowLeft className="inline mr-2" />
-                Voltar
-            </Link>
+// ...
+return (
+  <div className="relative min-h-screen">
+    <Link
+      className="absolute top-[5px] left-[5px] md:top-2 md:left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
+      href={"/reader/area/courses"}
+    >
+      <FiArrowLeft className="inline mr-2" />
+      Voltar
+    </Link>
 
-            {/* Se for PDF */}
-            {bookDetails?.isPdf && bookDetails?.pdfUrl ? (
-                <div className="p-4 md:p-8">
-                    <PdfViewer url={bookDetails.pdfUrl} />
-                </div>
-            ) : bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
-                <ChapterSlider
-                    chapters={bookDetails.chapters.map((chapter) => ({
-                        ...chapter,
-                        subtitle: chapter.subtitle ?? "",
-                        coverUrl: chapter.coverUrl ?? undefined,
-                    }))}
-                />
-            ) : (
-                <div className="text-center text-black py-20">Nenhum capítulo encontrado.</div>
-            )}
-        </div>
-    );
+    <div className="py-12 md:hidden block w-full bg-white">
+        <h1>-</h1>
+    </div>
+
+    {bookDetails?.isPdf && bookDetails?.pdfUrl ? (
+      <div className="p-4 md:p-8">
+        <PdfViewer url={bookDetails.pdfUrl} />
+      </div>
+    ) : bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
+      <ChapterSlider
+        bookId={bookId}
+        chapters={bookDetails.chapters.map((chapter) => ({
+          title: chapter.title,
+          subtitle: chapter.subtitle ?? "",
+          content: chapter.content,
+          coverUrl: chapter.coverUrl ?? undefined,
+        }))}
+      />
+    ) : (
+      <div className="text-center text-black py-20">Nenhum capítulo encontrado.</div>
+    )}
+  </div>
+);
+// ...
+
 }

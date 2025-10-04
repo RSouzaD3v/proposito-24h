@@ -1,77 +1,209 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { cn } from "@/lib/utils";
+import ReaderControls from "./ReaderControls";
+import { ReaderPrefsProvider, useReaderPrefs } from "./ReaderPrefsContext";
+import { useLocalStorage } from "./useLocalStorage";
 
 type Chapter = {
-    title: string;
-    subtitle: string;
-    content: string;
-    coverUrl?: string;
+  title: string;
+  subtitle?: string;
+  content: string;
+  coverUrl?: string;
 };
 
-export default function ChapterSlider({ chapters }: { chapters: Chapter[] }) {
-    const [index, setIndex] = useState(0);
+type InnerProps = {
+  chapters: Chapter[];
+  bookId: string;
+};
 
-    if (!chapters || chapters.length === 0)
-        return (
-            <div className="text-center mt-10 text-gray-400 text-xl font-medium">
-                Nenhum capítulo encontrado.
-            </div>
-        );
+function ThemedContainer({
+  children,
+  className,
+}: { children: React.ReactNode; className?: string }) {
+  const { prefs } = useReaderPrefs();
 
-    const prev = () => setIndex((i) => (i === 0 ? chapters.length - 1 : i - 1));
-    const next = () => setIndex((i) => (i === chapters.length - 1 ? 0 : i + 1));
+  const themeClass = useMemo(() => {
+    switch (prefs.theme) {
+      case "sepia":
+        return "bg-[#f4ecd8] text-[#2b2b2b]";
+      case "dark":
+        return "bg-[#0b0f14] text-white";
+      default:
+        return "bg-[#faf9f7] text-[#1f2937]";
+    }
+  }, [prefs.theme]);
 
-    const chapter = chapters[index];
+  const fontClass = useMemo(() => {
+    switch (prefs.font) {
+      case "sans":
+        return "font-sans";
+      case "mono":
+        return "font-mono";
+      default:
+        return "font-serif";
+    }
+  }, [prefs.font]);
 
+  return (
+    <div className={cn("min-h-screen", themeClass, fontClass, className)}>
+      {children}
+    </div>
+  );
+}
+
+function SliderInner({ chapters, bookId }: InnerProps) {
+  const [index, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
+  const { prefs } = useReaderPrefs();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const chapter = chapters[index];
+
+  const prev = () => setIndex(index === 0 ? chapters.length - 1 : index - 1);
+  const next = () => setIndex(index === chapters.length - 1 ? 0 : index + 1);
+  const jump = (i: number) => setIndex(i);
+
+  // teclado ← →
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, chapters.length]);
+
+  // ao trocar capítulo, rolar para topo
+  useEffect(() => {
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [index]);
+
+  if (!chapters || chapters.length === 0) {
     return (
-        <div className="relative bg-white min-h-screen w-full mx-auto bg-gradient-to-br flex flex-col items-center gap-7">
-            {chapter.coverUrl && (
-                <div className="w-full max-h-[400px] overflow-hidden mb-2 flex items-center justify-center">
-                    <img
-                        src={chapter.coverUrl}
-                        alt={chapter.title}
-                        className="w-full object-cover block transition-transform duration-300"
-                    />
-                </div>
-            )}
-            <div className="w-full text-center">
-                <h2 className="m-0 mb-2 text-2xl md:text-3xl font-bold text-black tracking-tight">
-                    {chapter.title}
-                </h2>
-                <h3 className="m-0 mb-4 font-normal text-blue-400 text-lg md:text-xl italic">
-                    {chapter.subtitle}
-                </h3>
-                <p className="text-base md:text-lg text-black leading-relaxed m-0  rounded-xl p-5  text-justify">
-                    {chapter.content}
-                </p>
-            </div>
-
-            <div className="flex items-center gap-10">
-                {/* Chevron esquerdo */}
-                <button
-                    onClick={prev}
-                    aria-label="Anterior"
-                    className="bg-white/85 border-none rounded-full shadow-md w-11 h-11 flex items-center justify-center cursor-pointer z-20"
-                >
-                    <FaChevronLeft size={24} color="#334155" />
-                </button>
-
-                {/* Chevron direito */}
-                <button
-                    onClick={next}
-                    aria-label="Próximo"
-                    className="bg-white/85 border-none rounded-full shadow-md w-11 h-11 flex items-center justify-center cursor-pointer z-20"
-                >
-                    <FaChevronRight size={24} color="#334155" />
-                </button>
-            </div>
-
-            <div className="flex w-full justify-center items-center mt-2">
-                <span className="font-semibold text-blue-400 text-base md:text-lg tracking-wide bg-slate-100 rounded-lg px-5 py-1.5 shadow-sm">
-                    {index + 1} / {chapters.length}
-                </span>
-            </div>
+      <ThemedContainer className="flex items-center justify-center">
+        <div className="text-center mt-10 opacity-70 text-xl font-medium">
+          Nenhum capítulo encontrado.
         </div>
+      </ThemedContainer>
     );
+  }
+
+  return (
+    <ThemedContainer className="relative">
+      {/* áreas de toque/click para virar página */}
+      <button
+        aria-label="Anterior"
+        onClick={prev}
+        className="hidden md:block select-none absolute left-0 top-0 bottom-0 w-[12%] opacity-0 hover:opacity-20 hover:bg-black/10"
+      />
+      <button
+        aria-label="Próximo"
+        onClick={next}
+        className="hidden md:block select-none absolute right-0 top-0 bottom-0 w-[12%] opacity-0 hover:opacity-20 hover:bg-black/10"
+      />
+
+      <div
+        ref={containerRef}
+        className="mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40"
+      >
+        {/* capa (opcional) */}
+        {chapter.coverUrl && (
+          <div className="w-full max-h-[380px] overflow-hidden mb-4 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={chapter.coverUrl}
+              alt={chapter.title}
+              className="w-full object-cover block transition-transform duration-300"
+            />
+          </div>
+        )}
+
+        {/* título/subtítulo */}
+        <header
+          className="text-center space-y-2"
+          style={{ maxWidth: `${prefs.maxChars}ch`, marginInline: "auto" }}
+        >
+          <h2
+            className="font-bold tracking-tight"
+            style={{ fontSize: Math.round(prefs.fontSize + 8) }}
+          >
+            {chapter.title}
+          </h2>
+          {chapter.subtitle && (
+            <h3
+              className="italic opacity-80"
+              style={{ fontSize: Math.round(prefs.fontSize + 2) }}
+            >
+              {chapter.subtitle}
+            </h3>
+          )}
+        </header>
+
+        {/* conteúdo */}
+        <article
+          className={cn(
+            "mt-6 selection:bg-yellow-300/40",
+            prefs.align === "justify" ? "text-justify" : "text-left"
+          )}
+          style={{
+            fontSize: prefs.fontSize,
+            lineHeight: prefs.lineHeight,
+            maxWidth: `${prefs.maxChars}ch`,
+            marginInline: "auto",
+          }}
+        >
+          {/* quebra simples por "\n\n" vira parágrafos */}
+          {chapter.content.split(/\n{2,}/g).map((para, i) => (
+            <p key={i} className="mb-4 leading-[inherit]">
+              {para}
+            </p>
+          ))}
+        </article>
+
+        {/* botões flutuantes mobile */}
+        <div className="md:hidden fixed bottom-20 right-4 flex gap-2">
+          <button
+            onClick={prev}
+            className="bg-white/80 dark:bg-neutral-800/80 rounded-full shadow px-3 py-3"
+            aria-label="Anterior"
+          >
+            <FaChevronLeft className="text-slate-700 dark:text-slate-200" />
+          </button>
+          <button
+            onClick={next}
+            className="bg-white/80 dark:bg-neutral-800/80 rounded-full shadow px-3 py-3"
+            aria-label="Próximo"
+          >
+            <FaChevronRight className="text-slate-700 dark:text-slate-200" />
+          </button>
+        </div>
+      </div>
+
+      {/* controles inferiores */}
+      <ReaderControls
+        chaptersCount={chapters.length}
+        currentIndex={index}
+        onPrev={prev}
+        onNext={next}
+        onJump={jump}
+      />
+    </ThemedContainer>
+  );
+}
+
+export default function ChapterSlider({
+  chapters,
+  bookId,
+}: {
+  chapters: Chapter[];
+  bookId: string;
+}) {
+  return (
+    <ReaderPrefsProvider bookId={bookId}>
+      <SliderInner chapters={chapters} bookId={bookId} />
+    </ReaderPrefsProvider>
+  );
 }
