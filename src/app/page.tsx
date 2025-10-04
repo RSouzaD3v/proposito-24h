@@ -59,7 +59,7 @@ export default async function Home() {
 
       <section className="absolute top-0 left-0 -z-10 w-full min-h-screen flex items-center justify-center flex-col gap-4">
         <video autoPlay muted loop className="absolute w-full h-full object-cover">
-          <source src="/video/man-woman.mp4" type="video/mp4" />
+          <source src="/video/fundo-sol.mp4" type="video/mp4" />
         </video>
         <div className="bg-black absolute top-0 left-0 w-full h-full opacity-70" />
 
