@@ -90,9 +90,9 @@ export default function ReaderControls({
 
   return (
     <>
-      {/* FAB (engrenagem) */}
+      {/* FAB (engrenagem) — DESKTOP apenas */}
       {!open && (
-        <div className="fixed bottom-4 right-4 z-40">
+        <div className="fixed bottom-4 right-4 z-40 hidden md:block">
           <Button
             size="icon"
             onClick={() => setOpen(true)}

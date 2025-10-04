@@ -86,10 +86,6 @@ return (
       Voltar
     </Link>
 
-    <div className="py-12 md:hidden block w-full bg-white">
-        <h1>-</h1>
-    </div>
-
     {bookDetails?.isPdf && bookDetails?.pdfUrl ? (
       <div className="p-4 md:p-8">
         <PdfViewer url={bookDetails.pdfUrl} />
