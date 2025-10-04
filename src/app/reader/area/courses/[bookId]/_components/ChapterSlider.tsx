@@ -149,8 +149,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
           </div>
         </>
       )}
-
-// === MOBILE: dock central (⬅️ X/N ➡️) + engrenagem à direita ===
+      
 {!open && (
   <div className="md:hidden fixed inset-x-0 z-40"
        style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
