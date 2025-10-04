@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import ReaderControls from "./ReaderControls";
 import { ReaderPrefsProvider, useReaderPrefs } from "./ReaderPrefsContext";
 import { useLocalStorage } from "./useLocalStorage";
+import { Settings2 } from "lucide-react";
 
 type Chapter = {
   title: string;
@@ -193,10 +194,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
           pal.btn
         )}
       >
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-          <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 .3 1.8 1.8 0 0 0-.9 1.56V21a2 2 0 1 1-4 0v-.04A1.8 1.8 0 0 0 7 19.4a1.8 1.8 0 0 0-1.98-.36l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-.3-1 1.8 1.8 0 0 0-1.56-.9H2a2 2 0 1 1 0-4h.04A1.8 1.8 0 0 0 4.6 7a1.8 1.8 0 0 0 .36-1.98l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.8 1.8 0 0 0 9 4.6c.31 0 .62-.1 1-.3A1.8 1.8 0 0 0 10.9 2H11a2 2 0 1 1 4 0v.04A1.8 1.8 0 0 0 15 4.6a1.8 1.8 0 0 0 1 .3 1.8 1.8 0 0 0 1.56-.9l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.8 1.8 0 0 0 19.4 9c0 .31.1.62.3 1 .2.38.3.69.3 1s-.1.62-.3 1a1.8 1.8 0 0 0-.3 1z" />
-        </svg>
+        <Settings2 />
       </button>
     </div>
   </div>
