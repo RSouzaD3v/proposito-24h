@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import ReaderControls from "./ReaderControls";
@@ -14,58 +15,52 @@ type Chapter = {
   coverUrl?: string;
 };
 
-type InnerProps = {
-  chapters: Chapter[];
-  bookId: string;
-};
+type InnerProps = { chapters: Chapter[]; bookId: string };
 
-function ThemedContainer({
-  children,
-  className,
-}: { children: React.ReactNode; className?: string }) {
+function pagePalette(theme: "light" | "sepia" | "dark") {
+  if (theme === "dark")
+    return {
+      pageBg: "bg-[#0b0f14] text-white",
+      btn: "bg-[#121821]/85 text-white border border-white/15 hover:opacity-90",
+      badge: "bg-black/30 text-white",
+    };
+  if (theme === "sepia")
+    return {
+      pageBg: "bg-[#f4ecd8] text-[#2b2b2b]",
+      btn: "bg-[#efe6cf]/90 text-[#2b2b2b] border border-[#e1d7b9] hover:bg-[#eadfbe]",
+      badge: "bg-[#e9dfc3] text-[#2b2b2b]",
+    };
+  return {
+    pageBg: "bg-[#faf9f7] text-[#1f2937]",
+    btn: "bg-white/90 text-slate-800 border border-slate-200 hover:bg-slate-100",
+    badge: "bg-white/80 text-slate-800",
+  };
+}
+
+function ThemedContainer({ children }: { children: React.ReactNode }) {
   const { prefs } = useReaderPrefs();
+  const pal = pagePalette(prefs.theme);
 
-  const themeClass = useMemo(() => {
-    switch (prefs.theme) {
-      case "sepia":
-        return "bg-[#f4ecd8] text-[#2b2b2b]";
-      case "dark":
-        return "bg-[#0b0f14] text-white";
-      default:
-        return "bg-[#faf9f7] text-[#1f2937]";
-    }
-  }, [prefs.theme]);
+  // família de fonte respeitando preferência
+  const fontClass =
+    prefs.font === "sans" ? "font-sans" : prefs.font === "mono" ? "font-mono" : "font-serif";
 
-  const fontClass = useMemo(() => {
-    switch (prefs.font) {
-      case "sans":
-        return "font-sans";
-      case "mono":
-        return "font-mono";
-      default:
-        return "font-serif";
-    }
-  }, [prefs.font]);
-
-  return (
-    <div className={cn("min-h-screen", themeClass, fontClass, className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("min-h-screen", pal.pageBg, fontClass)}>{children}</div>;
 }
 
 function SliderInner({ chapters, bookId }: InnerProps) {
   const [index, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
+  const [open, setOpen] = useLocalStorage<boolean>(`reader:${bookId}:controlsOpen`, false);
   const { prefs } = useReaderPrefs();
+  const pal = pagePalette(prefs.theme);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const chapter = chapters[index];
-
   const prev = () => setIndex(index === 0 ? chapters.length - 1 : index - 1);
   const next = () => setIndex(index === chapters.length - 1 ? 0 : index + 1);
   const jump = (i: number) => setIndex(i);
 
-  // teclado ← →
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
@@ -76,15 +71,14 @@ function SliderInner({ chapters, bookId }: InnerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, chapters.length]);
 
-  // ao trocar capítulo, rolar para topo
   useEffect(() => {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [index]);
 
   if (!chapters || chapters.length === 0) {
     return (
-      <ThemedContainer className="flex items-center justify-center">
-        <div className="text-center mt-10 opacity-70 text-xl font-medium">
+      <ThemedContainer>
+        <div className="flex items-center justify-center min-h-screen opacity-70 text-xl font-medium">
           Nenhum capítulo encontrado.
         </div>
       </ThemedContainer>
@@ -92,62 +86,32 @@ function SliderInner({ chapters, bookId }: InnerProps) {
   }
 
   return (
-    <ThemedContainer className="relative">
-      {/* áreas de toque/click para virar página */}
-      <button
-        aria-label="Anterior"
-        onClick={prev}
-        className="hidden md:block select-none absolute left-0 top-0 bottom-0 w-[12%] opacity-0 hover:opacity-20 hover:bg-black/10"
-      />
-      <button
-        aria-label="Próximo"
-        onClick={next}
-        className="hidden md:block select-none absolute right-0 top-0 bottom-0 w-[12%] opacity-0 hover:opacity-20 hover:bg-black/10"
-      />
-
-      <div
-        ref={containerRef}
-        className="mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40"
-      >
-        {/* capa (opcional) */}
+    <ThemedContainer>
+      <div ref={containerRef} className="mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40">
         {chapter.coverUrl && (
           <div className="w-full max-h-[380px] overflow-hidden mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={chapter.coverUrl}
-              alt={chapter.title}
-              className="w-full object-cover block transition-transform duration-300"
-            />
+            <img src={chapter.coverUrl} alt={chapter.title} className="w-full object-cover block" />
           </div>
         )}
 
-        {/* título/subtítulo */}
         <header
           className="text-center space-y-2"
           style={{ maxWidth: `${prefs.maxChars}ch`, marginInline: "auto" }}
         >
-          <h2
-            className="font-bold tracking-tight"
-            style={{ fontSize: Math.round(prefs.fontSize + 8) }}
-          >
+          <h2 className="font-bold tracking-tight" style={{ fontSize: Math.round(prefs.fontSize + 8) }}>
             {chapter.title}
           </h2>
           {chapter.subtitle && (
-            <h3
-              className="italic opacity-80"
-              style={{ fontSize: Math.round(prefs.fontSize + 2) }}
-            >
+            <h3 className="italic opacity-80" style={{ fontSize: Math.round(prefs.fontSize + 2) }}>
               {chapter.subtitle}
             </h3>
           )}
         </header>
 
-        {/* conteúdo */}
         <article
-          className={cn(
-            "mt-6 selection:bg-yellow-300/40",
-            prefs.align === "justify" ? "text-justify" : "text-left"
-          )}
+          className={cn("mt-6 selection:bg-yellow-300/40",
+            prefs.align === "justify" ? "text-justify" : "text-left")}
           style={{
             fontSize: prefs.fontSize,
             lineHeight: prefs.lineHeight,
@@ -155,52 +119,61 @@ function SliderInner({ chapters, bookId }: InnerProps) {
             marginInline: "auto",
           }}
         >
-          {/* quebra simples por "\n\n" vira parágrafos */}
           {chapter.content.split(/\n{2,}/g).map((para, i) => (
             <p key={i} className="mb-4 leading-[inherit]">
               {para}
             </p>
           ))}
         </article>
-
-        {/* botões flutuantes mobile */}
-        <div className="md:hidden fixed bottom-20 right-4 flex gap-2">
-          <button
-            onClick={prev}
-            className="bg-white/80 dark:bg-neutral-800/80 rounded-full shadow px-3 py-3"
-            aria-label="Anterior"
-          >
-            <FaChevronLeft className="text-slate-700 dark:text-slate-200" />
-          </button>
-          <button
-            onClick={next}
-            className="bg-white/80 dark:bg-neutral-800/80 rounded-full shadow px-3 py-3"
-            aria-label="Próximo"
-          >
-            <FaChevronRight className="text-slate-700 dark:text-slate-200" />
-          </button>
-        </div>
       </div>
 
-      {/* controles inferiores */}
+      {/* Desktop: setas + contador quando painel fechado */}
+      {!open && (
+        <>
+          <div className="hidden md:flex fixed inset-y-0 left-4 items-center z-40">
+            <button onClick={prev} aria-label="Anterior" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+              <FaChevronLeft />
+            </button>
+          </div>
+          <div className="hidden md:flex fixed inset-y-0 right-4 items-center z-40">
+            <button onClick={next} aria-label="Próximo" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+              <FaChevronRight />
+            </button>
+          </div>
+          <div className="hidden md:flex fixed bottom-6 inset-x-0 justify-center z-40">
+            <span className={cn("px-4 py-1.5 rounded-lg shadow text-sm tabular-nums", pal.badge)}>
+              {index + 1} / {chapters.length}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* Mobile: setas flutuantes quando painel fechado */}
+      {!open && (
+        <div className="md:hidden fixed bottom-20 right-4 flex gap-2 z-40">
+          <button onClick={prev} aria-label="Anterior" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+            <FaChevronLeft />
+          </button>
+          <button onClick={next} aria-label="Próximo" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+            <FaChevronRight />
+          </button>
+        </div>
+      )}
+
       <ReaderControls
         chaptersCount={chapters.length}
         currentIndex={index}
         onPrev={prev}
         onNext={next}
         onJump={jump}
+        open={open}
+        setOpen={setOpen}
       />
     </ThemedContainer>
   );
 }
 
-export default function ChapterSlider({
-  chapters,
-  bookId,
-}: {
-  chapters: Chapter[];
-  bookId: string;
-}) {
+export default function ChapterSlider({ chapters, bookId }: { chapters: Chapter[]; bookId: string }) {
   return (
     <ReaderPrefsProvider bookId={bookId}>
       <SliderInner chapters={chapters} bookId={bookId} />
