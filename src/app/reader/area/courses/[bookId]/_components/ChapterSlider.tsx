@@ -87,7 +87,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
 
   return (
     <ThemedContainer>
-      <div ref={containerRef} className="mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40">
+      <div ref={containerRef} className="py-32 mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40">
         {chapter.coverUrl && (
           <div className="w-full max-h-[380px] overflow-hidden mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -149,7 +149,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
           </div>
         </>
       )}
-      
+
 {!open && (
   <div className="md:hidden fixed inset-x-0 z-40"
        style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
