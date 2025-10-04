@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import {
-  List, Moon, Sun, Square, Type, ChevronLeft, ChevronRight, Settings, X
+  List, Moon, Sun, Square, Type, ChevronLeft, ChevronRight, Settings2, X
 } from "lucide-react";
 import { useReaderPrefs, ReaderTheme, ReaderFont } from "./ReaderPrefsContext";
 import { cn } from "@/lib/utils";
@@ -95,11 +95,12 @@ export default function ReaderControls({
         <div className="fixed bottom-4 right-4 z-40 hidden md:block">
           <Button
             size="icon"
+            variant={"secondary"}
             onClick={() => setOpen(true)}
             aria-label="Abrir controles de leitura"
             className={cn("rounded-full shadow-lg hover:opacity-90", pal.fab)}
           >
-            <Settings className="size-5" />
+            <Settings2 className="size-5" />
           </Button>
         </div>
       )}
