@@ -58,7 +58,7 @@ export default async function Home() {
       <Header logo={logo} name={title} />
 
       <section className="absolute top-0 left-0 -z-10 w-full min-h-screen flex items-center justify-center flex-col gap-4">
-        <video autoPlay muted loop className="absolute w-full h-full object-cover">
+        <video autoPlay muted loop playsInline preload="auto" className="absolute w-full h-full object-cover">
           <source src="/video/fundo-sol.mp4" type="video/mp4" />
         </video>
         <div className="bg-black absolute top-0 left-0 w-full h-full opacity-70" />
