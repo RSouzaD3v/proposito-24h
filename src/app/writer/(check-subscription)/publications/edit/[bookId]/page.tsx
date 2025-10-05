@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { is } from "zod/v4/locales";
 
 const publicationTypes = [
-    { value: "DEVOTIONAL", label: "Devocional" },
     { value: "EBOOK", label: "Ebook" },
 ];
 
