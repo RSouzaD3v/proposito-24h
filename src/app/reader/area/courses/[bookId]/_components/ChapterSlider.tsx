@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import ReaderControls from "./ReaderControls";
 import { ReaderPrefsProvider, useReaderPrefs } from "./ReaderPrefsContext";
 import { useLocalStorage } from "./useLocalStorage";
 import { Settings2 } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 type Chapter = {
   title: string;
   subtitle?: string;
-  content: string;
+  content: string;     // agora pode ser HTML rico
   coverUrl?: string;
 };
 
 type InnerProps = { chapters: Chapter[]; bookId: string };
 
+/* ---------- tema/cores ---------- */
 function pagePalette(theme: "light" | "sepia" | "dark") {
   if (theme === "dark")
     return {
@@ -41,12 +42,43 @@ function pagePalette(theme: "light" | "sepia" | "dark") {
 function ThemedContainer({ children }: { children: React.ReactNode }) {
   const { prefs } = useReaderPrefs();
   const pal = pagePalette(prefs.theme);
-
-  // família de fonte respeitando preferência
   const fontClass =
     prefs.font === "sans" ? "font-sans" : prefs.font === "mono" ? "font-mono" : "font-serif";
-
   return <div className={cn("min-h-screen", pal.pageBg, fontClass)}>{children}</div>;
+}
+
+/* ---------- util: detectar se já é HTML ---------- */
+const looksLikeHTML = (s: string) => /<\/?[a-z][\s\S]*>/i.test(s.trim());
+
+/* ---------- util: escapar quando conteúdo for texto puro ---------- */
+const escapeHTML = (str: string) =>
+  str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+/* ---------- montar HTML seguro p/ render ---------- */
+function useSafeHtml(raw: string) {
+  // Se for HTML, mantém; se for texto, converte \n\n -> <p>, \n -> <br>
+  const html = looksLikeHTML(raw)
+    ? raw
+    : raw
+        .split(/\n{2,}/g)
+        .map((para) => `<p>${escapeHTML(para).replace(/\n/g, "<br/>")}</p>`)
+        .join("");
+
+  const safe = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      "p", "br", "strong", "em", "u", "s", "mark", "sup", "sub",
+      "blockquote", "ul", "ol", "li", "h2", "h3", "hr", "a", "img",
+      "pre", "code", "span", "div"
+    ],
+    ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "title", "class", "style"],
+  });
+
+  return safe;
 }
 
 function SliderInner({ chapters, bookId }: InnerProps) {
@@ -86,13 +118,22 @@ function SliderInner({ chapters, bookId }: InnerProps) {
     );
   }
 
+  const safeHtml = useSafeHtml(chapter.content ?? "");
+
   return (
     <ThemedContainer>
-      <div ref={containerRef} className="py-32 mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40">
+      <div
+        ref={containerRef}
+        className="py-32 mx-auto w-full min-h-screen px-4 sm:px-6 md:px-8 pb-40"
+      >
         {chapter.coverUrl && (
           <div className="w-full max-h-[380px] overflow-hidden mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={chapter.coverUrl} alt={chapter.title} className="w-full object-cover block" />
+            <img
+              src={chapter.coverUrl}
+              alt={chapter.title}
+              className="w-full object-cover block"
+            />
           </div>
         )}
 
@@ -100,105 +141,134 @@ function SliderInner({ chapters, bookId }: InnerProps) {
           className="text-center space-y-2"
           style={{ maxWidth: `${prefs.maxChars}ch`, marginInline: "auto" }}
         >
-          <h2 className="font-bold tracking-tight" style={{ fontSize: Math.round(prefs.fontSize + 8) }}>
+          <h2
+            className="font-bold tracking-tight"
+            style={{ fontSize: Math.round(prefs.fontSize + 8) }}
+          >
             {chapter.title}
           </h2>
           {chapter.subtitle && (
-            <h3 className="italic opacity-80" style={{ fontSize: Math.round(prefs.fontSize + 2) }}>
+            <h3
+              className="italic opacity-80"
+              style={{ fontSize: Math.round(prefs.fontSize + 2) }}
+            >
               {chapter.subtitle}
             </h3>
           )}
         </header>
 
+        {/* CONTEÚDO — HTML rico sanitizado */}
         <article
-          className={cn("mt-6 selection:bg-yellow-300/40",
-            prefs.align === "justify" ? "text-justify" : "text-left")}
+          className={cn(
+            "mt-6 selection:bg-yellow-300/40 prose prose-slate dark:prose-invert max-w-none",
+            "prose-img:rounded-lg prose-a:underline",
+            "prose-ol:list-decimal prose-ul:list-disc",
+            prefs.align === "justify" ? "text-justify" : "text-left"
+          )}
           style={{
-            fontSize: prefs.fontSize,
+            fontSize: prefs.fontSize,        // base vem do leitor (parágrafo)
             lineHeight: prefs.lineHeight,
             maxWidth: `${prefs.maxChars}ch`,
             marginInline: "auto",
           }}
-        >
-          {chapter.content.split(/\n{2,}/g).map((para, i) => (
-            <p key={i} className="mb-4 leading-[inherit]">
-              {para}
-            </p>
-          ))}
-        </article>
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
+        />
       </div>
-
-      
 
       {/* Desktop: setas + contador quando painel fechado */}
       {!open && (
         <>
           <div className="hidden md:flex fixed inset-y-0 left-4 items-center z-40">
-            <button onClick={prev} aria-label="Anterior" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+            <button
+              onClick={prev}
+              aria-label="Anterior"
+              className={cn("rounded-full px-3 py-3 shadow", pal.btn)}
+            >
               <FaChevronLeft />
             </button>
           </div>
           <div className="hidden md:flex fixed inset-y-0 right-4 items-center z-40">
-            <button onClick={next} aria-label="Próximo" className={cn("rounded-full px-3 py-3 shadow", pal.btn)}>
+            <button
+              onClick={next}
+              aria-label="Próximo"
+              className={cn("rounded-full px-3 py-3 shadow", pal.btn)}
+            >
               <FaChevronRight />
             </button>
           </div>
           <div className="hidden md:flex fixed bottom-6 inset-x-0 justify-center z-40">
-            <span className={cn("px-4 py-1.5 rounded-lg shadow text-sm tabular-nums", pal.badge)}>
+            <span
+              className={cn(
+                "px-4 py-1.5 rounded-lg shadow text-sm tabular-nums",
+                pal.badge
+              )}
+              aria-live="polite"
+            >
               {index + 1} / {chapters.length}
             </span>
           </div>
         </>
       )}
 
-{!open && (
-  <div className="md:hidden fixed inset-x-0 z-40"
-       style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
-    <div className="relative px-4">
-      {/* grupo central: esquerda / contador / direita */}
-      <div className="flex justify-center">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={prev}
-            aria-label="Anterior"
-            className={cn("rounded-full size-11 shadow flex items-center justify-center", pal.btn)}
-          >
-            <FaChevronLeft />
-          </button>
+      {/* Mobile: central (← contador →) + engrenagem à direita na MESMA linha */}
+      {!open && (
+        <div
+          className="md:hidden fixed inset-x-0 z-40"
+          style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+        >
+          <div className="relative px-4">
+            {/* grupo central */}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prev}
+                  aria-label="Anterior"
+                  className={cn(
+                    "rounded-full size-11 shadow flex items-center justify-center",
+                    pal.btn
+                  )}
+                >
+                  <FaChevronLeft />
+                </button>
 
-          <span
-            className={cn(
-              "px-3 py-1.5 rounded-full shadow text-sm tabular-nums",
-              pal.badge
-            )}
-          >
-            {index + 1} / {chapters.length}
-          </span>
+                <span
+                  className={cn(
+                    "px-3 py-1.5 rounded-full shadow text-sm tabular-nums",
+                    pal.badge
+                  )}
+                  aria-live="polite"
+                >
+                  {index + 1} / {chapters.length}
+                </span>
 
-          <button
-            onClick={next}
-            aria-label="Próximo"
-            className={cn("rounded-full size-11 shadow flex items-center justify-center", pal.btn)}
-          >
-            <FaChevronRight />
-          </button>
+                <button
+                  onClick={next}
+                  aria-label="Próximo"
+                  className={cn(
+                    "rounded-full size-11 shadow flex items-center justify-center",
+                    pal.btn
+                  )}
+                >
+                  <FaChevronRight />
+                </button>
+              </div>
+            </div>
+
+            {/* engrenagem alinhada à direita */}
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Abrir ajustes"
+              className={cn(
+                "absolute right-4 top-1/2 -translate-y-1/2 rounded-full size-11 shadow flex items-center justify-center",
+                pal.btn
+              )}
+            >
+              <Settings2 />
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* engrenagem alinhada à direita, na mesma linha */}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Abrir ajustes"
-        className={cn(
-          "absolute right-4 top-1/2 -translate-y-1/2 rounded-full size-11 shadow flex items-center justify-center",
-          pal.btn
-        )}
-      >
-        <Settings2 />
-      </button>
-    </div>
-  </div>
-)}
+      )}
 
       <ReaderControls
         chaptersCount={chapters.length}
@@ -213,7 +283,13 @@ function SliderInner({ chapters, bookId }: InnerProps) {
   );
 }
 
-export default function ChapterSlider({ chapters, bookId }: { chapters: Chapter[]; bookId: string }) {
+export default function ChapterSlider({
+  chapters,
+  bookId,
+}: {
+  chapters: Chapter[];
+  bookId: string;
+}) {
   return (
     <ReaderPrefsProvider bookId={bookId}>
       <SliderInner chapters={chapters} bookId={bookId} />

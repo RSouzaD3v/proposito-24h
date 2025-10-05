@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const publicationTypes = [
-  { value: "DEVOTIONAL", label: "Devocional" },
   { value: "EBOOK", label: "Ebook" },
 ];
 
@@ -23,7 +22,7 @@ const visibilities = [
 export default function WriterPublicationCreatePage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    type: "DEVOTIONAL",
+    type: "EBOOK",
     status: "DRAFT",
     visibility: "FREE",
     price: "",

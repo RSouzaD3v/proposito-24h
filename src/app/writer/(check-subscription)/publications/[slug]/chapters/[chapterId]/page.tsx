@@ -2,6 +2,16 @@
 import S3Uploader from "@/components/S3Uploader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// em vez de: import RichEditor from "../_components/RichEditor";
+const RichEditor = dynamic(() => import("../_components/RichEditor"), {
+  ssr: false,
+  // opcional: componente enquanto carrega
+  loading: () => (
+    <div className="rounded-lg border bg-white p-4 shadow-sm min-h-[260px] animate-pulse" />
+  ),
+});
 
 interface Chapter {
     id: string;
@@ -138,7 +148,11 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
                                 /> */}
                             </div>
                         </div>
-                        <div>
+                        <RichEditor 
+                            value={content}
+                            onChange={(html) => setContent(html)}
+                        />
+                        {/* <div>
                             <label className="block text-gray-700 font-semibold mb-2">Conteúdo</label>
                             <textarea
                                 value={content}
@@ -147,7 +161,7 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
                                 rows={10}
                                 className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-y"
                             />
-                        </div>
+                        </div> */}
                         <div className="flex justify-end">
                             <button
                                 type="submit"

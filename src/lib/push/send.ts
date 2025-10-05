@@ -41,7 +41,7 @@ export async function notifyNewBook(writerId: string, book: { id: string; title:
   return sendPushToWriterTopic(writerId, 'new-book', {
     title: 'Novo livro publicado',
     body: `“${book.title}” acabou de sair. Toque para ler.`,
-    url: `/books/${book.slug}`,
+    url: `reader/area/courses/${book.id}`,
     tag: `book-${book.id}`
   });
 }
