@@ -60,8 +60,8 @@ const escapeHTML = (str: string) =>
     .replace(/'/g, "&#39;");
 
 /* ---------- montar HTML seguro p/ render ---------- */
-function useSafeHtml(raw: string) {
-  // Se for HTML, mantém; se for texto, converte \n\n -> <p>, \n -> <br>
+// ✅ renomeado: NÃO começa com "use"
+function toSafeHtml(raw: string) {
   const html = looksLikeHTML(raw)
     ? raw
     : raw
@@ -69,17 +69,16 @@ function useSafeHtml(raw: string) {
         .map((para) => `<p>${escapeHTML(para).replace(/\n/g, "<br/>")}</p>`)
         .join("");
 
-  const safe = DOMPurify.sanitize(html, {
+  return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
-      "p", "br", "strong", "em", "u", "s", "mark", "sup", "sub",
-      "blockquote", "ul", "ol", "li", "h2", "h3", "hr", "a", "img",
-      "pre", "code", "span", "div"
+      "p","br","strong","em","u","s","mark","sup","sub",
+      "blockquote","ul","ol","li","h2","h3","hr","a","img",
+      "pre","code","span","div"
     ],
-    ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "title", "class", "style"],
+    ALLOWED_ATTR: ["href","target","rel","src","alt","title","class","style"],
   });
-
-  return safe;
 }
+
 
 function SliderInner({ chapters, bookId }: InnerProps) {
   const [index, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
@@ -118,7 +117,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
     );
   }
 
-  const safeHtml = useSafeHtml(chapter.content ?? "");
+const safeHtml = toSafeHtml(chapter.content ?? "");
 
   return (
     <ThemedContainer>
