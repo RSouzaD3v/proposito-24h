@@ -22,11 +22,13 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
             isPdf: true,
             pdfUrl: true,
             chapters: {
+                    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
                 select: {
                     title: true,
                     subtitle: true,
                     content: true,
-                    coverUrl: true
+                    coverUrl: true,
+                    order: true, 
                 }
             }
         }
