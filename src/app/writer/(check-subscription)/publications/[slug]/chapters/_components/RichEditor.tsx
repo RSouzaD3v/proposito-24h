@@ -15,7 +15,6 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
-
 import { common, createLowlight } from "lowlight";
 const lowlight = createLowlight(common);
 
@@ -32,6 +31,22 @@ type Props = { value?: string; onChange: (html: string) => void };
 
 const FONT_SIZES = [14, 16, 18, 20, 24, 28, 32]; // px
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+
+/** Botão de toolbar: evita submit do <form> e mantém foco no editor */
+function TB(props: React.ComponentProps<typeof Button>) {
+  const { onMouseDown, type, ...rest } = props;
+  return (
+    <Button
+      type={type ?? "button"}
+      onMouseDown={(e) => {
+        // evita perder o foco do editor e previne submit
+        e.preventDefault();
+        onMouseDown?.(e);
+      }}
+      {...rest}
+    />
+  );
+}
 
 export default function RichEditor({ value, onChange }: Props) {
   const editor = useEditor({
@@ -57,7 +72,7 @@ export default function RichEditor({ value, onChange }: Props) {
         enableTabIndentation: true,
         defaultLanguage: "plaintext",
       }),
-      Typography, // “aspas inteligentes”, …, —
+      Typography,
     ],
     content: value || "",
     onUpdate({ editor }) {
@@ -71,10 +86,9 @@ export default function RichEditor({ value, onChange }: Props) {
           "prose-img:rounded-lg prose-hr:my-6",
       },
     },
-    immediatelyRender: false, // evita hydration mismatch no Next
+    immediatelyRender: false,
   });
 
-  // manter controlado
   useEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
@@ -83,7 +97,6 @@ export default function RichEditor({ value, onChange }: Props) {
     }
   }, [value, editor]);
 
-  // === ações ===
   const addImageByUrl = useCallback(() => {
     const url = window.prompt("URL da imagem:");
     if (!url) return;
@@ -98,28 +111,19 @@ export default function RichEditor({ value, onChange }: Props) {
     editor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);
 
-  /** Aplica font-size na seleção; se vazia, aplica ao parágrafo atual. */
   const applyFontSizeSmart = (px: number | "") => {
     if (!editor) return;
     const chain = editor.chain().focus();
-
-    // Seleção vazia? Seleciona o texto do parágrafo p/ o mark pegar.
     const { empty, $from } = editor.state.selection;
     if (empty) {
       const start = $from.start($from.depth);
       const end = $from.end($from.depth);
       chain.setTextSelection({ from: start, to: end });
     }
-
     if (px === "") {
-      chain
-        .updateAttributes("textStyle", { fontSize: null as any })
-        .removeEmptyTextStyle()
-        .run();
+      chain.updateAttributes("textStyle", { fontSize: null as any }).removeEmptyTextStyle().run();
     } else {
-      chain
-        .updateAttributes("textStyle", { fontSize: `${px}px` })
-        .run();
+      chain.updateAttributes("textStyle", { fontSize: `${px}px` }).run();
     }
   };
 
@@ -133,7 +137,6 @@ export default function RichEditor({ value, onChange }: Props) {
 
   if (!editor) return null;
 
-  // helpers de estado
   const isActive = (name: string, attrs?: any) => editor.isActive(name as any, attrs);
   const isActiveAlign = (a: "left" | "center" | "right" | "justify") => editor.isActive({ textAlign: a });
   const currentSizeStr = (editor.getAttributes("textStyle")?.fontSize as string | undefined) ?? "";
@@ -143,122 +146,114 @@ export default function RichEditor({ value, onChange }: Props) {
     <div className="w-full">
       {/* Toolbar */}
       <div className="sticky top-0 z-10 mb-2 rounded-lg border bg-white p-2 shadow-sm flex flex-wrap gap-1 not-prose">
-        {/* inline */}
-        <Button variant={isActive("bold") ? "default" : "outline"} size="sm"
+        <TB variant={isActive("bold") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()} title="Negrito (Ctrl/Cmd+B)">
           <Bold className="size-4" />
-        </Button>
-        <Button variant={isActive("italic") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("italic") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()} title="Itálico (Ctrl/Cmd+I)">
           <Italic className="size-4" />
-        </Button>
-        <Button variant={isActive("underline") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("underline") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleUnderline().run()} title="Sublinhar">
           <UnderlineIcon className="size-4" />
-        </Button>
-        <Button variant={isActive("strike") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("strike") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleStrike().run()} title="Tachar">
           <Strikethrough className="size-4" />
-        </Button>
-        <Button variant={isActive("highlight") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("highlight") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleHighlight().run()} title="Realçar">
           <Highlighter className="size-4" />
-        </Button>
+        </TB>
 
         <Separator orientation="vertical" className="mx-1 h-6" />
 
-        {/* headings */}
-        <Button variant={isActive("heading", { level: 2 }) ? "default" : "outline"} size="sm"
+        <TB variant={isActive("heading", { level: 2 }) ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="Título (H2)">
           <Type className="size-4 mr-1" /> H2
-        </Button>
-        <Button variant={isActive("heading", { level: 3 }) ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("heading", { level: 3 }) ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title="Subtítulo (H3)">
           <Type className="size-4 mr-1" /> H3
-        </Button>
+        </TB>
 
-        {/* listas */}
-        <Button variant={isActive("bulletList") ? "default" : "outline"} size="sm"
+        <TB variant={isActive("bulletList") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleBulletList().run()} title="Lista com pontos">
           <List className="size-4" />
-        </Button>
-        <Button variant={isActive("orderedList") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("orderedList") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Lista numerada">
           <ListOrdered className="size-4" />
-        </Button>
-        <Button variant={isActive("blockquote") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("blockquote") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Citação (bloco)">
           <Quote className="size-4" />
-        </Button>
+        </TB>
 
-        {/* link / imagem */}
-        <Button variant={isActive("link") ? "default" : "outline"} size="sm" onClick={setLink} title="Inserir link">
+        <TB variant={isActive("link") ? "default" : "outline"} size="sm" onClick={setLink} title="Inserir link">
           <LinkIcon className="size-4" />
-        </Button>
-        <Button variant="outline" size="sm" onClick={addImageByUrl} title="Inserir imagem por URL">
+        </TB>
+        <TB variant="outline" size="sm" onClick={addImageByUrl} title="Inserir imagem por URL">
           <ImageIcon className="size-4" />
-        </Button>
+        </TB>
 
-        {/* alinhamento */}
         <Separator orientation="vertical" className="mx-1 h-6" />
-        <Button variant={isActiveAlign("left") ? "default" : "outline"} size="sm"
+        <TB variant={isActiveAlign("left") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().setTextAlign("left").run()} title="Alinhar à esquerda">
           <AlignLeft className="size-4" />
-        </Button>
-        <Button variant={isActiveAlign("center") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActiveAlign("center") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().setTextAlign("center").run()} title="Centralizar">
           <AlignCenter className="size-4" />
-        </Button>
-        <Button variant={isActiveAlign("right") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActiveAlign("right") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().setTextAlign("right").run()} title="Alinhar à direita">
           <AlignRight className="size-4" />
-        </Button>
-        <Button variant={isActiveAlign("justify") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActiveAlign("justify") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().setTextAlign("justify").run()} title="Justificar">
           <AlignJustify className="size-4" />
-        </Button>
+        </TB>
 
-        {/* código / divisor */}
         <Separator orientation="vertical" className="mx-1 h-6" />
-        <Button variant={isActive("code") ? "default" : "outline"} size="sm"
+        <TB variant={isActive("code") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleCode().run()} title="Código inline">
           <Code className="size-4" />
-        </Button>
-        <Button variant={isActive("codeBlock") ? "default" : "outline"} size="sm"
+        </TB>
+        <TB variant={isActive("codeBlock") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleCodeBlock().run()} title="Bloco de código">
           <Code2 className="size-4" />
-        </Button>
-        <Button variant="outline" size="sm"
+        </TB>
+        <TB variant="outline" size="sm"
           onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Separador">
           <Minus className="size-4" />
-        </Button>
+        </TB>
 
-        {/* desfazer/refazer/borracha */}
         <Separator orientation="vertical" className="mx-1 h-6" />
-        <Button variant="outline" size="sm" onClick={() => editor.chain().focus().undo().run()} title="Desfazer (Ctrl/Cmd+Z)">
+        <TB variant="outline" size="sm" onClick={() => editor.chain().focus().undo().run()} title="Desfazer (Ctrl/Cmd+Z)">
           <Undo2 className="size-4" />
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => editor.chain().focus().redo().run()} title="Refazer (Ctrl/Cmd+Shift+Z)">
+        </TB>
+        <TB variant="outline" size="sm" onClick={() => editor.chain().focus().redo().run()} title="Refazer (Ctrl/Cmd+Shift+Z)">
           <Redo2 className="size-4" />
-        </Button>
-        <Button
+        </TB>
+        <TB
           variant="outline"
           size="sm"
           title="Limpar formatação"
           onClick={() =>
             editor.chain().focus()
-              .unsetAllMarks() // bold/italic/underline/etc.
-              .updateAttributes("textStyle", { fontSize: null as any }) // limpa o tamanho
+              .unsetAllMarks()
+              .updateAttributes("textStyle", { fontSize: null as any })
               .removeEmptyTextStyle()
               .run()
           }
         >
           <Eraser className="size-4" />
-        </Button>
+        </TB>
 
-        {/* tamanho */}
-        {/* <Separator orientation="vertical" className="mx-1 h-6" />
-        <div className="flex items-center gap-2">
+        <Separator orientation="vertical" className="mx-1 h-6" />
+        {/* <div className="flex items-center gap-2">
           <label className="text-xs text-slate-500">Tamanho</label>
           <select
             className="h-8 rounded-md border px-2 text-sm"
@@ -268,24 +263,20 @@ export default function RichEditor({ value, onChange }: Props) {
               if (!v) applyFontSizeSmart("");
               else applyFontSizeSmart(parseInt(v, 10));
             }}
+            onMouseDown={(e) => e.preventDefault()} // evita blur no editor
           >
             <option value="">Padrão</option>
             {FONT_SIZES.map((s) => (
               <option key={s} value={String(s)}>{s}px</option>
             ))}
           </select>
-          <Button variant="outline" size="sm" onClick={() => stepFontSize(-2)} title="Diminuir (A-)">A-</Button>
-          <Button variant="outline" size="sm" onClick={() => stepFontSize(+2)} title="Aumentar (A+)">A+</Button>
+          <TB variant="outline" size="sm" onClick={() => stepFontSize(-2)} title="Diminuir (A-)">A-</TB>
+          <TB variant="outline" size="sm" onClick={() => stepFontSize(+2)} title="Aumentar (A+)">A+</TB>
         </div> */}
       </div>
 
-      {/* Área do editor */}
       <div className="rounded-lg border bg-white p-4 shadow-sm">
         <EditorContent editor={editor} />
-      </div>
-
-      <div className="mt-2 text-xs text-slate-500 not-prose">
-        Dica: sem seleção, o tamanho aplica no parágrafo atual; com seleção, só no trecho marcado.
       </div>
     </div>
   );
