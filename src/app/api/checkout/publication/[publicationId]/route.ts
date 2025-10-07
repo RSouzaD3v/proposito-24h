@@ -79,7 +79,7 @@ export async function POST(
         { price: pub.stripePriceId!, quantity: 1 },
       ],
       currency,
-      payment_method_types: ["card"], // Add pix
+      payment_method_types: ["card", 'pix'], // Add pix
       // Gera/reutiliza customer para esse e-mail na conta conectada
       customer_creation: "always",
       customer_email: user.email,
