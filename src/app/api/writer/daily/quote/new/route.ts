@@ -25,28 +25,28 @@ export async function POST(req: NextRequest) {
 
   // --- janela de "hoje" na TZ desejada, usando API atual ---
   const now = new Date();
-  const localNow = toZonedTime(now, TZ);      // << API atual
-  const startLocal = startOfDay(localNow);
-  const endLocal = addDays(startLocal, 1);
-  const startUtc = fromZonedTime(startLocal, TZ); // << API atual
-  const endUtc = fromZonedTime(endLocal, TZ);
+  // const localNow = toZonedTime(now, TZ);      // << API atual
+  // const startLocal = startOfDay(localNow);
+  // const endLocal = addDays(startLocal, 1);
+  // const startUtc = fromZonedTime(startLocal, TZ); // << API atual
+  // const endUtc = fromZonedTime(endLocal, TZ);
 
-  const existingQuoteToday = await db.quote.findFirst({
-    where: {
-      writerId: userWriter.writerId, // << bug fix
-      createdAt: {
-        gte: startUtc,
-        lt: endUtc,
-      },
-    },
-  });
+  // const existingQuoteToday = await db.quote.findFirst({
+  //   where: {
+  //     writerId: userWriter.writerId, // << bug fix
+  //     createdAt: {
+  //       gte: startUtc,
+  //       lt: endUtc,
+  //     },
+  //   },
+  // });
 
-  if (existingQuoteToday) {
-    return NextResponse.json(
-      { error: "Você já criou uma citação hoje." },
-      { status: 400 }
-    );
-  }
+  // if (existingQuoteToday) {
+  //   return NextResponse.json(
+  //     { error: "Você já criou uma citação hoje." },
+  //     { status: 400 }
+  //   );
+  // }
 
   // date (YYYY-MM-DD) → meia-noite local na TZ → UTC
   const createdAt =
