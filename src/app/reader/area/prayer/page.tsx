@@ -67,25 +67,45 @@ export default async function PrayerPage() {
         });
     };
 
-        const verifyAccess = await db.writerReaderAccess.findFirst({
-        where: {
-            writerId: prayer?.writer.id
-        }
-    });
+  // Usuário (precisamos do writer atual p/ regra de acesso)
+  const userReader = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      writer: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
-    const subscription = await db.readerSubscription.findFirst({
-        where: {
-            writerId: prayer?.writer.id,
-            readerId: session.user.id
-        }
-    });
+  // Se sua regra exige que o usuário seja "writer" para ver o plano, mantenha:
+  if (!userReader || !userReader.writerId) {
+    return (
+      <div>
+        <h2>Acesso Negado</h2>
+        <p>Você precisa ser um escritor para acessar este plano de leitura.</p>
+      </div>
+    );
+  }
 
-            const isFree = verifyAccess?.verse === true;
-    const hasSubscription = !!subscription;
+  // Regras de acesso do writer
+  const verifyAccess = await db.writerReaderAccess.findFirst({
+    where: { writerId: userReader.writerId },
+  });
 
-    if (!isFree && !hasSubscription) {
-        <ScreenSubscription slug={prayer?.writer.slug || ""} />
-    }
+  // Assinatura do leitor para esse writer
+  const subscription = await db.readerSubscription.findFirst({
+    where: { writerId: userReader.writerId, readerId: session.user.id },
+    // select: { status: true, endsAt: true } // opcional
+  });
+
+  // Defina aqui o que considera "ativa"
+  const hasActiveSubscription =
+    !!subscription &&
+    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
+    ((subscription as any).status === "ACTIVE" ||
+      (subscription as any).status === "active");
+
+  if (!verifyAccess?.prayer && !hasActiveSubscription && !userReader.freePlan) {
+    return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
+  }
 
 
     return (

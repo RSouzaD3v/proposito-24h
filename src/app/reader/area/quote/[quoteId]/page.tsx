@@ -25,25 +25,45 @@ export default async function QuoteDetails({ params }: { params: Promise<{ quote
         }
     });
 
-    const verifyAccess = await db.writerReaderAccess.findFirst({
-        where: {
-            writerId: quote?.writer.id
-        }
-    });
+  // Usuário (precisamos do writer atual p/ regra de acesso)
+  const userReader = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      writer: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
-    const subscription = await db.readerSubscription.findFirst({
-        where: {
-            writerId: quote?.writer.id,
-            readerId: session.user.id
-        }
-    });
+  // Se sua regra exige que o usuário seja "writer" para ver o plano, mantenha:
+  if (!userReader || !userReader.writerId) {
+    return (
+      <div>
+        <h2>Acesso Negado</h2>
+        <p>Você precisa ser um escritor para acessar este plano de leitura.</p>
+      </div>
+    );
+  }
 
-    const isFree = verifyAccess?.quote === true;
-    const hasSubscription = !!subscription;
+  // Regras de acesso do writer
+  const verifyAccess = await db.writerReaderAccess.findFirst({
+    where: { writerId: userReader.writerId },
+  });
 
-    if (!isFree && !hasSubscription) {
-        <ScreenSubscription slug={quote?.writer.slug || ""} />
-    }
+  // Assinatura do leitor para esse writer
+  const subscription = await db.readerSubscription.findFirst({
+    where: { writerId: userReader.writerId, readerId: session.user.id },
+    // select: { status: true, endsAt: true } // opcional
+  });
+
+  // Defina aqui o que considera "ativa"
+  const hasActiveSubscription =
+    !!subscription &&
+    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
+    ((subscription as any).status === "ACTIVE" ||
+      (subscription as any).status === "active");
+
+  if (!verifyAccess?.quote && !hasActiveSubscription && !userReader.freePlan) {
+    return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
+  }
 
     return (
         <div style={{ backgroundImage: quote?.imageUrl ? `url(${quote.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} className="min-h-screen px-4 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">

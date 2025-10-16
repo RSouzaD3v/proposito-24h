@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
             email,
             password: hashedPassword,
             writerId,
-            role: Role.CLIENT
+            role: Role.CLIENT,
+            freePlan: false
         }
     });
 

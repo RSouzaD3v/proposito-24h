@@ -37,13 +37,15 @@ export default async function PlanPage({ params }: Props) {
 
   const completedDayIds = new Set(userProgress.map((p) => p.dayId));
 
+  // Usuário (precisamos do writer atual p/ regra de acesso)
   const userReader = await db.user.findUnique({
     where: { id: session.user.id },
-    include: { writer: {
-      select: { id: true, name: true, slug: true }
-    } },
+    include: {
+      writer: { select: { id: true, name: true, slug: true } },
+    },
   });
 
+  // Se sua regra exige que o usuário seja "writer" para ver o plano, mantenha:
   if (!userReader || !userReader.writerId) {
     return (
       <div>
@@ -53,25 +55,28 @@ export default async function PlanPage({ params }: Props) {
     );
   }
 
-      const verifyAccess = await db.writerReaderAccess.findFirst({
-        where: {
-            writerId: userReader.writerId
-        }
-    });
+  // Regras de acesso do writer
+  const verifyAccess = await db.writerReaderAccess.findFirst({
+    where: { writerId: userReader.writerId },
+  });
 
-    const subscription = await db.readerSubscription.findFirst({
-        where: {
-            writerId: userReader.writerId,
-            readerId: session.user.id
-        }
-    });
+  // Assinatura do leitor para esse writer
+  const subscription = await db.readerSubscription.findFirst({
+    where: { writerId: userReader.writerId, readerId: session.user.id },
+    // select: { status: true, endsAt: true } // opcional
+  });
 
-            const isFree = verifyAccess?.verse === true;
-    const hasSubscription = !!subscription;
+  // Defina aqui o que considera "ativa"
+  const hasActiveSubscription =
+    !!subscription &&
+    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
+    ((subscription as any).status === "ACTIVE" ||
+      (subscription as any).status === "active");
 
-    if (!isFree && !hasSubscription) {
-        <ScreenSubscription slug={userReader.writer?.slug || ""} />
-    }
+  // 🔐 Regra: se o writer bloqueia o plano (biblePlan === true) e usuário NÃO tem assinatura ativa → mostrar paywall e PARAR aqui
+  if (!verifyAccess?.biblePlan && !hasActiveSubscription && !userReader.freePlan) {
+    return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
+  }
 
   return (
     <PlanClient

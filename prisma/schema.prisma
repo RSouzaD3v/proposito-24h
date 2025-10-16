@@ -7,502 +7,387 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/** Papéis */
-enum Role {
-  ADMIN        // Admin master (writerId opcional)
-  WRITER_ADMIN // Admin/gestor da instância (writerId obrigatório)
-  CLIENT       // Usuário final (writerId obrigatório)
-}
-
-/** Publicação pode ser um Devocional (página única) ou um Ebook (com capítulos) */
-enum PublicationType {
-  DEVOTIONAL   // página única (title/subtitle/description + cover)
-  EBOOK        // múltiplos capítulos
-}
-
-enum PublicationStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-enum Visibility {
-  FREE
-  PAID         // se PAID, exige compra para acessar conteúdo completo
-}
-
-enum PurchaseStatus {
-  SUCCESS
-  PENDING
-  FAILED
-}
-
-/** Provedor de pagamento (por enquanto só Stripe) */
-enum PaymentProvider {
-  STRIPE
-}
-
-enum PayoutStatus {
-  PENDING
-  PAID
-  CANCELED
-}
-
 model Writer {
-  id             String   @id @default(uuid())
-  name           String
-  slug           String   @unique
-  logoUrl        String?
-  colorPrimary   String?
-  colorSecondary String?
-  
-  titleApp      String? @default("Deus seja sempre louvado!")
-  titleHeader   String? @default("Vamos passar um tempo com Deus?")
-
-  // Configurações white label
-  branding       Json?
-  socials        Json?
-  storagePrefix  String?
-  emailFrom      String?
-  featureFlags   Json?
-
-  stripeAccountId String?
-  stripeCustomerId String?
-
-  domains        Domain[]
-  publications   Publication[]
-  users          User[]
-  purchases      Purchase[]
-  payouts        WriterPayout[]
-  subscriptions WriterSubscription[]
-  quotes         Quote[]
-  devotionals    Devotional[]
-  verses         Verse[]
-  prayers       Prayer[]
+  id                      String                   @id @default(uuid())
+  name                    String
+  slug                    String                   @unique
+  logoUrl                 String?
+  colorPrimary            String?
+  colorSecondary          String?
+  branding                Json?
+  socials                 Json?
+  storagePrefix           String?
+  emailFrom               String?
+  featureFlags            Json?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  stripeAccountId         String?
+  stripeCustomerId        String?
+  titleApp                String?                  @default("Deus seja sempre louvado!")
+  titleHeader             String?                  @default("Vamos passar um tempo com Deus?")
+  devotionals             Devotional[]
+  domains                 Domain[]
+  prayers                 Prayer[]
+  publications            Publication[]
+  purchases               Purchase[]
+  quotes                  Quote[]
+  readerSubscriptions     ReaderSubscription[]
+  users                   User[]
+  verses                  Verse[]
+  payouts                 WriterPayout[]
+  readerAccess            WriterReaderAccess?
+  subscriptions           WriterSubscription[]
   writerSubscriptionPlans WriterSubscriptionPlan[]
-  readerSubscriptions ReaderSubscription[]
-  readerAccess   WriterReaderAccess?
-  
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 }
 
 model WriterSubscription {
-  id         String   @id @default(uuid())
-  writerId   String
-  writer     Writer   @relation(fields: [writerId], references: [id])
-  startedAt  DateTime @default(now())
-  endedAt    DateTime?
-  amount     Int      // em centavos
+  id          String    @id @default(uuid())
+  writerId    String
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  amount      Int
   description String?
-  stripeId   String? @unique
-  stripe     Json?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  stripeId    String?   @unique
+  stripe      Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  writer      Writer    @relation(fields: [writerId], references: [id])
 }
 
 model Domain {
   id        String  @id @default(uuid())
-  host      String  @unique  // ex: igreja1.seudominio.com ou dominio-proprio.com
-  subdomain String?  @unique
+  host      String  @unique
   writerId  String
-  writer    Writer  @relation(fields: [writerId], references: [id])
   isPrimary Boolean @default(false)
+  subdomain String? @unique
+  writer    Writer  @relation(fields: [writerId], references: [id])
 }
 
 model User {
-  id         String    @id @default(uuid())
-  email      String    @unique
-  name       String?
-  password   String
-  role       Role      @default(CLIENT)
-
-  // Para ADMIN pode ser null; para WRITER_ADMIN/CLIENT deve apontar p/ o writer
-  writerId   String?
-  writer     Writer?   @relation(fields: [writerId], references: [id])
-  stripeCustomerId String?
-
-  purchases  Purchase[]
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  userCompletationQuote UserCompletationQuote[]
+  id                         String                       @id @default(uuid())
+  email                      String                       @unique
+  name                       String?
+  password                   String
+  role                       Role                         @default(CLIENT)
+  writerId                   String?
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  stripeCustomerId           String?
+  freePlan                   Boolean                      @default(true)
+  achievements               Achievements[]
+  purchases                  Purchase[]
+  readerSubscriptions        ReaderSubscription[]
+  writer                     Writer?                      @relation(fields: [writerId], references: [id])
   userCompletationDevotional UserCompletationDevotional[]
-  userCompletationVerse UserCompletationVerse[]
-  userCompletationPrayer UserCompletationPrayer[]
-  userReadingProgress UserReadingProgress[]
-
-  achievements Achievements[]
-
-  readerSubscriptions ReaderSubscription[]
+  userCompletationPrayer     UserCompletationPrayer[]
+  userCompletationQuote      UserCompletationQuote[]
+  userCompletationVerse      UserCompletationVerse[]
+  userReadingProgress        UserReadingProgress[]
 }
 
 model Achievements {
-  id String @id @default(uuid())
-  userId String
-  user   User @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String
   completed String[]
   createdAt DateTime @default(now())
-}
-
-// Subscription Reader to Writer
-enum SubscriptionInterval { 
-  LIFETIME
-  DAY 
-  WEEK 
-  MONTH 
-  YEAR 
-}
-enum SubscriptionStatus { 
-  INCOMPLETE 
-  INCOMPLETE_EXPIRED
-  TRIALING 
-  ACTIVE 
-  PAST_DUE 
-  CANCELED 
-  UNPAID 
-  PAUSED 
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model WriterSubscriptionPlan {
-  id                 String   @id @default(cuid())
-  writerId           String
-  writer             Writer   @relation(fields: [writerId], references: [id])
-  stripeProductId    String
-  stripePriceId      String
-  interval           SubscriptionInterval @default(MONTH)
-  amountCents        Int
-  currency           String   @default("BRL")
-  trialDays          Int      @default(0)
-  applicationFeePct  Float?   // sua taxa (%)
-  isActive           Boolean  @default(true)
-  isReaderVisible    Boolean  @default(true) // exibir na página de planos
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String               @id @default(cuid())
+  writerId          String
+  stripeProductId   String
+  stripePriceId     String
+  interval          SubscriptionInterval @default(MONTH)
+  amountCents       Int
+  currency          String               @default("BRL")
+  trialDays         Int                  @default(0)
+  applicationFeePct Float?
+  isActive          Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  isReaderVisible   Boolean              @default(true)
+  writer            Writer               @relation(fields: [writerId], references: [id])
+
   @@index([writerId])
-    @@index([writerId, isActive]) // ✅ comum listar planos ativos por escritor
+  @@index([writerId, isActive])
 }
 
 model ReaderSubscription {
-  id                     String   @id @default(cuid())
-  readerId               String
-  reader                 User     @relation(fields: [readerId], references: [id])
-  writerId               String
-  writer                 Writer   @relation(fields: [writerId], references: [id])
-  stripeCustomerId       String
-  stripeSubscriptionId   String?
-  priceId                String
-  status                 SubscriptionStatus @default(INCOMPLETE)
-  currentPeriodStart     DateTime?
-  currentPeriodEnd       DateTime?
-  cancelAt               DateTime?
-  cancelAtPeriodEnd      Boolean  @default(false)
-  latestInvoiceId        String?
-  metadata               Json?
-  lifetime               Boolean  @default(false) // assinatura vitalícia
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                   String             @id @default(cuid())
+  readerId             String
+  writerId             String
+  stripeCustomerId     String
+  stripeSubscriptionId String?
+  priceId              String
+  status               SubscriptionStatus @default(INCOMPLETE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAt             DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  latestInvoiceId      String?
+  metadata             Json?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  lifetime             Boolean            @default(false)
+  reader               User               @relation(fields: [readerId], references: [id])
+  writer               Writer             @relation(fields: [writerId], references: [id])
 
   @@unique([readerId, writerId], name: "reader_writer_unique")
-  @@index([writerId])                // consultas por escritor
-  @@index([readerId])                // consultas por leitor
-  @@index([writerId, status])        // status por escritor
-  @@index([writerId, createdAt])     // lista de novos assinantes
+  @@index([writerId])
+  @@index([readerId])
+  @@index([writerId, status])
+  @@index([writerId, createdAt])
 }
 
 model WriterReaderAccess {
-  id String @id @default(uuid())
-  writerId String
-  writer Writer @relation(fields: [writerId], references: [id])
-  quote Boolean @default(true)
-  devotional Boolean @default(true)
-  verse Boolean @default(true)
-  prayer Boolean @default(true)
-  biblePlan Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  writerId   String   @unique
+  quote      Boolean  @default(true)
+  devotional Boolean  @default(true)
+  verse      Boolean  @default(true)
+  prayer     Boolean  @default(true)
+  biblePlan  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  writer     Writer   @relation(fields: [writerId], references: [id])
 
-  @@unique([writerId])
   @@index([quote, devotional, verse, prayer, biblePlan])
 }
 
-
 model Prayer {
-  id String @id @default(uuid())
-  title String
-  content String
-  writerId String
-  imageUrl String?
-  audioUrl String?
-  writer   Writer @relation(fields: [writerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                     String                   @id @default(uuid())
+  title                  String
+  content                String
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  writerId               String
+  imageUrl               String?
+  audioUrl               String?
+  writer                 Writer                   @relation(fields: [writerId], references: [id])
   userCompletationPrayer UserCompletationPrayer[]
 }
 
 model UserCompletationPrayer {
-  id String @id @default(uuid())
-  userId String
-  user   User @relation(fields: [userId], references: [id])
+  id       String @id @default(uuid())
+  userId   String
   prayerId String
   prayer   Prayer @relation(fields: [prayerId], references: [id])
+  user     User   @relation(fields: [userId], references: [id])
 }
 
-/**
- * PUBLICATION = unidade editorial publicável e vendável.
- * - DEVOTIONAL: página única (usa os campos de corpo na própria Publication)
- * - EBOOK: metadados na Publication e conteúdo distribuído em Chapter(s)
- */
+/// *
+/// * PUBLICATION = unidade editorial publicável e vendável.
+/// * - DEVOTIONAL: página única (usa os campos de corpo na própria Publication)
+/// * - EBOOK: metadados na Publication e conteúdo distribuído em Chapter(s)
 model Publication {
-  id            String            @id @default(uuid())
-  writerId      String
-  writer        Writer            @relation(fields: [writerId], references: [id])
+  id              String            @id @default(uuid())
+  writerId        String
+  type            PublicationType
+  status          PublicationStatus @default(DRAFT)
+  visibility      Visibility        @default(FREE)
+  price           Int?
+  currency        String?
+  slug            String
+  title           String
+  subtitle        String?
+  description     String?
+  coverUrl        String?
+  body            String?
+  tags            String[]
+  publishedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  stripePriceId   String?
+  stripeProductId String?
+  category        String?           @default("Religioso")
+  isPdf           Boolean           @default(false)
+  pdfUrl          String?
+  chapters        Chapter[]
+  writer          Writer            @relation(fields: [writerId], references: [id])
+  purchases       Purchase[]
 
-  type          PublicationType
-  status        PublicationStatus @default(DRAFT)
-  visibility    Visibility        @default(FREE)
-
-  // monetização (se visibility = PAID)
-  price         Int?              // em centavos (opcional)
-  currency      String?           // ex: "BRL"
-  stripeProductId String?         // <--- novo
-  stripePriceId   String?         // <--- novo
-  
-  isPdf          Boolean          @default(false)
-  pdfUrl        String?           // <--- novo
-
-  // SEO / rota
-  slug          String            // único por writer
   @@unique([writerId, slug])
+}
 
-  // metadados editoriais
+/// *
+/// * CHAPTER = capítulo de um ebook.
+/// * - Possui ordem, imagem própria opcional e conteúdo.
+model Chapter {
+  id            String      @id @default(uuid())
+  publicationId String
+  order         Int
   title         String
   subtitle      String?
-  description   String?
-  category     String? @default("Religioso")           // ex: "Espiritualidade", "Família"
-
-  // capa da publicação
   coverUrl      String?
-
-  // Conteúdo direto (para DEVOTIONAL página única)
-  // Para EBOOK normalmente fica vazio e o conteúdo vem de Chapter(s)
-  body          String?           // markdown/HTML/JSON (defina no app)
-
-  // Organização
-  tags          String[]          // opcional: ["oração","família"]
-  publishedAt   DateTime?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  chapters      Chapter[]
-  purchases     Purchase[]
+  content       String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  publication   Publication @relation(fields: [publicationId], references: [id])
 }
 
-/**
- * CHAPTER = capítulo de um ebook.
- * - Possui ordem, imagem própria opcional e conteúdo.
- */
-model Chapter {
-  id             String       @id @default(uuid())
-  publicationId  String
-  publication    Publication  @relation(fields: [publicationId], references: [id])
-
-  order          Int          // índice/ordem do capítulo (0..n)
-  title          String
-  subtitle       String?
-  coverUrl       String?      // imagem do capítulo (opcional)
-  content        String       // markdown/HTML/JSON
-
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-}
-
-/**
- * Purchase centralizada no Admin Master (Stripe).
- * Mantém campos para conciliação, taxas e recibos.
- */
+/// *
+/// * Purchase centralizada no Admin Master (Stripe).
+/// * Mantém campos para conciliação, taxas e recibos.
 model Purchase {
-  id                     String          @id @default(uuid())
-  userId                 String
-  user                   User            @relation(fields: [userId], references: [id])
-
-  publicationId          String
-  publication            Publication     @relation(fields: [publicationId], references: [id])
-
-  // redundância útil p/ relatórios rápidos por writer
-  writerId               String
-  writer                 Writer          @relation(fields: [writerId], references: [id])
-
-  // Valores
-  amount                 Int             // bruto em centavos
-  currency               String          @default("BRL")
-  fees                   Int?            // taxas do provedor (centavos)
-  netAmount              Int?            // líquido (amount - fees - impostos)
-
-  status                 PurchaseStatus
-  provider               PaymentProvider @default(STRIPE)
-
-  // Referências Stripe p/ conciliação
-  stripeSessionId        String?   // checkout session
-  stripePaymentIntentId  String?
-  stripePaymentMethodId  String?
-  stripeChargeId         String?
-  stripeInvoiceId        String?
-  stripeCustomerId       String?
-  receiptUrl             String?
-
-  rawProviderPayload     Json?     // payload do webhook (opcional)
-
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  id                    String          @id @default(uuid())
+  userId                String
+  publicationId         String
+  writerId              String
+  amount                Int
+  currency              String          @default("BRL")
+  fees                  Int?
+  netAmount             Int?
+  status                PurchaseStatus
+  provider              PaymentProvider @default(STRIPE)
+  stripeSessionId       String?
+  stripePaymentIntentId String?
+  stripePaymentMethodId String?
+  stripeChargeId        String?
+  stripeInvoiceId       String?
+  stripeCustomerId      String?
+  receiptUrl            String?
+  rawProviderPayload    Json?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  publication           Publication     @relation(fields: [publicationId], references: [id])
+  user                  User            @relation(fields: [userId], references: [id])
+  writer                Writer          @relation(fields: [writerId], references: [id])
 
   @@index([writerId, createdAt])
   @@index([publicationId, createdAt])
 }
 
-/**
- * Registro de repasses do Admin Master para cada escritor.
- * Pode ser gerado por período (ex.: mensal).
- */
+/// *
+/// * Registro de repasses do Admin Master para cada escritor.
+/// * Pode ser gerado por período (ex.: mensal).
 model WriterPayout {
-  id           String       @id @default(uuid())
-  writerId     String
-  writer       Writer       @relation(fields: [writerId], references: [id])
-
-  periodStart  DateTime
-  periodEnd    DateTime
-
-  grossAmount  Int          // escolha: soma de netAmount ou amount conforme sua regra
-  fees         Int?         // tarifas bancárias do repasse (se houver)
-  netAmount    Int          // total a pagar ao escritor
-  status       PayoutStatus @default(PENDING)
-
-  // Referências externas (comprovante, txid Pix, etc.)
-  reference    String?
-  receiptUrl   String?
-
-  notes        String?
-  createdAt    DateTime     @default(now())
-  paidAt       DateTime?
-  updatedAt    DateTime     @updatedAt
+  id          String       @id @default(uuid())
+  writerId    String
+  periodStart DateTime
+  periodEnd   DateTime
+  grossAmount Int
+  fees        Int?
+  netAmount   Int
+  status      PayoutStatus @default(PENDING)
+  reference   String?
+  receiptUrl  String?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  paidAt      DateTime?
+  updatedAt   DateTime     @updatedAt
+  writer      Writer       @relation(fields: [writerId], references: [id])
 
   @@index([writerId, periodStart, periodEnd])
 }
 
-// CITAÇÃO, DEVOCIONAL, PASSAGEM
 model Quote {
-  id String @id @default(uuid())
-  nameAuthor String
-  content String
-  verse String
-  imageUrl String?
-  writerId String
-  writer Writer @relation(fields: [writerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String                  @id @default(uuid())
+  nameAuthor       String
+  content          String
+  verse            String
+  imageUrl         String?
+  writerId         String
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  writer           Writer                  @relation(fields: [writerId], references: [id])
   userCompletation UserCompletationQuote[]
 
   @@index([writerId, createdAt])
 }
 
 model UserCompletationQuote {
-  id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId], references: [id])
-  quoteId String
-  quote Quote @relation(fields: [quoteId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String
+  quoteId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Devotional {
-  id String @id @default(uuid())
-  title String
-  content String
-  verse String
-  imageUrl String?
-  audioUrl String?
-  writerId String
-  writer Writer @relation(fields: [writerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id               String                       @id @default(uuid())
+  title            String
+  content          String
+  verse            String
+  imageUrl         String?
+  writerId         String
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+  audioUrl         String?
+  writer           Writer                       @relation(fields: [writerId], references: [id])
   userCompletation UserCompletationDevotional[]
+
   @@index([writerId, createdAt])
 }
 
 model UserCompletationDevotional {
-  id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId], references: [id])
+  id           String     @id @default(uuid())
+  userId       String
   devotionalId String
-  devotional Devotional @relation(fields: [devotionalId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  devotional   Devotional @relation(fields: [devotionalId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
 }
 
 model Verse {
-  id String @id @default(uuid())
-  content String
-  reference String
-  imageUrl String?
-  writerId String
-  writer Writer @relation(fields: [writerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                    String                  @id @default(uuid())
+  content               String
+  reference             String
+  writerId              String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  imageUrl              String?
   userCompletationVerse UserCompletationVerse[]
+  writer                Writer                  @relation(fields: [writerId], references: [id])
+
   @@index([writerId, createdAt])
 }
 
 model UserCompletationVerse {
-  id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId], references: [id])
-  verseId String
-  verse Verse @relation(fields: [verseId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String
+  verseId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  verse     Verse    @relation(fields: [verseId], references: [id])
 }
 
-// Biblia
 model BibleVersion {
-  id        String   @id @default(uuid())
-  code      String   @unique   // "ACF"
-  name      String             // "Almeida Corrigida Fiel"
-  language  String             // "pt-BR"
-  createdAt DateTime @default(now())
+  id        String       @id @default(uuid())
+  code      String       @unique
+  name      String
+  language  String
+  createdAt DateTime     @default(now())
   verses    BibleVerse[]
 }
 
 model BibleBook {
-  id        Int      @id       // 1..66
-  abbrev    String   @unique   // "gn", "mt", ...
-  name      String              // "Gênesis", ...
-  order     Int      @unique   // posição canônica
-  createdAt DateTime @default(now())
+  id        Int          @id
+  abbrev    String       @unique
+  name      String
+  order     Int          @unique
+  createdAt DateTime     @default(now())
   verses    BibleVerse[]
 
   @@index([order])
 }
 
 model BibleVerse {
-  id         String       @id @default(uuid())
-  versionId  String
-  bookId     Int
-  chapter    Int
-  verse      Int
-  text       String
+  id        String       @id @default(uuid())
+  versionId String
+  bookId    Int
+  chapter   Int
+  verse     Int
+  text      String
+  createdAt DateTime     @default(now())
+  book      BibleBook    @relation(fields: [bookId], references: [id])
+  version   BibleVersion @relation(fields: [versionId], references: [id])
 
-  version    BibleVersion @relation(fields: [versionId], references: [id])
-  book       BibleBook    @relation(fields: [bookId], references: [id])
-
-  createdAt  DateTime     @default(now())
-
-  @@unique([versionId, bookId, chapter, verse]) // 1 versículo por versão
+  @@unique([versionId, bookId, chapter, verse])
   @@index([bookId, chapter, verse])
   @@index([versionId])
 }
@@ -514,45 +399,101 @@ model PushSubscription {
   auth           String
   expirationTime DateTime?
   userId         String?
-  writerId       String?   // sua white-label
-  topics         String[]  // ex.: ["new-book", "devotional"]
+  writerId       String?
+  topics         String[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   @@index([writerId])
 }
 
-// Biblia Plano de leitura
 model BibleReadingPlan {
-  id        String   @id @default(uuid())
-  name      String   // Ex: "Plano Bíblia em 365 dias"
-  days      ReadingDay[]
-  createdAt DateTime @default(now())
-
+  id                  String                @id @default(uuid())
+  name                String
+  createdAt           DateTime              @default(now())
+  days                ReadingDay[]
   UserReadingProgress UserReadingProgress[]
 }
 
 model ReadingDay {
-  id        String   @id @default(uuid())
-  dayNumber Int      // 1 até 365
-  passages  String   // Ex: "Gênesis 1-3; Mateus 1"
-  planId    String
-  plan      BibleReadingPlan @relation(fields: [planId], references: [id])
-
+  id                  String                @id @default(uuid())
+  dayNumber           Int
+  passages            String
+  planId              String
+  plan                BibleReadingPlan      @relation(fields: [planId], references: [id])
   UserReadingProgress UserReadingProgress[]
 }
 
 model UserReadingProgress {
-  id        String   @id @default(uuid())
-  userId    String   // referência ao usuário (Writer/Client)
-  user     User     @relation(fields: [userId], references: [id])
-  planId    String
-  dayId     String
-  completed Boolean  @default(false)
+  id          String           @id @default(uuid())
+  userId      String
+  planId      String
+  dayId       String
+  completed   Boolean          @default(false)
   completedAt DateTime?
-  
-  plan BibleReadingPlan @relation(fields: [planId], references: [id])
-  day  ReadingDay       @relation(fields: [dayId], references: [id])
+  day         ReadingDay       @relation(fields: [dayId], references: [id])
+  plan        BibleReadingPlan @relation(fields: [planId], references: [id])
+  user        User             @relation(fields: [userId], references: [id])
 
   @@unique([userId, planId, dayId])
+}
+
+/// * Papéis
+enum Role {
+  ADMIN
+  WRITER_ADMIN
+  CLIENT
+}
+
+/// * Publicação pode ser um Devocional (página única) ou um Ebook (com capítulos)
+enum PublicationType {
+  DEVOTIONAL
+  EBOOK
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Visibility {
+  FREE
+  PAID
+}
+
+enum PurchaseStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}
+
+/// * Provedor de pagamento (por enquanto só Stripe)
+enum PaymentProvider {
+  STRIPE
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum SubscriptionInterval {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
 }
