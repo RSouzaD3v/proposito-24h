@@ -14,6 +14,7 @@ import {
   CreditCard,
   LogOut,
   Menu,
+  Paintbrush,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils"; // se não tiver, troque por template strings
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/admin/writers", label: "Escritores", icon: Users2 },
   { href: "/admin/payouts", label: "Repasses", icon: Banknote },
   { href: "/admin/writer-subscriptions", label: "Assinaturas (Escritores)", icon: CreditCard },
+  { href: "/admin/personalization", label: "Personalização", icon: Paintbrush },
 ];
 
 export default function Sidebar() {

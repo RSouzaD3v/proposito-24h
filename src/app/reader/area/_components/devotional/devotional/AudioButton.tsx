@@ -9,6 +9,7 @@ type Props = {
   className?: string;
   labelPlay?: string;   // padrão: "Ouvir"
   labelPause?: string;  // padrão: "Parar"
+  style?: React.CSSProperties;
 };
 
 export default function AudioButton({
@@ -16,6 +17,7 @@ export default function AudioButton({
   className = "",
   labelPlay = "Ouvir",
   labelPause = "Parar",
+  style
 }: Props) {
   const [playing, setPlaying] = React.useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -63,6 +65,7 @@ export default function AudioButton({
       aria-pressed={playing}
       aria-label={playing ? "Parar áudio" : "Tocar áudio"}
       className={className + " flex items-center justify-center gap-2 text-xl font-bold"}
+      style={style}
     >
       {playing ? <FiPause /> : <FiPlay />}
       {playing ? labelPause : labelPlay}

@@ -11,6 +11,7 @@ import Link from "next/link";
 import { ScreenSubscription } from "../_components/ScreenSubscription";
 import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import clientPromise from "@/lib/mongodb";
 
 const TZ = "America/Sao_Paulo";
 
@@ -56,6 +57,21 @@ export default async function PrayerPage() {
             }
         }
     });
+
+      const client = await clientPromise;
+  const mongoDb = client.db(process.env.MONGODB_DB || "railway");
+  const personalization = await mongoDb
+    .collection("personalizations")
+    .findOne({ writerId: user.writerId });
+
+      const colors = {
+    primary: personalization?.primaryColor || "#202020",
+    secondary: personalization?.secondaryColor || "#404040",
+    background: personalization?.backgroundColor || "#ffffff",
+    buttonBg: personalization?.bgButtonColor || "#22c55e",
+    buttonText: personalization?.buttonTextColor || "#ffffff",
+    text: personalization?.textColor || "#000000",
+  };
 
     let userCompletionPrayer;
     if (prayer) {
@@ -153,7 +169,7 @@ export default async function PrayerPage() {
                 </div>
             )}
 
-            <MenuPainel />
+            <MenuPainel colors={colors} />
         </section>
     );
 }

@@ -21,7 +21,18 @@ function brasiliaDayRange(now = new Date()) {
   };
 }
 
-export const VerseCard = async () => {
+interface VerseCardProps {
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    buttonBg: string;
+    buttonText: string;
+    text: string;
+  };
+}
+
+export const VerseCard = async ({ colors }: VerseCardProps) => {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
@@ -57,7 +68,7 @@ export const VerseCard = async () => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card style={{ backgroundColor: colors.background }}  >
       <CardHeader className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <FiBook size={25} />
@@ -75,7 +86,7 @@ export const VerseCard = async () => {
       </CardContent>
 
       <CardFooter>
-        <Link href={`/reader/area/verse/${verse.id}`} className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline">
+        <Link  style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }} href={`/reader/area/verse/${verse.id}`} className="p-2 text-center text-xl font-bold w-full rounded-xl hover:underline">
           Ler
         </Link>
       </CardFooter>

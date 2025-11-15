@@ -9,33 +9,68 @@ import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db";
+import clientPromise from "@/lib/mongodb";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function AreaReader() {
   const session = await getServerSession(authOptions);
-
   if (!session) {
-    return <div>Acesso negado</div>;
+    return <div className="p-8 text-center">Acesso negado</div>;
   }
 
-  const date = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-
+  // 🔹 Pega writerId do usuário logado (PostgreSQL)
   const userReader = await db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
+    where: { id: session.user.id },
     select: {
       writer: {
         select: {
-          colorPrimary: true,
-          colorSecondary: true,
           id: true,
           logoUrl: true,
           titleApp: true,
           titleHeader: true,
-        }
-      }
+        },
+      },
     },
   });
+
+  const writerId = userReader?.writer?.id;
+  if (!writerId) {
+    return (
+      <section className="p-8">
+        <h1 className="text-xl font-bold mb-2">Sem escritor vinculado</h1>
+        <p className="opacity-80">
+          Vincule sua conta a um escritor para acessar esta área.
+        </p>
+      </section>
+    );
+  }
+
+  // 🔹 Busca personalização no MongoDB
+  const client = await clientPromise;
+  const mongoDb = client.db(process.env.MONGODB_DB || "railway");
+  const personalization = await mongoDb
+    .collection("personalizations")
+    .findOne({ writerId });
+
+  // 🔹 Define cores com fallback padrão
+  const colors = {
+    primary: personalization?.primaryColor || "#202020",
+    secondary: personalization?.secondaryColor || "#404040",
+    background: personalization?.backgroundColor || "#ffffff",
+    buttonBg: personalization?.bgButtonColor || "#22c55e",
+    buttonText: personalization?.buttonTextColor || "#ffffff",
+    text: personalization?.textColor || "#000000",
+  };
+
+  // 🔹 Gradiente aplicado nas seções
+  const gradient = `from-[${colors.primary}] to-[${colors.secondary}]`;
+
+  // 🔹 Data formatada
+  const date = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  );
 
   const items = [
     {
@@ -43,75 +78,99 @@ export default async function AreaReader() {
       name: "Oração de Hoje",
       type: "Oração",
       link: "/reader/area/prayer",
-      primaryColor: "from-[#202020] to-[#404040]",
     },
     {
       id: 2,
       name: "Plano Bíblia em 365 Dias",
       type: "Plano de Leitura",
       link: "/reader/area/reading/plan/365",
-      primaryColor: "from-[#202020] to-[#404040]",
     },
     {
       id: 3,
       name: "Biblioteca",
       type: "Ebooks",
       link: "/reader/area/courses",
-      primaryColor: "from-[#202020] to-[#404040]",
     },
     {
       id: 4,
-      name: "Dashboard Biblico",
+      name: "Dashboard Bíblico",
       type: "Conquistas",
       link: "/reader/area/dashboard",
-      primaryColor: "from-[#202020] to-[#404040]",
     },
   ];
 
   return (
     <ThemeWriterProvider>
-      <section className="container mx-auto min-h-screen md:px-1 px-5 py-36">
-        <HeaderReader titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}/>
+      <section
+        className="container mx-auto min-h-screen md:px-1 px-5 py-36 transition-all"
+      >
+
+        <HeaderReader
+        colors={colors}
+          titleHeader={
+            userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"
+          }
+        />
+
+        {/* 📅 Data e cabeçalho */}
         <div className="px-2">
-            {date.toLocaleDateString("pt-BR", {
+          {date.toLocaleDateString("pt-BR", {
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric",
-            })} - {date.toLocaleTimeString("pt-BR", {
+          })}{" "}
+          -{" "}
+          {date.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
-            })}
-
-          <h2 className="md:text-xl text-lg font-bold">{userReader?.writer?.titleApp}</h2>
+          })}
+          <h2 className="md:text-xl text-lg font-bold mt-1">
+            {userReader?.writer?.titleApp || "Meu Devocional"}
+          </h2>
         </div>
 
-        <h3 className="mt-5 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
+        {/* 📖 Cards principais */}
+        <h3 className="mt-6 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-6 px-2 py-1">
-          <QuoteCard />
-          <VerseCard />
-          <DevotionalCard />
+          <QuoteCard colors={colors} />
+          <VerseCard colors={colors}/>
+          <DevotionalCard colors={colors} />
         </div>
 
+        {/* ⚙️ Funcionalidades */}
         <h3 className="mt-5 px-2 my-2">FUNCIONALIDADES & OUTROS</h3>
         <div className="space-y-6 md:p-0 py-6 px-2">
           {items.map((item) => (
             <Link
+              style={{
+                backgroundColor: colors.background,
+                color: colors.text
+              }}
               key={item.id}
               href={item.link}
-              className={`flex items-center justify-between bg-gradient-to-r ${item.primaryColor} text-white p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group`}
+              className={`flex items-center justify-between  p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group`}
             >
               <div>
-                <h2 className="md:text-2xl text-xl font-extrabold mb-2">{item.name}</h2>
-                <p className="bg-white/10 text-propositoBlue text-xs px-3 py-1 rounded-full w-fit font-semibold shadow">
+                <h2 className="md:text-2xl text-xl font-extrabold mb-2">
+                  {item.name}
+                </h2>
+                <p
+                  style={{  color: colors.buttonText, backgroundColor: colors.buttonBg }}
+                  className="text-xs px-3 py-1 rounded-full w-fit font-semibold shadow"
+                >
                   {item.type}
                 </p>
               </div>
-              <FiChevronRight size={40} className="text-white group-hover:translate-x-2 transition-transform duration-200" />
+              <FiChevronRight
+                size={40}
+                className="text-white group-hover:translate-x-2 transition-transform duration-200"
+              />
             </Link>
           ))}
         </div>
-        <MenuPainel />
+
+        <MenuPainel colors={colors}/>
       </section>
     </ThemeWriterProvider>
   );

@@ -21,7 +21,18 @@ function brasiliaDayRange(now = new Date()) {
   };
 }
 
-export const QuoteCard = async () => {
+interface QuoteCardProps {
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    buttonBg: string;
+    buttonText: string;
+    text: string;
+  };
+}
+
+export const QuoteCard = async ({ colors }: QuoteCardProps) => {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
@@ -56,7 +67,9 @@ export const QuoteCard = async () => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card style={{
+      backgroundColor: colors.background
+    }} >
       <CardHeader className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <FiActivity size={25} />
@@ -76,8 +89,9 @@ export const QuoteCard = async () => {
 
       <CardFooter>
         <Link
+          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
           href={`/reader/area/quote/${quote.id}`}
-          className="bg-black p-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline"
+          className="p-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >
           Ler
         </Link>

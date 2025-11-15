@@ -2,59 +2,91 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaTree } from "react-icons/fa";
-import { FiHeart, FiBook, FiSettings, FiCheck } from "react-icons/fi";
+import { FiHeart, FiBook, FiCheck } from "react-icons/fi";
 
-export const MenuPainel = () => {
-    const pathname = usePathname();
+interface MenuPainelProps {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    buttonBg?: string;
+    buttonText?: string;
+    text?: string;
+  };
+}
 
-    const itemsNav = [
-        {
-            id: 1,
-            name: "Hoje",
-            icon: <FiCheck size={22} />,
-            link: "/reader/area"
-        },
-        {
-            id: 2,
-            name: "Oração",
-            icon: <FiHeart size={22} />,
-            link: "/reader/area/prayer"
-        },
-        {
-            id: 3,
-            name: "Bíblia",
-            icon: <FiBook size={22} />,
-            link: "/reader/area/bible-nvi"
-        },
-        {
-            id: 4,
-            name: "Minha Jornada",
-            icon: <FaTree size={22} />,
-            link: "/reader/area/journey"
-        },
-    ];
+export const MenuPainel = ({ colors }: MenuPainelProps) => {
+  const pathname = usePathname();
 
-    return (
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 shadow-2xl rounded-full px-6 py-3 z-50 border border-gray-200 backdrop-blur-md">
-            <ul className="flex items-center md:gap-6 gap-3">
-                {itemsNav.map(item => {
-                    const isActive = pathname === item.link;
-                    return (
-                        <Link
-                            key={item.id}
-                            href={item.link}
-                            className={`flex flex-col items-center justify-center px-3 py-1 rounded-xl transition-all duration-150
-                                ${isActive
-                                    ? "bg-gradient-to-b from-blue-600 to-blue-400 text-white shadow-lg scale-110"
-                                    : "text-gray-700 hover:bg-gray-100 hover:scale-105"
-                                }`}
-                        >
-                            <span className="mb-1">{item.icon}</span>
-                            <span className="text-xs md:block hidden font-semibold">{item.name}</span>
-                        </Link>
-                    );
-                })}
-            </ul>
-        </nav>
-    );
+  // Fallback seguro (nunca quebra)
+  const safeColors = {
+    primary: colors?.primary || "#202020",
+    secondary: colors?.secondary || "#404040",
+    background: colors?.background || "#ffffff",
+    buttonBg: colors?.buttonBg || "#22c55e",
+    buttonText: colors?.buttonText || "#ffffff",
+    text: colors?.text || "#000000",
+  };
+
+  const itemsNav = [
+    {
+      id: 1,
+      name: "Hoje",
+      icon: <FiCheck size={22} />,
+      link: "/reader/area",
+    },
+    {
+      id: 2,
+      name: "Oração",
+      icon: <FiHeart size={22} />,
+      link: "/reader/area/prayer",
+    },
+    {
+      id: 3,
+      name: "Bíblia",
+      icon: <FiBook size={22} />,
+      link: "/reader/area/bible-nvi",
+    },
+    {
+      id: 4,
+      name: "Minha Jornada",
+      icon: <FaTree size={22} />,
+      link: "/reader/area/journey",
+    },
+  ];
+
+  return (
+    <nav
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 shadow-2xl rounded-full px-6 py-3 z-50 backdrop-blur-md border transition-all bg-white/50"
+    >
+      <ul className="flex items-center md:gap-6 gap-3">
+        {itemsNav.map((item) => {
+          const isActive = pathname === item.link;
+
+          return (
+            <Link
+              key={item.id}
+              href={item.link}
+              className="flex flex-col items-center justify-center px-3 py-1 rounded-xl transition-all duration-150"
+              style={{
+                background: isActive
+                  ? `linear-gradient(180deg, ${safeColors.primary}, ${safeColors.secondary})`
+                  : "transparent",
+                color: isActive ? safeColors.buttonText : safeColors.text,
+                transform: isActive ? "scale(1.1)" : "scale(1)",
+                boxShadow: isActive
+                  ? `0 4px 15px ${safeColors.primary}40`
+                  : "none",
+              }}
+            >
+              <span className="mb-1">{item.icon}</span>
+              <span className="text-xs md:block hidden font-semibold">
+                {item.name}
+              </span>
+            </Link>
+          );
+        })}
+      </ul>
+    </nav>
+  );
 };

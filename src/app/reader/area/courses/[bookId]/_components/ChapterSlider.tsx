@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import ReaderControls from "./ReaderControls";
@@ -12,7 +12,7 @@ import DOMPurify from "isomorphic-dompurify";
 type Chapter = {
   title: string;
   subtitle?: string;
-  content: string;     // agora pode ser HTML rico
+  content: string;     // HTML rich
   coverUrl?: string;
 };
 
@@ -47,10 +47,9 @@ function ThemedContainer({ children }: { children: React.ReactNode }) {
   return <div className={cn("min-h-screen", pal.pageBg, fontClass)}>{children}</div>;
 }
 
-/* ---------- util: detectar se já é HTML ---------- */
+/* ---------- utils HTML ---------- */
 const looksLikeHTML = (s: string) => /<\/?[a-z][\s\S]*>/i.test(s.trim());
 
-/* ---------- util: escapar quando conteúdo for texto puro ---------- */
 const escapeHTML = (str: string) =>
   str
     .replace(/&/g, "&amp;")
@@ -59,8 +58,6 @@ const escapeHTML = (str: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-/* ---------- montar HTML seguro p/ render ---------- */
-// ✅ renomeado: NÃO começa com "use"
 function toSafeHtml(raw: string) {
   const html = looksLikeHTML(raw)
     ? raw
@@ -79,6 +76,9 @@ function toSafeHtml(raw: string) {
   });
 }
 
+/* ------------------------------------------------------ */
+/* ---------------------- SLIDER ------------------------ */
+/* ------------------------------------------------------ */
 
 function SliderInner({ chapters, bookId }: InnerProps) {
   const [index, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
@@ -93,6 +93,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
   const next = () => setIndex(index === chapters.length - 1 ? 0 : index + 1);
   const jump = (i: number) => setIndex(i);
 
+  /* --- teclado --- */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
@@ -100,9 +101,9 @@ function SliderInner({ chapters, bookId }: InnerProps) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, chapters.length]);
 
+  /* --- scroll top a cada troca --- */
   useEffect(() => {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [index]);
@@ -117,7 +118,7 @@ function SliderInner({ chapters, bookId }: InnerProps) {
     );
   }
 
-const safeHtml = toSafeHtml(chapter.content ?? "");
+  const safeHtml = toSafeHtml(chapter.content ?? "");
 
   return (
     <ThemedContainer>
@@ -127,6 +128,8 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
       >
         {chapter.coverUrl && (
           <div className="w-full max-h-[380px] overflow-hidden mb-4 flex items-center justify-center">
+
+            {/* Permitido: img precisa ser usada aqui */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={chapter.coverUrl}
@@ -146,6 +149,7 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
           >
             {chapter.title}
           </h2>
+
           {chapter.subtitle && (
             <h3
               className="italic opacity-80"
@@ -156,7 +160,7 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
           )}
         </header>
 
-        {/* CONTEÚDO — HTML rico sanitizado */}
+        {/* HTML sanitizado */}
         <article
           className={cn(
             "mt-6 selection:bg-yellow-300/40 prose prose-slate dark:prose-invert max-w-none",
@@ -165,17 +169,17 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
             prefs.align === "justify" ? "text-justify" : "text-left"
           )}
           style={{
-            fontSize: prefs.fontSize,        // base vem do leitor (parágrafo)
+            fontSize: prefs.fontSize,
             lineHeight: prefs.lineHeight,
             maxWidth: `${prefs.maxChars}ch`,
             marginInline: "auto",
           }}
-          // eslint-disable-next-line react/no-danger
+          /* eslint-disable react/no-danger */
           dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       </div>
 
-      {/* Desktop: setas + contador quando painel fechado */}
+      {/* Desktop (setas + contador) */}
       {!open && (
         <>
           <div className="hidden md:flex fixed inset-y-0 left-4 items-center z-40">
@@ -187,6 +191,7 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
               <FaChevronLeft />
             </button>
           </div>
+
           <div className="hidden md:flex fixed inset-y-0 right-4 items-center z-40">
             <button
               onClick={next}
@@ -196,12 +201,10 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
               <FaChevronRight />
             </button>
           </div>
+
           <div className="hidden md:flex fixed bottom-6 inset-x-0 justify-center z-40">
             <span
-              className={cn(
-                "px-4 py-1.5 rounded-lg shadow text-sm tabular-nums",
-                pal.badge
-              )}
+              className={cn("px-4 py-1.5 rounded-lg shadow text-sm tabular-nums", pal.badge)}
               aria-live="polite"
             >
               {index + 1} / {chapters.length}
@@ -210,14 +213,13 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
         </>
       )}
 
-      {/* Mobile: central (← contador →) + engrenagem à direita na MESMA linha */}
+      {/* Mobile (controles + engrenagem) */}
       {!open && (
         <div
           className="md:hidden fixed inset-x-0 z-40"
           style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
         >
           <div className="relative px-4">
-            {/* grupo central */}
             <div className="flex justify-center">
               <div className="flex items-center gap-2">
                 <button
@@ -254,7 +256,6 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
               </div>
             </div>
 
-            {/* engrenagem alinhada à direita */}
             <button
               onClick={() => setOpen(true)}
               aria-label="Abrir ajustes"
@@ -282,6 +283,7 @@ const safeHtml = toSafeHtml(chapter.content ?? "");
   );
 }
 
+/* ---------- Provider wrapper ---------- */
 export default function ChapterSlider({
   chapters,
   bookId,

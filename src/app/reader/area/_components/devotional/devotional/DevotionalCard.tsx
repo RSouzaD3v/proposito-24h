@@ -20,7 +20,18 @@ function brasiliaDayRange(now = new Date()) {
   };
 }
 
-export const DevotionalCard = async () => {
+interface DevotionalCardProps {
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    buttonBg: string;
+    buttonText: string;
+    text: string;
+  };
+}
+
+export const DevotionalCard = async ({ colors }: DevotionalCardProps) => {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
@@ -55,7 +66,7 @@ export const DevotionalCard = async () => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card style={{ backgroundColor: colors.background }}>
       <CardHeader className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <FaComments size={25} />
@@ -74,8 +85,9 @@ export const DevotionalCard = async () => {
 
       <CardFooter className="grid grid-cols-2 gap-2 w-full">
         <Link
+          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
           href={`/reader/area/devotional/${devotional.id}`}
-          className="bg-black px-4 py-2 text-center text-xl font-bold w-full rounded-xl text-white hover:underline"
+          className="px-4 py-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >
           Ler
         </Link>
@@ -83,7 +95,8 @@ export const DevotionalCard = async () => {
         {/* Botão Ouvir/Pausar – só aparece se existir audioUrl */}
         <AudioButton
           src={devotional.audioUrl}
-          className="bg-black text-white py-2 w-full rounded-xl"
+          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
+          className="py-2 w-full rounded-xl"
           labelPlay="Ouvir"
           labelPause="Parar"
         />
