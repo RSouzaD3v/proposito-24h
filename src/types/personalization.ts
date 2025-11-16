@@ -8,6 +8,8 @@ export const PersonalizationSchema = z.object({
   bgButtonColor: z.string().default("#22c55e"),
   buttonTextColor: z.string().default("#ffffff"),
   textColor: z.string().default("#000000"),
+  independenteColor1: z.string().default("#f97316"),
+  independenteColor2: z.string().default("#f97316"),
   createdAt: z.date().default(new Date()),
   updatedAt: z.date().default(new Date()),
 });

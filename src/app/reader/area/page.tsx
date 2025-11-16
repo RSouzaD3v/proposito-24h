@@ -62,10 +62,12 @@ export default async function AreaReader() {
     buttonBg: personalization?.bgButtonColor || "#22c55e",
     buttonText: personalization?.buttonTextColor || "#ffffff",
     text: personalization?.textColor || "#000000",
+    independenteColor1: personalization?.independenteColor1 || "#f97316",
+    independenteColor2: personalization?.independenteColor2 || "#f97316",
   };
 
   // 🔹 Gradiente aplicado nas seções
-  const gradient = `from-[${colors.primary}] to-[${colors.secondary}]`;
+  // const gradient = `from-[${colors.primary}] to-[${colors.secondary}]`;
 
   // 🔹 Data formatada
   const date = new Date(

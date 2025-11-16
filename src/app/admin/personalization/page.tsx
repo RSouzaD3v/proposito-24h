@@ -16,6 +16,8 @@ type Personalization = {
   backgroundColor: string
   bgButtonColor: string
   buttonTextColor: string
+  independenteColor1: string
+  independenteColor2: string
   textColor: string
   createdAt?: string
   updatedAt?: string
@@ -32,6 +34,8 @@ export default function AdminPersonalizationPage() {
     backgroundColor: '#ffffff',
     bgButtonColor: '#22c55e',
     buttonTextColor: '#ffffff',
+    independenteColor1: '#f97316',
+    independenteColor2: '#f97316',
     textColor: '#000000',
   })
 
@@ -76,6 +80,8 @@ export default function AdminPersonalizationPage() {
           backgroundColor: '#ffffff',
           bgButtonColor: '#22c55e',
           buttonTextColor: '#ffffff',
+          independenteColor1: '#f97316',
+          independenteColor2: '#f97316',
           textColor: '#000000',
         })
         loadData()
@@ -149,6 +155,8 @@ export default function AdminPersonalizationPage() {
                 { key: 'bgButtonColor', label: 'Button BG' },
                 { key: 'buttonTextColor', label: 'Button Text' },
                 { key: 'textColor', label: 'Text Color' },
+                { key: 'independenteColor1', label: 'Independente Color 1' },
+                { key: 'independenteColor2', label: 'Independente Color 2' },
               ].map(({ key, label }) => (
                 <div key={key}>
                   <Label>{label}</Label>
@@ -203,6 +211,8 @@ export default function AdminPersonalizationPage() {
                       { color: p.bgButtonColor, label: 'Button BG' },
                       { color: p.buttonTextColor, label: 'Button Text' },
                       { color: p.textColor, label: 'Text' },
+                      { color: p.independenteColor1, label: 'Independente Color 1' },
+                      { color: p.independenteColor2, label: 'Independente Color 2' },
                     ].map((c, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div

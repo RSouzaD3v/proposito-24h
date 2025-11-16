@@ -29,6 +29,8 @@ interface QuoteCardProps {
     buttonBg: string;
     buttonText: string;
     text: string;
+    independenteColor1: string;
+    independenteColor2: string;
   };
 }
 
@@ -76,7 +78,7 @@ export const QuoteCard = async ({ colors }: QuoteCardProps) => {
           <h2>Citação Diária</h2>
         </div>
         {userCompletionQuote ? (
-          <div className="w-6 h-6 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg">
+          <div style={{ backgroundColor: colors.independenteColor1 }} className="w-6 h-6 flex items-center justify-center text-white rounded-full shadow-lg">
             <FaCheck />
           </div>
         ) : null}
@@ -89,7 +91,7 @@ export const QuoteCard = async ({ colors }: QuoteCardProps) => {
 
       <CardFooter>
         <Link
-          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
+          style={{ background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`, color: colors.buttonText }}
           href={`/reader/area/quote/${quote.id}`}
           className="p-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >

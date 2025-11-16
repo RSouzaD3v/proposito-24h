@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { useAuth } from "../_contexts/AuthContext";
 
-export const HeaderReader = ({ titleHeader, colors }: { titleHeader?: string; colors: { primary: string; secondary: string; background: string; buttonBg: string; buttonText: string; text: string; } }) => {
+export const HeaderReader = ({ titleHeader, colors }: { titleHeader?: string; colors: { primary: string; secondary: string; background: string; 
+  buttonBg: string; buttonText: string; text: string; independenteColor1: string; independenteColor2: string } }) => {
   const { user } = useAuth();
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full flex items-center justify-center md:gap-10 gap-5 p-4 bg-[#202020] shadow rounded-b-[50px]">
+    <header style={{ backgroundColor: colors.independenteColor1 }} className="fixed top-0 left-0 z-50 w-full flex items-center justify-center md:gap-10 gap-5 p-4 bg-[#202020] shadow rounded-b-[50px]">
       <Link style={{
         backgroundColor: colors.buttonBg,
         color: colors.buttonText

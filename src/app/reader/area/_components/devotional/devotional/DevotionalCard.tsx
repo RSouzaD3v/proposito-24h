@@ -28,6 +28,8 @@ interface DevotionalCardProps {
     buttonBg: string;
     buttonText: string;
     text: string;
+    independenteColor1: string;
+    independenteColor2: string;
   };
 }
 
@@ -73,7 +75,7 @@ export const DevotionalCard = async ({ colors }: DevotionalCardProps) => {
           <h2>Devocional</h2>
         </div>
         {userCompletationDevotional ? (
-          <div className="w-6 h-6 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg">
+          <div style={{ backgroundColor: colors.independenteColor1 }} className="w-6 h-6 flex items-center justify-center text-white rounded-full shadow-lg">
             <FaCheck />
           </div>
         ) : null}
@@ -85,7 +87,7 @@ export const DevotionalCard = async ({ colors }: DevotionalCardProps) => {
 
       <CardFooter className="grid grid-cols-2 gap-2 w-full">
         <Link
-          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
+          style={{ background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`, color: colors.buttonText }}
           href={`/reader/area/devotional/${devotional.id}`}
           className="px-4 py-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >
@@ -95,7 +97,7 @@ export const DevotionalCard = async ({ colors }: DevotionalCardProps) => {
         {/* Botão Ouvir/Pausar – só aparece se existir audioUrl */}
         <AudioButton
           src={devotional.audioUrl}
-          style={{ backgroundColor: colors.buttonBg, color: colors.buttonText }}
+          style={{ background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`, color: colors.buttonText }}
           className="py-2 w-full rounded-xl"
           labelPlay="Ouvir"
           labelPause="Parar"
