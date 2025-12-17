@@ -109,7 +109,6 @@ export default async function AreaReader({
 
   const items = [
     { id: 5, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
-    { id: 1, name: "Oração de Hoje", type: "Oração", link: "/reader/area/prayer" },
     { id: 2, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
     { id: 3, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
     { id: 4, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
