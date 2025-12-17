@@ -125,11 +125,11 @@ export default async function AreaReader({
         />
 
         <div className="flex items-center justify-center">
-          <WeekDayFilter />
+          <WeekDayFilter colors={colors} />
         </div>
 
         {/* 📅 Data baseada no filtro */}
-        <div className="px-2">
+        <div className="px-2 md:text-xl text-sm mt-5">
           {activeDay.toLocaleDateString("pt-BR", {
             weekday: "long",
             year: "numeric",
