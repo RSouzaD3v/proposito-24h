@@ -27,14 +27,14 @@ export const authOptions: AuthOptions = {
         const ok = await bcrypt.compare(credentials.password, user.password);
         if (!ok) return null;
 
-        await db.user.update({
-          where: {
-            id: user.id
-          },
-          data: {
-            lastAccess: new Date()
-          }
-        });
+        // await db.user.update({
+        //   where: {
+        //     id: user.id
+        //   },
+        //   data: {
+        //     lastAccess: new Date()
+        //   }
+        // });
 
         // Retorna os campos que vamos propagar pro token
         return {

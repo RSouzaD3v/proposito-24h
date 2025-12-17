@@ -14,6 +14,7 @@ import clientPromise from "@/lib/mongodb";
 import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { WeekDayFilter } from "./_components/WeekDayFilter";
+import { TrackAccess } from "@/components/TrackAccess";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -116,6 +117,7 @@ export default async function AreaReader({
 
   return (
     <ThemeWriterProvider>
+      <TrackAccess />
       <section className="container mx-auto min-h-screen md:px-1 px-5 py-36 transition-all">
         <HeaderReader
           colors={colors}
