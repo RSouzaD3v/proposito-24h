@@ -123,7 +123,7 @@ function LoginInner() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-propositoBlue via-blue-800 to-blue-700 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-blue-800 hover:to-propositoBlue transition"
+              className="w-full bg-linear-to-r from-propositoBlue via-blue-800 to-blue-700 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-blue-800 hover:to-propositoBlue transition"
             >
               Entrar
             </button>

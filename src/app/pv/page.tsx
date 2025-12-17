@@ -45,7 +45,7 @@ export default function LandingProposito24h() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="size-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600" />
+            <div className="size-8 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600" />
             <span className="font-bold">Proposito24h</span>
             <Badge variant="secondary" className="ml-2">Para Escritores</Badge>
           </div>
@@ -69,7 +69,7 @@ export default function LandingProposito24h() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-r from-blue-700 to-indigo-800 py-16 text-white">
+      <section className="relative overflow-hidden border-b bg-linear-to-r from-blue-700 to-indigo-800 py-16 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_45%)]" />
         <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 md:grid-cols-2">
           <div>
@@ -209,7 +209,7 @@ export default function LandingProposito24h() {
       </section>
 
       {/* PREÇOS / OFERTA */}
-      <section className="border-y bg-gradient-to-r from-emerald-600 to-green-600 py-16 text-white">
+      <section className="border-y bg-linear-to-r from-emerald-600 to-green-600 py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h3 className="text-3xl font-extrabold md:text-5xl">
@@ -346,7 +346,7 @@ export default function LandingProposito24h() {
       </footer>
 
       {/* BARRA FIXA DE CONVERSÃO */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="hidden items-center gap-3 md:flex">
             <ShieldCheck className="size-5 text-emerald-600" />

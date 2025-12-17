@@ -73,11 +73,12 @@ model User {
   name                       String?
   password                   String
   role                       Role                         @default(CLIENT)
+  stripeCustomerId           String?
+  freePlan                   Boolean                      @default(true)
   writerId                   String?
   createdAt                  DateTime                     @default(now())
   updatedAt                  DateTime                     @updatedAt
-  stripeCustomerId           String?
-  freePlan                   Boolean                      @default(true)
+  lastAccess                 DateTime?
   achievements               Achievements[]
   purchases                  Purchase[]
   readerSubscriptions        ReaderSubscription[]
