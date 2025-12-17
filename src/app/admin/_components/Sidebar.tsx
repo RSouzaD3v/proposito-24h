@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   Paintbrush,
+  Gamepad,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils"; // se não tiver, troque por template strings
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/admin/payouts", label: "Repasses", icon: Banknote },
   { href: "/admin/writer-subscriptions", label: "Assinaturas (Escritores)", icon: CreditCard },
   { href: "/admin/personalization", label: "Personalização", icon: Paintbrush },
+  { href: "/admin/game", label: "Game", icon: Gamepad },
 ];
 
 export default function Sidebar() {

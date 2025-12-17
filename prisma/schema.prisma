@@ -38,6 +38,10 @@ model Writer {
   readerAccess            WriterReaderAccess?
   subscriptions           WriterSubscription[]
   writerSubscriptionPlans WriterSubscriptionPlan[]
+
+  personalizationWriters PersonalizationWriter[]
+
+  groupingDailies GroupingDaily[]
 }
 
 model WriterSubscription {
@@ -83,6 +87,8 @@ model User {
   userCompletationQuote      UserCompletationQuote[]
   userCompletationVerse      UserCompletationVerse[]
   userReadingProgress        UserReadingProgress[]
+
+  playerGames PlayerGame[]
 }
 
 model Achievements {
@@ -96,8 +102,8 @@ model Achievements {
 model WriterSubscriptionPlan {
   id                String               @id @default(cuid())
   writerId          String
-  stripeProductId   String
-  stripePriceId     String
+  stripeProductId   String?
+  stripePriceId     String?
   interval          SubscriptionInterval @default(MONTH)
   amountCents       Int
   currency          String               @default("BRL")
@@ -117,7 +123,7 @@ model ReaderSubscription {
   id                   String             @id @default(cuid())
   readerId             String
   writerId             String
-  stripeCustomerId     String
+  stripeCustomerId     String?
   stripeSubscriptionId String?
   priceId              String
   status               SubscriptionStatus @default(INCOMPLETE)
@@ -159,6 +165,7 @@ model Prayer {
   id                     String                   @id @default(uuid())
   title                  String
   content                String
+  referenceDay     Int?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   writerId               String
@@ -166,6 +173,8 @@ model Prayer {
   audioUrl               String?
   writer                 Writer                   @relation(fields: [writerId], references: [id])
   userCompletationPrayer UserCompletationPrayer[]
+
+  groupingDailies GroupingDaily[]
 }
 
 model UserCompletationPrayer {
@@ -286,6 +295,7 @@ model Quote {
   nameAuthor       String
   content          String
   verse            String
+  referenceDay     Int?
   imageUrl         String?
   writerId         String
   createdAt        DateTime                @default(now())
@@ -294,6 +304,7 @@ model Quote {
   userCompletation UserCompletationQuote[]
 
   @@index([writerId, createdAt])
+  groupingDailies GroupingDaily[]
 }
 
 model UserCompletationQuote {
@@ -310,6 +321,7 @@ model Devotional {
   id               String                       @id @default(uuid())
   title            String
   content          String
+  referenceDay     Int?
   verse            String
   imageUrl         String?
   writerId         String
@@ -320,6 +332,7 @@ model Devotional {
   userCompletation UserCompletationDevotional[]
 
   @@index([writerId, createdAt])
+  groupingDailies GroupingDaily[]
 }
 
 model UserCompletationDevotional {
@@ -337,6 +350,7 @@ model Verse {
   content               String
   reference             String
   writerId              String
+  referenceDay     Int?
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   imageUrl              String?
@@ -344,6 +358,7 @@ model Verse {
   writer                Writer                  @relation(fields: [writerId], references: [id])
 
   @@index([writerId, createdAt])
+  groupingDailies GroupingDaily[]
 }
 
 model UserCompletationVerse {
@@ -471,6 +486,7 @@ enum PurchaseStatus {
 /// * Provedor de pagamento (por enquanto só Stripe)
 enum PaymentProvider {
   STRIPE
+  ASAAS
 }
 
 enum PayoutStatus {
@@ -496,4 +512,123 @@ enum SubscriptionStatus {
   CANCELED
   UNPAID
   PAUSED
+}
+
+// Nova versão V2
+model PersonalizationWriter {
+  id String @id @default(uuid())
+  writerId String @unique
+  writer Writer @relation(fields: [writerId], references: [id])
+  active Boolean
+  primaryColor String?
+  secondaryColor String?
+  backgroundColor String?
+  bgButtonColor String?
+  buttonTextColor String?
+  independenteColor1 String?
+  independenteColor2 String?
+  textColor String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+}
+
+model GroupingDaily {
+  id String @id @default(uuid())
+  writerId String
+  writer Writer @relation(fields: [writerId], references: [id])
+  active Boolean
+  quotes Quote[]
+  devotionals Devotional[]
+  prayers Prayer[]
+  verses Verse[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+}
+
+// Game
+model GameTemplate {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  type        GameType // WORD_CONNECT
+  active      Boolean  @default(true)
+
+  levels      GameLevel[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  playerGames PlayerGame[]
+}
+
+enum GameType {
+  WORD_CONNECT
+}
+
+model GameLevel {
+  id            String   @id @default(cuid())
+  gameTemplateId String
+  order         Int      // nível 1, 2, 3...
+  letters       String[] // ["A","D","I"]
+
+  // layout livre das letras (posição relativa)
+  layout        Json     // [{x:0.5,y:0.2},{x:0.8,y:0.6}]
+
+  gameTemplate  GameTemplate @relation(fields: [gameTemplateId], references: [id])
+  words         GameWord[]
+
+  createdAt     DateTime @default(now())
+
+  playerLevelProgresses PlayerLevelProgress[]
+}
+
+model GameWord {
+  id        String @id @default(cuid())
+  levelId  String
+  word      String
+  bonus     Boolean @default(false)
+
+  level     GameLevel @relation(fields: [levelId], references: [id])
+}
+
+model PlayerGame {
+  id             String @id @default(cuid())
+  userId         String
+  gameTemplateId String
+
+  currentLevel   Int     @default(1)
+  coins          Int     @default(0)
+  completed      Boolean @default(false)
+
+  user           User         @relation(fields: [userId], references: [id])
+  gameTemplate   GameTemplate @relation(fields: [gameTemplateId], references: [id])
+
+  levels         PlayerLevelProgress[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, gameTemplateId])
+}
+
+model PlayerLevelProgress {
+  id          String @id @default(cuid())
+  playerGameId String
+  levelId     String
+
+  attempts    Int     @default(0)
+  completed   Boolean @default(false)
+  timeSpent   Int     @default(0) // segundos
+  score       Int     @default(0)
+
+  foundWords  String[] // ["DIA","IDA"]
+
+  playerGame  PlayerGame @relation(fields: [playerGameId], references: [id])
+  level       GameLevel  @relation(fields: [levelId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([playerGameId, levelId])
 }

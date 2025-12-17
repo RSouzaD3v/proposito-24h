@@ -15,6 +15,8 @@ export default async function WriterDashboardPage() {
     { id: 3, title: "Meus Insights", href: "/writer/analytics" },
     { id: 4, title: "Configurações", href: "/writer/settings" },
     { id: 5, title: "Mais Recursos", href: "/writer/profile" },
+    { id: 6, title: "Personalização cliente", href: "/writer/personalization" },
+    // { id: 7, title: "Agrupamento Daily", href: "/writer/group-daily" },
   ];
 
   if (!session?.user || session.user.role !== "WRITER_ADMIN") {

@@ -34,14 +34,14 @@ export async function PUT(
 
   if (willChangePrice) {
     // inativa price antigo
-    await stripe.prices.update(plan.stripePriceId, { active: false });
+    await stripe.prices.update(plan.stripePriceId || "", { active: false });
 
     // cria novo price
     const price = await stripe.prices.create({
       unit_amount: typeof amountCents === "number" ? amountCents : plan.amountCents,
       currency: (currency ?? plan.currency).toLowerCase(),
       recurring: { interval: (interval ?? plan.interval).toLowerCase() as any },
-      product: plan.stripeProductId,
+      product: plan.stripeProductId || "",
       metadata: { writerId },
     });
     newStripePriceId = price.id;

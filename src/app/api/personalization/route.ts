@@ -1,109 +1,162 @@
 import { PersonalizationSchema } from "@/types/personalization";
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
 
-// ===============================================
-// GET → lista todas as personalizações
-// ===============================================
+import clientPromise from "@/lib/mongodb";
+import { db } from "@/lib/db";
+
+/* ===============================================
+   GET → frontend continua lendo do MongoDB
+=============================================== */
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || "railway");
-    const personalizations = await db
+    const mongoDb = client.db(process.env.MONGODB_DB || "railway");
+
+    const personalizations = await mongoDb
       .collection("personalizations")
       .find()
       .toArray();
 
-    return NextResponse.json(personalizations);
+    const normalized = personalizations.map((p) => ({
+      active: true,
+      ...p,
+    }));
+
+    return NextResponse.json(normalized);
   } catch (error: any) {
     console.error("GET /personalization error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// ===============================================
-// POST → cria nova personalização
-// ===============================================
+
+/* ===============================================
+   POST → cria nova personalização
+   Mongo = fonte ativa
+   Postgres = consolidação
+=============================================== */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const parsedBody = PersonalizationSchema.parse(body);
+    const { writerId, ...data } = parsedBody;
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || "railway");
-
-    // Garante timestamps
     const now = new Date();
-    const doc = {
-      ...parsedBody,
+
+    /* ---------- MongoDB ---------- */
+    const client = await clientPromise;
+    const mongoDb = client.db(process.env.MONGODB_DB || "railway");
+
+    const mongoDoc = {
+      writerId,
+      ...data,
       createdAt: now,
       updatedAt: now,
     };
 
-    const result = await db.collection("personalizations").insertOne(doc);
+    const result = await mongoDb
+      .collection("personalizations")
+      .insertOne(mongoDoc);
 
-    return NextResponse.json({ ...doc, _id: result.insertedId });
+    /* ---------- PostgreSQL ---------- */
+    await db.personalizationWriter.upsert({
+      where: { writerId },
+      update: {
+        ...data,
+      },
+      create: {
+        writerId,
+        active: true,
+        ...data,
+      },
+    });
+
+    return NextResponse.json({ ...mongoDoc, _id: result.insertedId });
   } catch (error: any) {
     console.error("POST /personalization error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
-// ===============================================
-// PUT → atualiza ou cria (upsert) personalização por writerId
-// ===============================================
 export async function PUT(request: Request) {
   try {
-    const body = await request.json();
-    // permite atualização parcial
-    const parsedBody = PersonalizationSchema.partial().parse(body);
+    const rawBody = await request.json();
 
-    if (!parsedBody.writerId) {
+    // 1️⃣ Remove campos proibidos ANTES do Zod
+    const {
+      createdAt,
+      updatedAt,
+      _id,
+      ...input
+    } = rawBody;
+
+    // 2️⃣ Zod valida apenas campos editáveis
+    const parsed = PersonalizationSchema.partial().parse(input);
+
+    // 3️⃣ Remove novamente para GARANTIA TOTAL
+    const {
+      writerId,
+      createdAt: _c,
+      updatedAt: _u,
+      ...data
+    } = parsed;
+
+    if (!writerId) {
       return NextResponse.json(
         { error: "writerId is required" },
         { status: 400 }
       );
     }
 
+    const now = new Date();
+
     const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || "railway");
+    const mongoDb = client.db(process.env.MONGODB_DB || "railway");
 
-    // Verifica se já existe
-    const existing = await db
-      .collection("personalizations")
-      .findOne({ writerId: parsedBody.writerId });
+    /* ---------- MongoDB ---------- */
+    await mongoDb.collection("personalizations").updateOne(
+      { writerId },
+      {
+        $set: {
+          ...data,
+          updatedAt: now,
+        },
+        $setOnInsert: {
+          writerId,
+          createdAt: now,
+          active: true,
+        },
+      },
+      { upsert: true }
+    );
 
-    if (existing) {
-      // Atualiza somente os campos enviados
-      await db.collection("personalizations").updateOne(
-        { writerId: parsedBody.writerId },
-        {
-          $set: {
-            ...parsedBody,
-            updatedAt: new Date(),
-          },
-        }
-      );
-    } else {
-      // Cria nova personalização
-      await db.collection("personalizations").insertOne({
-        ...parsedBody,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
+    /* ---------- PostgreSQL ---------- */
+    await db.personalizationWriter.upsert({
+      where: { writerId },
+      update: { ...data },
+      create: {
+        writerId,
+        active: true,
+        ...data,
+      },
+    });
 
-    return NextResponse.json({ success: true, writerId: parsedBody.writerId });
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("PUT /personalization error:", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 400 }
+    );
   }
 }
 
-// ===============================================
-// DELETE → exclui personalização por writerId
-// Exemplo: /api/personalization?writerId=abc123
-// ===============================================
+
+
+/* ===============================================
+   DELETE → remove personalização
+   Mongo + Postgres
+=============================================== */
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -116,16 +169,22 @@ export async function DELETE(request: Request) {
       );
     }
 
+    /* ---------- MongoDB ---------- */
     const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || "railway");
+    const mongoDb = client.db(process.env.MONGODB_DB || "railway");
 
-    const result = await db
+    const mongoResult = await mongoDb
       .collection("personalizations")
       .deleteOne({ writerId });
 
+    /* ---------- PostgreSQL ---------- */
+    await db.personalizationWriter.deleteMany({
+      where: { writerId },
+    });
+
     return NextResponse.json({
       success: true,
-      deletedCount: result.deletedCount,
+      deletedCount: mongoResult.deletedCount,
     });
   } catch (error: any) {
     console.error("DELETE /personalization error:", error);

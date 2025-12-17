@@ -76,6 +76,12 @@ export default async function AreaReader() {
 
   const items = [
     {
+      id: 5,
+      name: "Cronologia Diários",
+      type: "Daily",
+      link: "/reader/area/daily",
+    },
+    {
       id: 1,
       name: "Oração de Hoje",
       type: "Oração",

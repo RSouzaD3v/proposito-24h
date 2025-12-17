@@ -1,0 +1,634 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model Writer {
+//   id                      String                   @id @default(uuid())
+//   name                    String
+//   slug                    String                   @unique
+//   logoUrl                 String?
+//   colorPrimary            String?
+//   colorSecondary          String?
+//   branding                Json?
+//   socials                 Json?
+//   storagePrefix           String?
+//   emailFrom               String?
+//   featureFlags            Json?
+//   createdAt               DateTime                 @default(now())
+//   updatedAt               DateTime                 @updatedAt
+//   stripeAccountId         String?
+//   stripeCustomerId        String?
+//   titleApp                String?                  @default("Deus seja sempre louvado!")
+//   titleHeader             String?                  @default("Vamos passar um tempo com Deus?")
+//   devotionals             Devotional[]
+//   domains                 Domain[]
+//   prayers                 Prayer[]
+//   publications            Publication[]
+//   purchases               Purchase[]
+//   quotes                  Quote[]
+//   readerSubscriptions     ReaderSubscription[]
+//   users                   User[]
+//   verses                  Verse[]
+//   payouts                 WriterPayout[]
+//   readerAccess            WriterReaderAccess?
+//   subscriptions           WriterSubscription[]
+//   writerSubscriptionPlans WriterSubscriptionPlan[]
+
+//   personalizationWriters PersonalizationWriter[]
+
+//   groupingDailies GroupingDaily[]
+// }
+
+// model WriterSubscription {
+//   id          String    @id @default(uuid())
+//   writerId    String
+//   startedAt   DateTime  @default(now())
+//   endedAt     DateTime?
+//   amount      Int
+//   description String?
+//   stripeId    String?   @unique
+//   stripe      Json?
+//   createdAt   DateTime  @default(now())
+//   updatedAt   DateTime  @updatedAt
+//   writer      Writer    @relation(fields: [writerId], references: [id])
+// }
+
+// model Domain {
+//   id        String  @id @default(uuid())
+//   host      String  @unique
+//   writerId  String
+//   isPrimary Boolean @default(false)
+//   subdomain String? @unique
+//   writer    Writer  @relation(fields: [writerId], references: [id])
+// }
+
+// model User {
+//   id                         String                       @id @default(uuid())
+//   email                      String                       @unique
+//   name                       String?
+//   password                   String
+//   role                       Role                         @default(CLIENT)
+//   writerId                   String?
+//   createdAt                  DateTime                     @default(now())
+//   updatedAt                  DateTime                     @updatedAt
+//   stripeCustomerId           String?
+//   freePlan                   Boolean                      @default(true)
+//   achievements               Achievements[]
+//   purchases                  Purchase[]
+//   readerSubscriptions        ReaderSubscription[]
+//   writer                     Writer?                      @relation(fields: [writerId], references: [id])
+//   userCompletationDevotional UserCompletationDevotional[]
+//   userCompletationPrayer     UserCompletationPrayer[]
+//   userCompletationQuote      UserCompletationQuote[]
+//   userCompletationVerse      UserCompletationVerse[]
+//   userReadingProgress        UserReadingProgress[]
+
+//   playerGames PlayerGame[]
+// }
+
+// model Achievements {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   completed String[]
+//   createdAt DateTime @default(now())
+//   user      User     @relation(fields: [userId], references: [id])
+// }
+
+// model WriterSubscriptionPlan {
+//   id                String               @id @default(cuid())
+//   writerId          String
+//   stripeProductId   String?
+//   stripePriceId     String?
+//   interval          SubscriptionInterval @default(MONTH)
+//   amountCents       Int
+//   currency          String               @default("BRL")
+//   trialDays         Int                  @default(0)
+//   applicationFeePct Float?
+//   isActive          Boolean              @default(true)
+//   createdAt         DateTime             @default(now())
+//   updatedAt         DateTime             @updatedAt
+//   isReaderVisible   Boolean              @default(true)
+//   writer            Writer               @relation(fields: [writerId], references: [id])
+
+//   @@index([writerId])
+//   @@index([writerId, isActive])
+// }
+
+// model ReaderSubscription {
+//   id                   String             @id @default(cuid())
+//   readerId             String
+//   writerId             String
+//   stripeCustomerId     String?
+//   stripeSubscriptionId String?
+//   priceId              String
+//   status               SubscriptionStatus @default(INCOMPLETE)
+//   currentPeriodStart   DateTime?
+//   currentPeriodEnd     DateTime?
+//   cancelAt             DateTime?
+//   cancelAtPeriodEnd    Boolean            @default(false)
+//   latestInvoiceId      String?
+//   metadata             Json?
+//   createdAt            DateTime           @default(now())
+//   updatedAt            DateTime           @updatedAt
+//   lifetime             Boolean            @default(false)
+//   reader               User               @relation(fields: [readerId], references: [id])
+//   writer               Writer             @relation(fields: [writerId], references: [id])
+
+//   @@unique([readerId, writerId], name: "reader_writer_unique")
+//   @@index([writerId])
+//   @@index([readerId])
+//   @@index([writerId, status])
+//   @@index([writerId, createdAt])
+// }
+
+// model WriterReaderAccess {
+//   id         String   @id @default(uuid())
+//   writerId   String   @unique
+//   quote      Boolean  @default(true)
+//   devotional Boolean  @default(true)
+//   verse      Boolean  @default(true)
+//   prayer     Boolean  @default(true)
+//   biblePlan  Boolean  @default(true)
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+//   writer     Writer   @relation(fields: [writerId], references: [id])
+
+//   @@index([quote, devotional, verse, prayer, biblePlan])
+// }
+
+// model Prayer {
+//   id                     String                   @id @default(uuid())
+//   title                  String
+//   content                String
+//   referenceDay     Int?
+//   createdAt              DateTime                 @default(now())
+//   updatedAt              DateTime                 @updatedAt
+//   writerId               String
+//   imageUrl               String?
+//   audioUrl               String?
+//   writer                 Writer                   @relation(fields: [writerId], references: [id])
+//   userCompletationPrayer UserCompletationPrayer[]
+
+//   groupingDailies GroupingDaily[]
+// }
+
+// model UserCompletationPrayer {
+//   id       String @id @default(uuid())
+//   userId   String
+//   prayerId String
+//   prayer   Prayer @relation(fields: [prayerId], references: [id])
+//   user     User   @relation(fields: [userId], references: [id])
+// }
+
+// /// *
+// /// * PUBLICATION = unidade editorial publicável e vendável.
+// /// * - DEVOTIONAL: página única (usa os campos de corpo na própria Publication)
+// /// * - EBOOK: metadados na Publication e conteúdo distribuído em Chapter(s)
+// model Publication {
+//   id              String            @id @default(uuid())
+//   writerId        String
+//   type            PublicationType
+//   status          PublicationStatus @default(DRAFT)
+//   visibility      Visibility        @default(FREE)
+//   price           Int?
+//   currency        String?
+//   slug            String
+//   title           String
+//   subtitle        String?
+//   description     String?
+//   coverUrl        String?
+//   body            String?
+//   tags            String[]
+//   publishedAt     DateTime?
+//   createdAt       DateTime          @default(now())
+//   updatedAt       DateTime          @updatedAt
+//   stripePriceId   String?
+//   stripeProductId String?
+//   category        String?           @default("Religioso")
+//   isPdf           Boolean           @default(false)
+//   pdfUrl          String?
+//   chapters        Chapter[]
+//   writer          Writer            @relation(fields: [writerId], references: [id])
+//   purchases       Purchase[]
+
+//   @@unique([writerId, slug])
+// }
+
+// /// *
+// /// * CHAPTER = capítulo de um ebook.
+// /// * - Possui ordem, imagem própria opcional e conteúdo.
+// model Chapter {
+//   id            String      @id @default(uuid())
+//   publicationId String
+//   order         Int
+//   title         String
+//   subtitle      String?
+//   coverUrl      String?
+//   content       String
+//   createdAt     DateTime    @default(now())
+//   updatedAt     DateTime    @updatedAt
+//   publication   Publication @relation(fields: [publicationId], references: [id])
+// }
+
+// /// *
+// /// * Purchase centralizada no Admin Master (Stripe).
+// /// * Mantém campos para conciliação, taxas e recibos.
+// model Purchase {
+//   id                    String          @id @default(uuid())
+//   userId                String
+//   publicationId         String
+//   writerId              String
+//   amount                Int
+//   currency              String          @default("BRL")
+//   fees                  Int?
+//   netAmount             Int?
+//   status                PurchaseStatus
+//   provider              PaymentProvider @default(STRIPE)
+//   stripeSessionId       String?
+//   stripePaymentIntentId String?
+//   stripePaymentMethodId String?
+//   stripeChargeId        String?
+//   stripeInvoiceId       String?
+//   stripeCustomerId      String?
+//   receiptUrl            String?
+//   rawProviderPayload    Json?
+//   createdAt             DateTime        @default(now())
+//   updatedAt             DateTime        @updatedAt
+//   publication           Publication     @relation(fields: [publicationId], references: [id])
+//   user                  User            @relation(fields: [userId], references: [id])
+//   writer                Writer          @relation(fields: [writerId], references: [id])
+
+//   @@index([writerId, createdAt])
+//   @@index([publicationId, createdAt])
+// }
+
+// /// *
+// /// * Registro de repasses do Admin Master para cada escritor.
+// /// * Pode ser gerado por período (ex.: mensal).
+// model WriterPayout {
+//   id          String       @id @default(uuid())
+//   writerId    String
+//   periodStart DateTime
+//   periodEnd   DateTime
+//   grossAmount Int
+//   fees        Int?
+//   netAmount   Int
+//   status      PayoutStatus @default(PENDING)
+//   reference   String?
+//   receiptUrl  String?
+//   notes       String?
+//   createdAt   DateTime     @default(now())
+//   paidAt      DateTime?
+//   updatedAt   DateTime     @updatedAt
+//   writer      Writer       @relation(fields: [writerId], references: [id])
+
+//   @@index([writerId, periodStart, periodEnd])
+// }
+
+// model Quote {
+//   id               String                  @id @default(uuid())
+//   nameAuthor       String
+//   content          String
+//   verse            String
+//   referenceDay     Int?
+//   imageUrl         String?
+//   writerId         String
+//   createdAt        DateTime                @default(now())
+//   updatedAt        DateTime                @updatedAt
+//   writer           Writer                  @relation(fields: [writerId], references: [id])
+//   userCompletation UserCompletationQuote[]
+
+//   @@index([writerId, createdAt])
+//   groupingDailies GroupingDaily[]
+// }
+
+// model UserCompletationQuote {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   quoteId   String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   quote     Quote    @relation(fields: [quoteId], references: [id])
+//   user      User     @relation(fields: [userId], references: [id])
+// }
+
+// model Devotional {
+//   id               String                       @id @default(uuid())
+//   title            String
+//   content          String
+//   referenceDay     Int?
+//   verse            String
+//   imageUrl         String?
+//   writerId         String
+//   createdAt        DateTime                     @default(now())
+//   updatedAt        DateTime                     @updatedAt
+//   audioUrl         String?
+//   writer           Writer                       @relation(fields: [writerId], references: [id])
+//   userCompletation UserCompletationDevotional[]
+
+//   @@index([writerId, createdAt])
+//   groupingDailies GroupingDaily[]
+// }
+
+// model UserCompletationDevotional {
+//   id           String     @id @default(uuid())
+//   userId       String
+//   devotionalId String
+//   createdAt    DateTime   @default(now())
+//   updatedAt    DateTime   @updatedAt
+//   devotional   Devotional @relation(fields: [devotionalId], references: [id])
+//   user         User       @relation(fields: [userId], references: [id])
+// }
+
+// model Verse {
+//   id                    String                  @id @default(uuid())
+//   content               String
+//   reference             String
+//   writerId              String
+//   referenceDay     Int?
+//   createdAt             DateTime                @default(now())
+//   updatedAt             DateTime                @updatedAt
+//   imageUrl              String?
+//   userCompletationVerse UserCompletationVerse[]
+//   writer                Writer                  @relation(fields: [writerId], references: [id])
+
+//   @@index([writerId, createdAt])
+//   groupingDailies GroupingDaily[]
+// }
+
+// model UserCompletationVerse {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   verseId   String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   user      User     @relation(fields: [userId], references: [id])
+//   verse     Verse    @relation(fields: [verseId], references: [id])
+// }
+
+// model BibleVersion {
+//   id        String       @id @default(uuid())
+//   code      String       @unique
+//   name      String
+//   language  String
+//   createdAt DateTime     @default(now())
+//   verses    BibleVerse[]
+// }
+
+// model BibleBook {
+//   id        Int          @id
+//   abbrev    String       @unique
+//   name      String
+//   order     Int          @unique
+//   createdAt DateTime     @default(now())
+//   verses    BibleVerse[]
+
+//   @@index([order])
+// }
+
+// model BibleVerse {
+//   id        String       @id @default(uuid())
+//   versionId String
+//   bookId    Int
+//   chapter   Int
+//   verse     Int
+//   text      String
+//   createdAt DateTime     @default(now())
+//   book      BibleBook    @relation(fields: [bookId], references: [id])
+//   version   BibleVersion @relation(fields: [versionId], references: [id])
+
+//   @@unique([versionId, bookId, chapter, verse])
+//   @@index([bookId, chapter, verse])
+//   @@index([versionId])
+// }
+
+// model PushSubscription {
+//   id             String    @id @default(cuid())
+//   endpoint       String    @unique
+//   p256dh         String
+//   auth           String
+//   expirationTime DateTime?
+//   userId         String?
+//   writerId       String?
+//   topics         String[]
+//   createdAt      DateTime  @default(now())
+//   updatedAt      DateTime  @updatedAt
+
+//   @@index([writerId])
+// }
+
+// model BibleReadingPlan {
+//   id                  String                @id @default(uuid())
+//   name                String
+//   createdAt           DateTime              @default(now())
+//   days                ReadingDay[]
+//   UserReadingProgress UserReadingProgress[]
+// }
+
+// model ReadingDay {
+//   id                  String                @id @default(uuid())
+//   dayNumber           Int
+//   passages            String
+//   planId              String
+//   plan                BibleReadingPlan      @relation(fields: [planId], references: [id])
+//   UserReadingProgress UserReadingProgress[]
+// }
+
+// model UserReadingProgress {
+//   id          String           @id @default(uuid())
+//   userId      String
+//   planId      String
+//   dayId       String
+//   completed   Boolean          @default(false)
+//   completedAt DateTime?
+//   day         ReadingDay       @relation(fields: [dayId], references: [id])
+//   plan        BibleReadingPlan @relation(fields: [planId], references: [id])
+//   user        User             @relation(fields: [userId], references: [id])
+
+//   @@unique([userId, planId, dayId])
+// }
+
+// /// * Papéis
+// enum Role {
+//   ADMIN
+//   WRITER_ADMIN
+//   CLIENT
+// }
+
+// /// * Publicação pode ser um Devocional (página única) ou um Ebook (com capítulos)
+// enum PublicationType {
+//   DEVOTIONAL
+//   EBOOK
+// }
+
+// enum PublicationStatus {
+//   DRAFT
+//   PUBLISHED
+//   ARCHIVED
+// }
+
+// enum Visibility {
+//   FREE
+//   PAID
+// }
+
+// enum PurchaseStatus {
+//   SUCCESS
+//   PENDING
+//   FAILED
+// }
+
+// /// * Provedor de pagamento (por enquanto só Stripe)
+// enum PaymentProvider {
+//   STRIPE
+//   ASAAS
+// }
+
+// enum PayoutStatus {
+//   PENDING
+//   PAID
+//   CANCELED
+// }
+
+// enum SubscriptionInterval {
+//   DAY
+//   WEEK
+//   MONTH
+//   YEAR
+//   LIFETIME
+// }
+
+// enum SubscriptionStatus {
+//   INCOMPLETE
+//   INCOMPLETE_EXPIRED
+//   TRIALING
+//   ACTIVE
+//   PAST_DUE
+//   CANCELED
+//   UNPAID
+//   PAUSED
+// }
+
+// // Nova versão V2
+// model PersonalizationWriter {
+//   id String @id @default(uuid())
+//   writerId String @unique
+//   writer Writer @relation(fields: [writerId], references: [id])
+//   active Boolean
+//   primaryColor String?
+//   secondaryColor String?
+//   backgroundColor String?
+//   bgButtonColor String?
+//   buttonTextColor String?
+//   independenteColor1 String?
+//   independenteColor2 String?
+//   textColor String?
+//   createdAt        DateTime                @default(now())
+//   updatedAt        DateTime                @updatedAt
+// }
+
+// model GroupingDaily {
+//   id String @id @default(uuid())
+//   writerId String
+//   writer Writer @relation(fields: [writerId], references: [id])
+//   active Boolean
+//   quotes Quote[]
+//   devotionals Devotional[]
+//   prayers Prayer[]
+//   verses Verse[]
+//   createdAt        DateTime                @default(now())
+//   updatedAt        DateTime                @updatedAt
+// }
+
+// // Game
+// model GameTemplate {
+//   id          String   @id @default(cuid())
+//   slug        String   @unique
+//   title       String
+//   description String?
+//   type        GameType // WORD_CONNECT
+//   active      Boolean  @default(true)
+
+//   levels      GameLevel[]
+
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   playerGames PlayerGame[]
+// }
+
+// enum GameType {
+//   WORD_CONNECT
+// }
+
+// model GameLevel {
+//   id            String   @id @default(cuid())
+//   gameTemplateId String
+//   order         Int      // nível 1, 2, 3...
+//   letters       String[] // ["A","D","I"]
+
+//   // layout livre das letras (posição relativa)
+//   layout        Json     // [{x:0.5,y:0.2},{x:0.8,y:0.6}]
+
+//   gameTemplate  GameTemplate @relation(fields: [gameTemplateId], references: [id])
+//   words         GameWord[]
+
+//   createdAt     DateTime @default(now())
+
+//   playerLevelProgresses PlayerLevelProgress[]
+// }
+
+// model GameWord {
+//   id        String @id @default(cuid())
+//   levelId  String
+//   word      String
+//   bonus     Boolean @default(false)
+
+//   level     GameLevel @relation(fields: [levelId], references: [id])
+// }
+
+// model PlayerGame {
+//   id             String @id @default(cuid())
+//   userId         String
+//   gameTemplateId String
+
+//   currentLevel   Int     @default(1)
+//   coins          Int     @default(0)
+//   completed      Boolean @default(false)
+
+//   user           User         @relation(fields: [userId], references: [id])
+//   gameTemplate   GameTemplate @relation(fields: [gameTemplateId], references: [id])
+
+//   levels         PlayerLevelProgress[]
+
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+
+//   @@unique([userId, gameTemplateId])
+// }
+
+// model PlayerLevelProgress {
+//   id          String @id @default(cuid())
+//   playerGameId String
+//   levelId     String
+
+//   attempts    Int     @default(0)
+//   completed   Boolean @default(false)
+//   timeSpent   Int     @default(0) // segundos
+//   score       Int     @default(0)
+
+//   foundWords  String[] // ["DIA","IDA"]
+
+//   playerGame  PlayerGame @relation(fields: [playerGameId], references: [id])
+//   level       GameLevel  @relation(fields: [levelId], references: [id])
+
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   @@unique([playerGameId, levelId])
+// }

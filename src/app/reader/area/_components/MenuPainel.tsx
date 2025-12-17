@@ -1,4 +1,5 @@
 "use client";
+import { Gamepad } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaTree } from "react-icons/fa";
@@ -52,6 +53,12 @@ export const MenuPainel = ({ colors }: MenuPainelProps) => {
       name: "Minha Jornada",
       icon: <FaTree size={22} />,
       link: "/reader/area/journey",
+    },
+    {
+      id: 5,
+      name: "Game",
+      icon: <Gamepad size={22} />,
+      link: "/reader/area/game",
     },
   ];
 
