@@ -27,11 +27,12 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const activeDayParam = searchParams.get("day");
-
   const now = new Date(
     new Date().toLocaleString("en-US", { timeZone: TZ })
   );
+
+  const todayParam = formatDayParam(now);
+  const activeDayParam = searchParams.get("day") ?? todayParam;
 
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const days = Array.from({ length: 7 }).map((_, i) =>
@@ -65,11 +66,12 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
                     backgroundColor: "transparent",
                   }
             }
-            className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all
+            className={`w-10 h-10 flex items-center justify-center rounded-full font-bold
+              transition-all duration-200 cursor-pointer
               ${
                 isActive
                   ? "shadow-lg scale-105"
-                  : "hover:opacity-80"
+                  : "hover:scale-105 hover:opacity-90"
               }
             `}
           >
