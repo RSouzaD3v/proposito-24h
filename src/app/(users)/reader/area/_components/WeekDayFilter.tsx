@@ -45,7 +45,7 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
   }
 
   return (
-    <div className="flex items-center gap-4 px-2">
+    <div className="flex items-center md:gap-4 gap-1 md:px-2 px-1">
       {days.map((day, index) => {
         const dayParam = formatDayParam(day);
         const isActive = dayParam === activeDayParam;
