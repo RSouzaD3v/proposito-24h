@@ -11,12 +11,12 @@ export default async function WriterDashboardPage() {
 
   const itemsNav = [
     { id: 1, title: "Diário", href: "/writer/daily" },
+    { id: 7, title: "Diários Agrupamento", href: "/writer/group-daily" },
     { id: 2, title: "Minhas Publicações", href: "/writer/publications" },
     { id: 3, title: "Meus Insights", href: "/writer/analytics" },
     { id: 4, title: "Configurações", href: "/writer/settings" },
     { id: 5, title: "Mais Recursos", href: "/writer/profile" },
     { id: 6, title: "Personalização cliente", href: "/writer/personalization" },
-    // { id: 7, title: "Agrupamento Daily", href: "/writer/group-daily" },
   ];
 
   if (!session?.user || session.user.role !== "WRITER_ADMIN") {
@@ -32,7 +32,7 @@ export default async function WriterDashboardPage() {
     <div className={`max-w-4xl mx-auto mt-20 md:px-0 px-4`}>
       {/* Header */}
       <div className="flex items-center gap-6 mb-8">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+        <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
           {session.user.name?.charAt(0)}
         </div>
         <div>
@@ -62,7 +62,7 @@ export default async function WriterDashboardPage() {
 
       {/* Clipboard Link */}
       {writer?.slug && (
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 rounded-lg shadow-inner flex items-center gap-4">
+        <div className="mt-8 p-6 bg-linear-to-r from-blue-100 to-blue-200 border border-blue-300 rounded-lg shadow-inner flex items-center gap-4">
           <ClipboardLink slug={writer?.slug} />
         </div>
       )}

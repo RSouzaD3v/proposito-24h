@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
+import TeacherBibleAI from "@/components/TeacherBibleAi";
 
 export default async function ReaderLayout({
   children,
@@ -45,6 +46,7 @@ export default async function ReaderLayout({
         <PushBootstrap writerId={user.writer.id} userId={user.id} />
         <PainelControl />
         <section>{children}</section>
+        <TeacherBibleAI />
       </ThemeWriterProvider>
     </AuthReaderProvider>
   );

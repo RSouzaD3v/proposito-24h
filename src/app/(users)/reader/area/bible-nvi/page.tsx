@@ -91,7 +91,7 @@ export default async function BibleHomePage() {
 
   return (
     <section className="min-h-screen">
-      <TeacherBibleAI />
+      {/* <TeacherBibleAI /> */}
       <h2 className="sr-only">Livros</h2>
 
       <Tabs defaultValue="ot" className="mt-2">

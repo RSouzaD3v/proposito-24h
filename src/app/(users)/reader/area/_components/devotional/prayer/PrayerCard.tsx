@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { HandHeart } from "lucide-react";
+import AudioButton from "../devotional/AudioButton";
 
 interface DayRange {
   gte: Date;
@@ -88,7 +89,7 @@ export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
         <h2 className="text-xl font-bold">{prayer.title}</h2>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="grid grid-cols-2 gap-2 w-full">
         <Link
           style={{
             background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
@@ -99,6 +100,17 @@ export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
         >
           Ler
         </Link>
+
+        <AudioButton
+          src={prayer.audioUrl}
+          style={{
+            background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
+            color: colors.buttonText,
+          }}
+          className="py-2 w-full rounded-xl"
+          labelPlay="Ouvir"
+          labelPause="Parar"
+        />
       </CardFooter>
     </Card>
   );

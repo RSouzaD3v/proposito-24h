@@ -108,10 +108,11 @@ export default async function AreaReader({
   };
 
   const items = [
-    { id: 5, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
-    { id: 2, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
-    { id: 3, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
-    { id: 4, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
+    { id: 1, name: "Trajetórias", type: "Daily", link: "/reader/area/group-daily" },
+    { id: 2, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
+    { id: 3, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
+    { id: 4, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
+    { id: 5, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
   ];
 
   return (
@@ -128,23 +129,25 @@ export default async function AreaReader({
         </div>
 
         {/* 📅 Data baseada no filtro */}
-        <div className="px-2 md:text-xl text-sm mt-5">
-          {activeDay.toLocaleDateString("pt-BR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}{" "}
-          -{" "}
-          {activeDay.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+      <div className="px-2 md:text-xl text-sm mt-5">
+        {activeDay.toLocaleDateString("pt-BR", {
+          timeZone: TZ,
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}{" "}
+        -{" "}
+        {activeDay.toLocaleTimeString("pt-BR", {
+          timeZone: TZ,
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
 
-          <h2 className="md:text-xl text-lg font-bold mt-1">
-            {userReader?.writer?.titleApp || "Meu Devocional"}
-          </h2>
-        </div>
+        <h2 className="md:text-xl text-lg font-bold mt-1">
+          {userReader?.writer?.titleApp || "Meu Devocional"}
+        </h2>
+      </div>
 
         {/* 📖 Cards principais (ainda sem receber o dayRange) */}
         <h3 className="mt-6 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>

@@ -535,6 +535,9 @@ model PersonalizationWriter {
 
 model GroupingDaily {
   id String @id @default(uuid())
+  title String
+  description String?
+  imageUrl String?
   writerId String
   writer Writer @relation(fields: [writerId], references: [id])
   active Boolean

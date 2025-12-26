@@ -54,7 +54,7 @@ export const DevotionalCard = async ({
 
   if (!devotional) {
     return (
-      <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+      <Card className="bg-linear-to-r from-blue-50 to-blue-100">
         <CardContent className="flex items-center justify-center flex-col text-center h-full">
           <h4>Nenhum devocional ainda.</h4>
         </CardContent>
