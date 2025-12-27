@@ -37,16 +37,38 @@ export default async function ReaderGroupDailyPage() {
     },
   });
 
-  if (groupings.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Nenhum devocional disponível no momento.
-      </p>
-    );
-  }
+if (groupings.length === 0) {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <Card className="max-w-md w-full text-center">
+        <CardContent className="p-8 space-y-4">
+          <div className="text-4xl">📖</div>
+
+          <h1 className="text-lg font-semibold">
+            Nenhum agrupamento disponível
+          </h1>
+
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Ainda não há devocionais organizados para hoje.
+            Volte mais tarde ou explore outros conteúdos disponíveis.
+          </p>
+
+          <div className="pt-4">
+            <Link href="/reader/area">
+              <Button className="w-full">
+                Voltar para a área
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto mt-6">
+    <div className="space-y-6 max-w-5xl mx-auto mt-6 px-3">
       <Link href={"/reader/area"}>
         <Button className="my-2 cursor-pointer">
           Voltar para area

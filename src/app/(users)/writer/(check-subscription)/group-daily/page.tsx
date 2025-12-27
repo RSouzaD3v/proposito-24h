@@ -28,9 +28,9 @@ export default async function GroupDaily() {
   });
 
   return (
-    <div className="space-y-6 mt-5 max-w-4xl mx-auto">
+    <div className="space-y-6 mt-5 max-w-4xl mx-auto px-3">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-2 items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">
             Agrupamentos Diários
@@ -40,7 +40,7 @@ export default async function GroupDaily() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <ModalGroupDaily />
 
           <Button asChild variant="outline">

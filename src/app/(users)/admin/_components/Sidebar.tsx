@@ -28,6 +28,7 @@ const NAV = [
   { href: "/admin/writer-subscriptions", label: "Assinaturas (Escritores)", icon: CreditCard },
   { href: "/admin/personalization", label: "Personalização", icon: Paintbrush },
   { href: "/admin/game", label: "Game", icon: Gamepad },
+  { href: "/admin/quiz", label: "Game Quiz", icon: Gamepad },
 ];
 
 export default function Sidebar() {

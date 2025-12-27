@@ -27,13 +27,16 @@ const TZ = "America/Sao_Paulo";
  */
 function resolveActiveDay(searchDay?: string) {
   if (searchDay) {
-    const parsed = new Date(`${searchDay}T00:00:00`);
+    const parsed = new Date(`${searchDay}T00:00:00-03:00`);
     if (!isNaN(parsed.getTime())) {
-      return toZonedTime(parsed, TZ);
+      return parsed;
     }
   }
-  return toZonedTime(new Date(), TZ);
+
+  // agora = UTC, mas referência SP
+  return new Date();
 }
+
 
 /**
  * Calcula o range do dia (gte / lt) timezone-safe
@@ -129,25 +132,24 @@ export default async function AreaReader({
         </div>
 
         {/* 📅 Data baseada no filtro */}
-      <div className="px-2 md:text-xl text-sm mt-5">
-        {activeDay.toLocaleDateString("pt-BR", {
-          timeZone: TZ,
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}{" "}
-        -{" "}
-        {activeDay.toLocaleTimeString("pt-BR", {
-          timeZone: TZ,
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+        <div className="px-2 md:text-xl text-sm mt-5">
+          {activeDay.toLocaleDateString("pt-BR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}{" "}
+          -{" "}
+          {activeDay.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        
+          <h2 className="md:text-xl text-lg font-bold mt-1">
+            {userReader?.writer?.titleApp || "Meu Devocional"}
+          </h2>
+        </div>
 
-        <h2 className="md:text-xl text-lg font-bold mt-1">
-          {userReader?.writer?.titleApp || "Meu Devocional"}
-        </h2>
-      </div>
 
         {/* 📖 Cards principais (ainda sem receber o dayRange) */}
         <h3 className="mt-6 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>

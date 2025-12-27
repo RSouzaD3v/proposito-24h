@@ -102,7 +102,7 @@ export default async function GroupDailyDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="space-y-6 mt-5 max-w-5xl mx-auto">
+    <div className="space-y-6 mt-5 max-w-5xl mx-auto px-2">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
