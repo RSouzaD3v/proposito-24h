@@ -13,6 +13,7 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
     content: "",
     verse: "",
     imageUrl: "",
+    referenceDay: 1,
     date: todayStr, // sempre string yyyy-MM-dd
   });
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
         content: data.quote.content ?? "",
         verse: data.quote.verse ?? "",
         imageUrl: data.quote.imageUrl ?? "",
+        referenceDay: data.quote.referenceDay ?? 1,
         date: dateStr, // já pronto para <input type="date">
       });
 
@@ -106,6 +108,21 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
         <div>
           <label className="block text-sm font-medium mb-1" htmlFor="verse">Versículo</label>
           <input id="verse" name="verse" value={form.verse} onChange={handleChange} required className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="verse">Dia referência</label>
+          <input
+            type="number"
+            id="referenceDay"
+            name="referenceDay"
+            min={0}
+            value={form.referenceDay}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="1"
+          />
         </div>
 
         {/* Data */}

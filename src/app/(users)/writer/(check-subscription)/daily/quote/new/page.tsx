@@ -13,6 +13,7 @@ export default function QuoteNewPage() {
     content: "",
     verse: "",
     imageUrl: "",
+    referenceDay: 1,
     date: todayStr, // mantém string yyyy-MM-dd
   });
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ export default function QuoteNewPage() {
         content: "",
         verse: "",
         imageUrl: "",
+        referenceDay: 1,
         date: todayStr,
       });
     } catch (err) {
@@ -98,6 +100,21 @@ export default function QuoteNewPage() {
             required
             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Ex: João 3:16"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="verse">Dia referência</label>
+          <input
+            type="number"
+            id="referenceDay"
+            name="referenceDay"
+            min={0}
+            value={form.referenceDay}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="1"
           />
         </div>
 

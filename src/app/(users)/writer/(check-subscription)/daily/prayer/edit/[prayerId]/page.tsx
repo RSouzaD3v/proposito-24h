@@ -13,6 +13,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
         title: "",
         imageUrl: "",
         audioUrl: "",
+        referenceDay: 1,
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -32,6 +33,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                 content: data.prayer.content,
                 title: data.prayer.title,
                 imageUrl: data.prayer.imageUrl || "",
+                referenceDay: data.prayer.referenceDay,
                 date: new Date(data.prayer.createdAt).toISOString().split("T")[0],
                 audioUrl: data.prayer.audioUrl || "",
             });
@@ -123,6 +125,20 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Título da Oração"
                     />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="verse">Dia referência</label>
+                  <input
+                    type="number"
+                    id="referenceDay"
+                    name="referenceDay"
+                    min={0}
+                    value={form.referenceDay}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="1"
+                  />
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="date">

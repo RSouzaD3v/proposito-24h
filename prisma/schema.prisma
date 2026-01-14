@@ -74,11 +74,12 @@ model User {
   password                   String
   role                       Role                         @default(CLIENT)
   stripeCustomerId           String?
-  freePlan                   Boolean                      @default(true)
+  freePlan                   Boolean                      @default(false)
   writerId                   String?
   createdAt                  DateTime                     @default(now())
   updatedAt                  DateTime                     @updatedAt
   lastAccess                 DateTime?
+  
   achievements               Achievements[]
   purchases                  Purchase[]
   readerSubscriptions        ReaderSubscription[]
@@ -92,6 +93,8 @@ model User {
   playerGames PlayerGame[]
 
   quizSessions QuizSession[]
+
+  userGroupingDaily UserGroupingDaily[]
 }
 
 model Achievements {
@@ -547,6 +550,28 @@ model GroupingDaily {
   devotionals Devotional[]
   prayers Prayer[]
   verses Verse[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  usersGroupingsDailies UserGroupingDaily[]
+}
+
+enum StatusUserGroupingDaily {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+model UserGroupingDaily {
+  id String @id @default(uuid())
+  groupingDailyId String
+  groupingDaily GroupingDaily @relation(fields: [groupingDailyId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  status StatusUserGroupingDaily @default(ACTIVE)
+  startAt DateTime?
+  completedAt DateTime?
+
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
 }

@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vers
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ verseId: string }> }) {
     const session = await getServerSession(authOptions);
-    const { content, reference, imageUrl, date } = await req.json();
+    const { content, reference, imageUrl, date, referenceDay } = await req.json();
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -76,6 +76,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ vers
             content,
             reference,
             imageUrl,
+            referenceDay: Number(referenceDay),
             createdAt: date ? new Date(date + "T12:00:00Z") : new Date(),
         },
     });

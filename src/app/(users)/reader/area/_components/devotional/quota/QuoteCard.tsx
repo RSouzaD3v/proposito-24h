@@ -8,11 +8,6 @@ import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { FiActivity } from "react-icons/fi";
 
-interface DayRange {
-  gte: Date;
-  lt: Date;
-}
-
 interface QuoteCardProps {
   colors: {
     primary: string;
@@ -24,29 +19,50 @@ interface QuoteCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayRange: DayRange;
+  dayIndex: number;
+  groupingDailyId?: string;
 }
 
-export const QuoteCard = async ({ colors, dayRange }: QuoteCardProps) => {
+export const QuoteCard = async ({
+  colors,
+  dayIndex,
+  groupingDailyId,
+}: QuoteCardProps) => {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, writerId: true },
+    select: {
+      id: true,
+      writerId: true,
+    },
   });
 
-  if (!user?.writerId) return null;
+  if (!user?.writerId || !groupingDailyId) {
+    return (
+      <Card className="bg-linear-to-r from-blue-50 to-blue-100">
+        <CardContent className="flex items-center justify-center flex-col text-center h-full">
+          <h4>Nenhuma citação ainda.</h4>
+        </CardContent>
+      </Card>
+    );
+  }
 
+  // 🔹 Busca citação pelo referenceDay + grouping
   const quote = await db.quote.findFirst({
     where: {
       writerId: user.writerId,
-      createdAt: {
-        gte: dayRange.gte,
-        lt: dayRange.lt,
+      referenceDay: dayIndex,
+      groupingDailies: {
+        some: {
+          id: groupingDailyId,
+        },
       },
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: {
+      createdAt: "asc", // só para consistência interna
+    },
   });
 
   if (!quote) {
@@ -59,8 +75,12 @@ export const QuoteCard = async ({ colors, dayRange }: QuoteCardProps) => {
     );
   }
 
+  // 🔹 Verifica se o usuário já concluiu
   const userCompletionQuote = await db.userCompletationQuote.findFirst({
-    where: { userId: user.id, quoteId: quote.id },
+    where: {
+      userId: user.id,
+      quoteId: quote.id,
+    },
     select: { id: true },
   });
 
@@ -93,11 +113,11 @@ export const QuoteCard = async ({ colors, dayRange }: QuoteCardProps) => {
 
       <CardFooter>
         <Link
+          href={`/reader/area/quote/${quote.id}`}
           style={{
             background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
             color: colors.buttonText,
           }}
-          href={`/reader/area/quote/${quote.id}`}
           className="p-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >
           Ler

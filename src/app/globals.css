@@ -3,6 +3,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.25s ease-out;
+}
+
+
 .tiptap p { margin: 0 0 1em; }
 .tiptap em { font-style: italic; }
 .tiptap u { text-decoration: underline; text-underline-offset: 3px; }

@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ pray
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ prayerId: string }> }) {
     const session = await getServerSession(authOptions);
-    const { content, title, imageUrl, date, audioUrl } = await req.json();
+    const { content, title, imageUrl, date, audioUrl, referenceDay } = await req.json();
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,6 +77,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ pray
             title,
             imageUrl,
             audioUrl,
+            referenceDay: Number(referenceDay),
             createdAt: date ? new Date(date + "T12:00:00Z") : prayer.createdAt,
         },
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { addDays, startOfWeek, format } from "date-fns";
+import { addDays, startOfWeek, differenceInCalendarDays, format } from "date-fns";
 
 const DAYS_LABEL = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg → Dom
 const TZ = "America/Sao_Paulo";
@@ -21,12 +21,19 @@ interface WeekDayFilterProps {
     independenteColor1: string;
     independenteColor2: string;
   };
+  startAt: Date | null;
+  currentDayIndex: number;
 }
 
-export function WeekDayFilter({ colors }: WeekDayFilterProps) {
+export function WeekDayFilter({
+  colors,
+  startAt,
+  currentDayIndex,
+}: WeekDayFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // 🔹 Hoje (timezone SP)
   const now = new Date(
     new Date().toLocaleString("en-US", { timeZone: TZ })
   );
@@ -39,7 +46,24 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
     addDays(weekStart, i)
   );
 
+  function getDayIndexForDate(date: Date) {
+    if (!startAt) return null;
+
+    const start = new Date(startAt);
+    start.setHours(0, 0, 0, 0);
+
+    const current = new Date(date);
+    current.setHours(0, 0, 0, 0);
+
+    return differenceInCalendarDays(current, start) + 1;
+  }
+
   function handleSelectDay(day: Date) {
+    const dayIndex = getDayIndexForDate(day);
+
+    // 🔒 bloqueia dias inválidos
+    if (!dayIndex || dayIndex < 1 || dayIndex > currentDayIndex) return;
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("day", formatDayParam(day));
     router.push(`?${params.toString()}`);
@@ -49,12 +73,18 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
     <div className="flex items-center md:gap-4 gap-1 md:px-2 px-1">
       {days.map((day, index) => {
         const dayParam = formatDayParam(day);
+        const dayIndex = getDayIndexForDate(day);
+
+        const isDisabled =
+          !dayIndex || dayIndex < 1 || dayIndex > currentDayIndex;
+
         const isActive = dayParam === activeDayParam;
 
         return (
           <button
             key={dayParam}
             onClick={() => handleSelectDay(day)}
+            disabled={isDisabled}
             style={
               isActive
                 ? {
@@ -62,17 +92,19 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
                     color: colors.buttonText,
                   }
                 : {
-                    color: colors.primary,
+                    color: isDisabled ? "#999" : colors.primary,
                     backgroundColor: "transparent",
                   }
             }
-            className={`w-10 h-10 flex items-center justify-center rounded-full font-bold
-              transition-all duration-200 cursor-pointer
+            className={`
+              w-10 h-10 flex items-center justify-center rounded-full font-bold
+              transition-all duration-200
               ${
-                isActive
-                  ? "shadow-lg scale-105"
-                  : "hover:scale-105 hover:opacity-90"
+                isDisabled
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer hover:scale-105 hover:opacity-90"
               }
+              ${isActive ? "shadow-lg scale-105" : ""}
             `}
           >
             {DAYS_LABEL[index]}

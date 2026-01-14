@@ -12,6 +12,9 @@ import { redirect } from "next/navigation";
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
+import { GroupingPickerGate } from "./_components/GroupingPickerGate";
+import { GroupingCompletionGate } from "./_components/GroupingCompletionGate";
+
 
 export default async function ReaderLayout({
   children,
@@ -25,14 +28,18 @@ export default async function ReaderLayout({
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, writer: { select: { id: true } } },
+    select: {
+      id: true,
+      writer: { select: { id: true } },
+    },
   });
 
   if (!user?.writer?.id) {
-    // Fallback simples (sem <html>/<body>)
     return (
       <section className="p-8">
-        <h1 className="text-xl font-bold mb-2">Conta sem escritor vinculado</h1>
+        <h1 className="text-xl font-bold mb-2">
+          Conta sem escritor vinculado
+        </h1>
         <p className="opacity-80">
           Vincule sua conta a um escritor para acessar a área do leitor.
         </p>
@@ -40,12 +47,53 @@ export default async function ReaderLayout({
     );
   }
 
+  // 🔹 Busca grouping ativo do usuário
+  const userGrouping = await db.userGroupingDaily.findFirst({
+    where: {
+      userId: user.id,
+      status: "ACTIVE",
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  // 🔹 Busca todos os groupings disponíveis do writer
+  const groupings = await db.groupingDaily.findMany({
+    where: {
+      writerId: user.writer.id,
+      active: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+    },
+  });
+
+  // 🔹 Decide se deve forçar escolha
+  const shouldShowGroupingPicker =
+    !userGrouping || userGrouping.status === "COMPLETED";
+
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
         <PushBootstrap writerId={user.writer.id} userId={user.id} />
+
+        <GroupingCompletionGate />
+
+        {/* 🔥 Modal FULLSCREEN se precisar */}
+        <GroupingPickerGate
+          shouldShow={shouldShowGroupingPicker}
+          groupings={groupings}
+        />
+
         <PainelControl />
+
         <section>{children}</section>
+
         <TeacherBibleAI />
       </ThemeWriterProvider>
     </AuthReaderProvider>

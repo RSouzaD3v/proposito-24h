@@ -11,6 +11,7 @@ export default function VerseNewPage() {
         content: "",
         reference: "",
         imageUrl: "",
+        referenceDay: 1,
         date: new Date().toISOString().split("T")[0],
     });
     const [loading, setLoading] = useState(false);
@@ -40,7 +41,7 @@ export default function VerseNewPage() {
             const data = await response.json();
             console.log("Quote created successfully:", data);
             setSuccess(true);
-            setForm({ content: "", reference: "", imageUrl: "", date: new Date().toISOString().split("T")[0] });
+            setForm({ content: "", reference: "", imageUrl: "", referenceDay: 1, date: new Date().toISOString().split("T")[0] });
         } catch (error) {
             console.error("Error creating quote:", error);
         } finally {
@@ -85,6 +86,20 @@ export default function VerseNewPage() {
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
                     />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="verse">Dia referência</label>
+                  <input
+                    type="number"
+                    id="referenceDay"
+                    name="referenceDay"
+                    min={0}
+                    value={form.referenceDay}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="1"
+                  />
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="date">

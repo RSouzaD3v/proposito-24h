@@ -14,6 +14,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
         verse: "",
         imageUrl: "",
         audioUrl: "",
+        referenceDay: 1,
         date: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
     });
     const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 verse: data.devotional.verse,
                 imageUrl: data.devotional.imageUrl || "",
                 audioUrl: data.devotional.audioUrl || "",
+                referenceDay: data.devotional.referenceDay || 1,
                 date: data.devotional.date || new Date().toISOString().split("T")[0],
             });
             setLoadingData(false);
@@ -140,6 +142,20 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                         className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Ex: João 3:16"
                     />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="verse">Dia referência</label>
+                  <input
+                    type="number"
+                    id="referenceDay"
+                    name="referenceDay"
+                    min={0}
+                    value={form.referenceDay}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="1"
+                  />
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="date">

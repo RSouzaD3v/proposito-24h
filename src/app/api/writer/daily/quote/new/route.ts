@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { nameAuthor, content, verse, imageUrl, date } = await req.json();
+  const { nameAuthor, content, verse, imageUrl, date, referenceDay } = await req.json();
 
   const userWriter = await db.user.findUnique({
     where: { id: session.user.id },
@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       verse,
       imageUrl,
       writerId: userWriter.writerId,
+      referenceDay: Number(referenceDay),
       createdAt,
     },
   });
