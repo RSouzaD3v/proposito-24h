@@ -50,15 +50,9 @@ export const MenuPainel = ({ colors }: MenuPainelProps) => {
     },
     {
       id: 5,
-      name: "Game",
+      name: "Games",
       icon: <Gamepad size={22} />,
-      link: "/reader/area/game",
-    },
-    {
-      id: 6,
-      name: "Quiz",
-      icon: <Gamepad size={22} />,
-      link: "/reader/area/quiz",
+      link: "/reader/area/games",
     },
   ];
 

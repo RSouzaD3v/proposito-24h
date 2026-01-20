@@ -47,7 +47,7 @@ export default async function ReaderQuizPage() {
         </p>
 
         <Button asChild variant="outline">
-          <Link href="/reader/area">Voltar</Link>
+          <Link href="/reader/area/games">Voltar</Link>
         </Button>
       </div>
     );
@@ -55,9 +55,9 @@ export default async function ReaderQuizPage() {
 
   return (
     <div className="max-w-5xl mx-auto mt-6 px-3 space-y-6">
-        <Link href={"/reader/area"}>
+        <Link href={"/reader/area/games"}>
             <Button className="cursor-pointer my-2">
-                Voltar
+                Voltar para games
             </Button>
         </Link>
       {/* HEADER */}

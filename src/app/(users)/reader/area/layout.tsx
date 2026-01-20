@@ -12,8 +12,8 @@ import { redirect } from "next/navigation";
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
-import { GroupingPickerGate } from "./_components/GroupingPickerGate";
-import { GroupingCompletionGate } from "./_components/GroupingCompletionGate";
+// import { GroupingPickerGate } from "./_components/GroupingPickerGate";
+// import { GroupingCompletionGate } from "./_components/GroupingCompletionGate";
 
 
 export default async function ReaderLayout({
@@ -48,47 +48,47 @@ export default async function ReaderLayout({
   }
 
   // 🔹 Busca grouping ativo do usuário
-  const userGrouping = await db.userGroupingDaily.findFirst({
-    where: {
-      userId: user.id,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-      status: true,
-    },
-  });
+  // const userGrouping = await db.userGroupingDaily.findFirst({
+  //   where: {
+  //     userId: user.id,
+  //     status: "ACTIVE",
+  //   },
+  //   select: {
+  //     id: true,
+  //     status: true,
+  //   },
+  // });
 
   // 🔹 Busca todos os groupings disponíveis do writer
-  const groupings = await db.groupingDaily.findMany({
-    where: {
-      writerId: user.writer.id,
-      active: true,
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      imageUrl: true,
-    },
-  });
+  // const groupings = await db.groupingDaily.findMany({
+  //   where: {
+  //     writerId: user.writer.id,
+  //     active: true,
+  //   },
+  //   select: {
+  //     id: true,
+  //     title: true,
+  //     description: true,
+  //     imageUrl: true,
+  //   },
+  // });
 
   // 🔹 Decide se deve forçar escolha
-  const shouldShowGroupingPicker =
-    !userGrouping || userGrouping.status === "COMPLETED";
+  // const shouldShowGroupingPicker =
+  //   !userGrouping || userGrouping.status === "COMPLETED";
 
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
         <PushBootstrap writerId={user.writer.id} userId={user.id} />
 
-        <GroupingCompletionGate />
+        {/* <GroupingCompletionGate /> */}
 
         {/* 🔥 Modal FULLSCREEN se precisar */}
-        <GroupingPickerGate
+        {/* <GroupingPickerGate
           shouldShow={shouldShowGroupingPicker}
           groupings={groupings}
-        />
+        /> */}
 
         <PainelControl />
 

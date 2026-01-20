@@ -11,44 +11,58 @@ import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db";
 import clientPromise from "@/lib/mongodb";
-import { WeekDayFilter } from "./_components/WeekDayFilter";
-import { TrackAccess } from "@/components/TrackAccess";
+import { startOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const TZ = "America/Sao_Paulo";
+
 /**
- * Calcula o Dia do Grouping (1,2,3...)
- * Baseado no startAt do usuário
+ * Resolve o dia ativo a partir da URL (?day=YYYY-MM-DD)
+ * Fallback: hoje (timezone SP)
  */
-function resolveGroupingDayIndex(startAt?: Date | null) {
-  if (!startAt) return 1;
-
-  const start = new Date(startAt);
-  const today = new Date();
-
-  start.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-
-  const diffDays =
-    Math.floor(
-      (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
-
-  return diffDays < 1 ? 1 : diffDays;
+function resolveActiveDay(searchDay?: string) {
+  if (searchDay) {
+    const parsed = new Date(`${searchDay}T00:00:00`);
+    if (!isNaN(parsed.getTime())) {
+      return toZonedTime(parsed, TZ);
+    }
+  }
+  return toZonedTime(new Date(), TZ);
 }
 
-export default async function AreaReader() {
+/**
+ * Calcula o range do dia (gte / lt) timezone-safe
+ */
+function brasiliaDayRange(day: Date) {
+  const start = startOfDay(day);
+  const next = startOfDay(addDays(start, 1));
+  return {
+    gte: fromZonedTime(start, TZ),
+    lt: fromZonedTime(next, TZ),
+  };
+}
+
+export default async function AreaReader({
+  searchParams,
+}: {
+  searchParams?: Promise<{ day?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return <div className="p-8 text-center">Acesso negado</div>;
   }
 
-  // 🔹 Usuário + Writer
+  // 🔹 Dia ativo (URL ou hoje)
+  const activeDay = resolveActiveDay((await searchParams)?.day);
+  const dayRange = brasiliaDayRange(activeDay);
+
+  // 🔹 Pega writerId do usuário logado (PostgreSQL)
   const userReader = await db.user.findUnique({
     where: { id: session.user.id },
     select: {
-      id: true,
       writer: {
         select: {
           id: true,
@@ -72,28 +86,14 @@ export default async function AreaReader() {
     );
   }
 
-  // 🔹 Grouping ativo do usuário
-  const userGrouping = await db.userGroupingDaily.findFirst({
-    where: {
-      userId: session.user.id,
-      status: "ACTIVE",
-    },
-    select: {
-      startAt: true,
-      groupingDailyId: true,
-    },
-  });
-
-  // 🔹 Dia atual do plano (Dia 1, 2, 3...)
-  const activeDayIndex = resolveGroupingDayIndex(userGrouping?.startAt);
-
-  // 🔹 Personalização (MongoDB)
+  // 🔹 Busca personalização no MongoDB
   const client = await clientPromise;
   const mongoDb = client.db(process.env.MONGODB_DB || "railway");
   const personalization = await mongoDb
     .collection("personalizations")
     .findOne({ writerId });
 
+  // 🔹 Define cores com fallback padrão
   const colors = {
     primary: personalization?.primaryColor || "#202020",
     secondary: personalization?.secondaryColor || "#404040",
@@ -106,72 +106,47 @@ export default async function AreaReader() {
   };
 
   const items = [
-    { id: 1, name: "Trajetórias", type: "Daily", link: "/reader/area/group-daily" },
-    { id: 2, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
-    { id: 3, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
-    { id: 4, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
-    { id: 5, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
+    // { id: 5, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
+    // { id: 1, name: "Oração de Hoje", type: "Oração", link: "/reader/area/prayer" },
+    { id: 2, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
+    { id: 3, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
+    { id: 4, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
   ];
 
   return (
     <ThemeWriterProvider>
-      <TrackAccess />
-
       <section className="container mx-auto min-h-screen md:px-1 px-5 py-36 transition-all">
         <HeaderReader
           colors={colors}
-          titleHeader={
-            userReader?.writer?.titleHeader ||
-            "Vamos passar tempo com Deus ?"
-          }
+          titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}
         />
 
-        {/* 📅 Filtro semanal ajustado ao Grouping */}
-        <div className="flex items-center justify-center">
-          <WeekDayFilter
-            colors={colors}
-            startAt={userGrouping?.startAt ?? null}
-            currentDayIndex={activeDayIndex}
-          />
-        </div>
+        {/* 📅 Data baseada no filtro */}
+        <div className="px-2">
+          {activeDay.toLocaleDateString("pt-BR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}{" "}
+          -{" "}
+          {activeDay.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
 
-        {/* 🔸 Cabeçalho */}
-        <div className="px-2 md:text-xl text-sm mt-5">
           <h2 className="md:text-xl text-lg font-bold mt-1">
             {userReader?.writer?.titleApp || "Meu Devocional"}
           </h2>
-
-          <p className="opacity-70 text-sm mt-1">
-            Dia {activeDayIndex} do plano
-          </p>
         </div>
 
-        {/* 📖 DEVOCIONAL DIÁRIO */}
+        {/* 📖 Cards principais (ainda sem receber o dayRange) */}
         <h3 className="mt-6 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
         <div className="grid md:grid-cols-4 grid-cols-1 gap-6 px-2 py-1">
-          <QuoteCard
-            colors={colors}
-            dayIndex={activeDayIndex}
-            groupingDailyId={userGrouping?.groupingDailyId}
-          />
-
-          <VerseCard
-            colors={colors}
-            dayIndex={activeDayIndex}
-            groupingDailyId={userGrouping?.groupingDailyId}
-          />
-
-          <DevotionalCard
-            colors={colors}
-            dayIndex={activeDayIndex}
-            groupingDailyId={userGrouping?.groupingDailyId}
-          />
-
-          <PrayerCard
-            colors={colors}
-            dayIndex={activeDayIndex}
-            groupingDailyId={userGrouping?.groupingDailyId}
-          />
+          <QuoteCard colors={colors} dayRange={dayRange} />
+          <VerseCard colors={colors} dayRange={dayRange} />
+          <DevotionalCard colors={colors} dayRange={dayRange} />
+          <PrayerCard colors={colors} dayRange={dayRange} />
         </div>
 
         {/* ⚙️ Funcionalidades */}
@@ -189,16 +164,12 @@ export default async function AreaReader() {
                   {item.name}
                 </h2>
                 <p
-                  style={{
-                    color: colors.buttonText,
-                    backgroundColor: colors.buttonBg,
-                  }}
+                  style={{ color: colors.buttonText, backgroundColor: colors.buttonBg }}
                   className="text-xs px-3 py-1 rounded-full w-fit font-semibold shadow"
                 >
                   {item.type}
                 </p>
               </div>
-
               <FiChevronRight
                 size={40}
                 className="text-white group-hover:translate-x-2 transition-transform duration-200"

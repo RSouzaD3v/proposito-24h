@@ -7,7 +7,11 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { HandHeart } from "lucide-react";
-import AudioButton from "../devotional/AudioButton";
+
+interface DayRange {
+  gte: Date;
+  lt: Date;
+}
 
 interface PrayerCardProps {
   colors: {
@@ -20,71 +24,46 @@ interface PrayerCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayIndex: number;
-  groupingDailyId?: string;
+  dayRange: DayRange;
 }
 
-export const PrayerCard = async ({
-  colors,
-  dayIndex,
-  groupingDailyId,
-}: PrayerCardProps) => {
+export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: {
-      id: true,
-      writerId: true,
-    },
+    select: { id: true, writerId: true },
   });
 
-  if (!user?.writerId || !groupingDailyId) {
-    return (
-      <Card className="bg-linear-to-r from-blue-50 to-blue-100">
-        <CardContent className="flex items-center justify-center flex-col text-center h-full">
-          <h4>Nenhuma oração ainda.</h4>
-        </CardContent>
-      </Card>
-    );
-  }
+  if (!user?.writerId) return null;
 
-  // 🔹 Busca oração pelo referenceDay + grouping
   const prayer = await db.prayer.findFirst({
     where: {
       writerId: user.writerId,
-      referenceDay: dayIndex,
-      groupingDailies: {
-        some: {
-          id: groupingDailyId,
-        },
+      createdAt: {
+        gte: dayRange.gte,
+        lt: dayRange.lt,
       },
     },
-    orderBy: {
-      createdAt: "asc", // apenas para consistência
-    },
+    orderBy: { createdAt: "asc" },
   });
 
   if (!prayer) {
     return (
       <Card className="bg-linear-to-r from-blue-50 to-blue-100">
         <CardContent className="flex items-center justify-center flex-col text-center h-full">
-          <h4>Nenhuma oração ainda.</h4>
+          <h4>Nenhuma citação ainda.</h4>
         </CardContent>
       </Card>
     );
   }
 
-  // 🔹 Verifica conclusão do usuário
   const userCompletationPrayer =
     await db.userCompletationPrayer.findFirst({
-      where: {
-        userId: user.id,
-        prayerId: prayer.id,
-      },
+      where: { userId: user.id, prayerId: prayer.id },
       select: { id: true },
-});
+    });
 
   return (
     <Card style={{ backgroundColor: colors.background }}>
@@ -109,28 +88,17 @@ export const PrayerCard = async ({
         <h2 className="text-xl font-bold">{prayer.title}</h2>
       </CardContent>
 
-      <CardFooter className="grid grid-cols-2 gap-2 w-full">
+      <CardFooter>
         <Link
-          href={`/reader/area/prayer/${prayer.id}`}
           style={{
             background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
             color: colors.buttonText,
           }}
+          href={`/reader/area/prayer/${prayer.id}`}
           className="p-2 text-center text-xl font-bold w-full rounded-xl hover:underline"
         >
           Ler
         </Link>
-
-        <AudioButton
-          src={prayer.audioUrl}
-          style={{
-            background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
-            color: colors.buttonText,
-          }}
-          className="py-2 w-full rounded-xl"
-          labelPlay="Ouvir"
-          labelPause="Parar"
-        />
       </CardFooter>
     </Card>
   );

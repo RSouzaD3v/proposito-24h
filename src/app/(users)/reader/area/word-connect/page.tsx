@@ -29,8 +29,8 @@ export default async function GameAreaPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        <Link href={"/reader/area"} className="bg-black hover:bg-gray-800 text-white p-2 rounded-sm">
-            Voltar para area
+        <Link href={"/reader/area/games"} className="bg-black hover:bg-gray-800 text-white p-2 rounded-sm">
+            Voltar para Games
         </Link>
       {/* Header */}
       <header className="space-y-2 mt-5">
