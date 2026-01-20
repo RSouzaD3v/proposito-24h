@@ -2,17 +2,28 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { addDays, startOfWeek, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 const DAYS_LABEL = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg → Dom
-
 const TZ = "America/Sao_Paulo";
 
 function formatDayParam(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
-export function WeekDayFilter() {
+interface WeekDayFilterProps {
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    buttonBg: string;
+    buttonText: string;
+    text: string;
+    independenteColor1: string;
+    independenteColor2: string;
+  };
+}
+
+export function WeekDayFilter({ colors }: WeekDayFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -22,7 +33,9 @@ export function WeekDayFilter() {
     new Date().toLocaleString("en-US", { timeZone: TZ })
   );
 
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // segunda
+  const todayParam = formatDayParam(now);
+
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const days = Array.from({ length: 7 }).map((_, i) =>
     addDays(weekStart, i)
   );
@@ -34,20 +47,36 @@ export function WeekDayFilter() {
   }
 
   return (
-    <div className="flex items-center gap-4 px-2">
+    <div
+      className="flex items-center gap-4 px-2"
+      style={{
+        ["--primary" as any]: colors.primary,
+        ["--secondary" as any]: colors.secondary,
+        ["--buttonText" as any]: colors.buttonText,
+      }}
+    >
       {days.map((day, index) => {
         const dayParam = formatDayParam(day);
-        const isActive = dayParam === activeDayParam;
+
+        const isActive =
+          activeDayParam
+            ? dayParam === activeDayParam
+            : dayParam === todayParam; // 👈 fallback para hoje
 
         return (
           <button
             key={dayParam}
             onClick={() => handleSelectDay(day)}
-            className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all
+            className={`
+              w-10 h-10
+              flex items-center justify-center
+              rounded-full
+              font-bold
+              transition-all duration-200
               ${
                 isActive
-                  ? "bg-orange-500 text-white shadow-lg scale-105"
-                  : "text-orange-300 hover:bg-orange-100"
+                  ? "bg-primary text-white shadow-lg scale-105 opacity-100"
+                  : "bg-secondary text-(--buttonText) opacity-20 hover:opacity-70"
               }
             `}
           >

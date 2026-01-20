@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import clientPromise from "@/lib/mongodb";
 import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { WeekDayFilter } from "./_components/WeekDayFilter";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -120,6 +121,10 @@ export default async function AreaReader({
           colors={colors}
           titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}
         />
+
+        <div className="w-full flex items-center justify-center">
+          <WeekDayFilter colors={colors} />
+        </div>
 
         {/* 📅 Data baseada no filtro */}
         <div className="px-2">
