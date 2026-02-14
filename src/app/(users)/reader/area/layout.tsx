@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
+import { TrackAccess } from "@/components/TrackAccess";
 // import { GroupingPickerGate } from "./_components/GroupingPickerGate";
 // import { GroupingCompletionGate } from "./_components/GroupingCompletionGate";
 
@@ -95,6 +96,7 @@ export default async function ReaderLayout({
         <section>{children}</section>
 
         <TeacherBibleAI />
+        <TrackAccess />
       </ThemeWriterProvider>
     </AuthReaderProvider>
   );

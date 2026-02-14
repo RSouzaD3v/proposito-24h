@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import clientPromise from "@/lib/mongodb";
 import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { parse } from "date-fns";
 import { WeekDayFilter } from "./_components/WeekDayFilter";
 
 export const dynamic = "force-dynamic";
@@ -26,11 +27,17 @@ const TZ = "America/Sao_Paulo";
  */
 function resolveActiveDay(searchDay?: string) {
   if (searchDay) {
-    const parsed = new Date(`${searchDay}T00:00:00`);
-    if (!isNaN(parsed.getTime())) {
-      return toZonedTime(parsed, TZ);
-    }
+    // Cria a data como string simples
+    const parsed = parse(searchDay, "yyyy-MM-dd", new Date());
+
+    // Converte assumindo que essa data está no timezone de SP
+    return toZonedTime(
+      fromZonedTime(parsed, TZ),
+      TZ
+    );
   }
+
+  // Hoje já ajustado para SP
   return toZonedTime(new Date(), TZ);
 }
 

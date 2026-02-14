@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { addDays, startOfWeek, format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 const DAYS_LABEL = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg → Dom
 const TZ = "America/Sao_Paulo";
@@ -29,9 +30,7 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
 
   const activeDayParam = searchParams.get("day");
 
-  const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: TZ })
-  );
+  const now = toZonedTime(new Date(), TZ);
 
   const todayParam = formatDayParam(now);
 
@@ -48,7 +47,7 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
 
   return (
     <div
-      className="flex items-center gap-4 px-2"
+      className="flex items-center gap-2 md:gap-6 mb-10 mt-3 px-2"
       style={{
         ["--primary" as any]: colors.primary,
         ["--secondary" as any]: colors.secondary,
