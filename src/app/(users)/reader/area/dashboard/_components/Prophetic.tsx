@@ -25,7 +25,7 @@ export default async function PropheticProgress() {
   const fallbackPlan = await db.bibleReadingPlan.findFirst({ select: { id: true } });
   const planId = anyProgress?.planId ?? fallbackPlan?.id;
   if (!planId) {
-    return (
+    return ( 
       <div className="p-6">
         <h1 className="text-2xl font-bold">Dashboard Bíblico</h1>
         <p className="mt-2">Nenhum plano de leitura encontrado.</p>

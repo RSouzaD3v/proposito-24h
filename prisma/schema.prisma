@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Writer {
@@ -73,6 +72,7 @@ model User {
   name                       String?
   password                   String
   role                       Role                         @default(CLIENT)
+  asaasCustomerId            String?
   stripeCustomerId           String?
   freePlan                   Boolean                      @default(false)
   writerId                   String?
@@ -242,7 +242,7 @@ model Chapter {
 }
 
 /// *
-/// * Purchase centralizada no Admin Master (Stripe).
+/// * Purchase centralizada no Admin Master (Stripe/Asaas).
 /// * Mantém campos para conciliação, taxas e recibos.
 model Purchase {
   id                    String          @id @default(uuid())
@@ -255,6 +255,7 @@ model Purchase {
   netAmount             Int?
   status                PurchaseStatus
   provider              PaymentProvider @default(STRIPE)
+  asaasPaymentId        String?
   stripeSessionId       String?
   stripePaymentIntentId String?
   stripePaymentMethodId String?
@@ -271,6 +272,7 @@ model Purchase {
 
   @@index([writerId, createdAt])
   @@index([publicationId, createdAt])
+  @@index([asaasPaymentId])
 }
 
 /// *
