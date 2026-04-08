@@ -72,7 +72,7 @@ model User {
   name                       String?
   password                   String
   role                       Role                         @default(CLIENT)
-  asaasCustomerId            String?
+  asaasCustomerId            String?                      @unique
   stripeCustomerId           String?
   freePlan                   Boolean                      @default(false)
   writerId                   String?
@@ -255,7 +255,7 @@ model Purchase {
   netAmount             Int?
   status                PurchaseStatus
   provider              PaymentProvider @default(STRIPE)
-  asaasPaymentId        String?
+  asaasPaymentId        String?         @unique
   stripeSessionId       String?
   stripePaymentIntentId String?
   stripePaymentMethodId String?
@@ -272,7 +272,6 @@ model Purchase {
 
   @@index([writerId, createdAt])
   @@index([publicationId, createdAt])
-  @@index([asaasPaymentId])
 }
 
 /// *
