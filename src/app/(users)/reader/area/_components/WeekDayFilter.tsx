@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { addDays, startOfWeek, format } from "date-fns";
+import { addDays, startOfWeek, format, startOfDay, subDays, isSameDay } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
 const DAYS_LABEL = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg → Dom
@@ -39,7 +39,17 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
     addDays(weekStart, i)
   );
 
+  const todayStart = startOfDay(now);
+  const yesterdayStart = subDays(todayStart, 1);
+
+  /** Só permite selecionar ontem ou hoje (calendário em SP). */
+  function isSelectableDay(day: Date) {
+    const d = startOfDay(day);
+    return isSameDay(d, todayStart) || isSameDay(d, yesterdayStart);
+  }
+
   function handleSelectDay(day: Date) {
+    if (!isSelectableDay(day)) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("day", formatDayParam(day));
     router.push(`?${params.toString()}`);
@@ -57,6 +67,8 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
       {days.map((day, index) => {
         const dayParam = formatDayParam(day);
 
+        const selectable = isSelectableDay(day);
+
         const isActive =
           activeDayParam
             ? dayParam === activeDayParam
@@ -65,7 +77,15 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
         return (
           <button
             key={dayParam}
+            type="button"
+            disabled={!selectable}
             onClick={() => handleSelectDay(day)}
+            aria-disabled={!selectable}
+            title={
+              !selectable
+                ? "Disponível apenas para ontem ou hoje"
+                : undefined
+            }
             className={`
               w-10 h-10
               flex items-center justify-center
@@ -73,9 +93,11 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
               font-bold
               transition-all duration-200
               ${
-                isActive
-                  ? "bg-primary text-white shadow-lg scale-105 opacity-100"
-                  : "bg-secondary text-(--buttonText) opacity-20 hover:opacity-70"
+                !selectable
+                  ? "bg-secondary text-(--buttonText) opacity-25 cursor-not-allowed"
+                  : isActive
+                    ? "bg-primary text-white shadow-lg scale-105 opacity-100"
+                    : "bg-secondary text-(--buttonText) opacity-20 hover:opacity-70"
               }
             `}
           >

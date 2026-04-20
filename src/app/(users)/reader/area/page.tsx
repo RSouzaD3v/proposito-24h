@@ -11,9 +11,9 @@ import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db";
 import clientPromise from "@/lib/mongodb";
-import { startOfDay, addDays } from "date-fns";
+import { startOfDay, addDays, subDays, format, parse } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
-import { parse } from "date-fns";
+import { redirect } from "next/navigation";
 import { WeekDayFilter } from "./_components/WeekDayFilter";
 
 export const dynamic = "force-dynamic";
@@ -21,24 +21,25 @@ export const runtime = "nodejs";
 
 const TZ = "America/Sao_Paulo";
 
-/**
- * Resolve o dia ativo a partir da URL (?day=YYYY-MM-DD)
- * Fallback: hoje (timezone SP)
- */
-function resolveActiveDay(searchDay?: string) {
-  if (searchDay) {
-    // Cria a data como string simples
-    const parsed = parse(searchDay, "yyyy-MM-dd", new Date());
+function formatDayParamSp(date: Date) {
+  return format(toZonedTime(date, TZ), "yyyy-MM-dd");
+}
 
-    // Converte assumindo que essa data está no timezone de SP
-    return toZonedTime(
-      fromZonedTime(parsed, TZ),
-      TZ
-    );
-  }
+function parseDayParamInSp(dayParam: string) {
+  const parsed = parse(dayParam, "yyyy-MM-dd", new Date());
+  return toZonedTime(fromZonedTime(parsed, TZ), TZ);
+}
 
-  // Hoje já ajustado para SP
-  return toZonedTime(new Date(), TZ);
+/** Ontem ou hoje (America/Sao_Paulo); usado para validar ?day= */
+function isYesterdayOrTodaySp(dayParam: string) {
+  const now = toZonedTime(new Date(), TZ);
+  const todayStart = startOfDay(now);
+  const yesterdayStart = subDays(todayStart, 1);
+  const targetStart = startOfDay(parseDayParamInSp(dayParam));
+  return (
+    targetStart.getTime() <= todayStart.getTime() &&
+    targetStart.getTime() >= yesterdayStart.getTime()
+  );
 }
 
 /**
@@ -63,8 +64,16 @@ export default async function AreaReader({
     return <div className="p-8 text-center">Acesso negado</div>;
   }
 
-  // 🔹 Dia ativo (URL ou hoje)
-  const activeDay = resolveActiveDay((await searchParams)?.day);
+  // 🔹 Dia ativo (URL ou hoje) — só ontem ou hoje
+  const sp = await searchParams;
+  const requestedDay = sp?.day;
+  const nowSp = toZonedTime(new Date(), TZ);
+
+  if (requestedDay && !isYesterdayOrTodaySp(requestedDay)) {
+    redirect(`/reader/area?day=${formatDayParamSp(nowSp)}`);
+  }
+
+  const activeDay = requestedDay ? parseDayParamInSp(requestedDay) : nowSp;
   const dayRange = brasiliaDayRange(activeDay);
 
   // 🔹 Pega writerId do usuário logado (PostgreSQL)
