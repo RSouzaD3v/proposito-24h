@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import ReaderControls from "./ReaderControls";
 import { ReaderPrefsProvider, useReaderPrefs } from "./ReaderPrefsContext";
 import { useLocalStorage } from "./useLocalStorage";
-import { Settings2 } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 
 type Chapter = {
@@ -255,17 +254,6 @@ function SliderInner({ chapters, bookId }: InnerProps) {
                 </button>
               </div>
             </div>
-
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Abrir ajustes"
-              className={cn(
-                "absolute right-4 top-1/2 -translate-y-1/2 rounded-full size-11 shadow flex items-center justify-center",
-                pal.btn
-              )}
-            >
-              <Settings2 />
-            </button>
           </div>
         </div>
       )}

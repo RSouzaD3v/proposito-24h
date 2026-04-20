@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -37,6 +38,11 @@ export default function ReaderControls({
   setOpen,
 }: Props) {
   const { prefs, setPrefs } = useReaderPrefs();
+  const [mounted, setMounted] = useState(false);
+
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Paletas 100% baseadas no tema do leitor
   const pal = useMemo(() => {
@@ -88,17 +94,46 @@ export default function ReaderControls({
     return () => window.removeEventListener("keydown", onKey);
   }, [setOpen]);
 
-  return (
+  const layerZ = {
+    backdrop: "z-[99980]",
+    fab: "z-[99981]",
+    panel: "z-[99982]",
+  } as const;
+
+  const ui = (
     <>
-      {/* FAB (engrenagem) — DESKTOP apenas */}
+      {/* Escurece o conteúdo e fecha ao tocar fora (estilo leitor) */}
+      {open && (
+        <button
+          type="button"
+          aria-label="Fechar ajustes"
+          className={cn(
+            "fixed inset-0 bg-black/40 backdrop-blur-[1px] transition-opacity md:bg-black/30",
+            layerZ.backdrop
+          )}
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* FAB — sempre visível; no mobile fica acima da barra de capítulos */}
       {!open && (
-        <div className="fixed bottom-4 right-4 z-40 hidden md:block">
+        <div
+          className={cn(
+            "fixed left-4",
+            layerZ.fab,
+            "max-md:bottom-[calc(5.75rem+env(safe-area-inset-bottom))]",
+            "md:bottom-6"
+          )}
+        >
           <Button
             size="icon"
             variant={"secondary"}
             onClick={() => setOpen(true)}
             aria-label="Abrir controles de leitura"
-            className={cn("rounded-full shadow-lg hover:opacity-90", pal.fab)}
+            className={cn(
+              "size-12 rounded-full shadow-lg hover:opacity-90 ring-2 ring-black/5",
+              pal.fab
+            )}
           >
             <Settings2 className="size-5" />
           </Button>
@@ -108,13 +143,14 @@ export default function ReaderControls({
       {/* Painel deslizante */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 transition-transform duration-300",
-          open ? "translate-y-0" : "translate-y-full"
+          "fixed inset-x-0 bottom-0 transition-transform duration-300 ease-out",
+          layerZ.panel,
+          open ? "translate-y-0" : "translate-y-full pointer-events-none"
         )}
       >
         <div
           className={cn(
-            "mx-auto max-w-4xl rounded-t-2xl shadow-lg p-3 backdrop-blur border",
+            "mx-auto max-w-4xl max-h-[min(78vh,720px)] overflow-y-auto overscroll-contain rounded-t-2xl shadow-2xl p-3 md:p-4 backdrop-blur border",
             pal.panel,
             pal.border,
             pal.txt
@@ -153,7 +189,7 @@ export default function ReaderControls({
                     <List className="size-4" /> Capítulos
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className={cn("max-h-[300px] overflow-auto", pal.menu)}>
+                <DropdownMenuContent className={cn("z-[100000] max-h-[300px] overflow-auto", pal.menu)}>
                   {Array.from({ length: chaptersCount }).map((_, i) => (
                     <DropdownMenuItem
                       key={i}
@@ -179,7 +215,7 @@ export default function ReaderControls({
                   <SelectTrigger className={cn("w-[150px] rounded-md", pal.chip)}>
                     <SelectValue placeholder="Fonte" />
                   </SelectTrigger>
-                  <SelectContent className={pal.menu}>
+                  <SelectContent className={cn("z-[100000]", pal.menu)}>
                     <SelectItem value="serif">Serif</SelectItem>
                     <SelectItem value="sans">Sans</SelectItem>
                     <SelectItem value="mono">Mono</SelectItem>
@@ -233,7 +269,7 @@ export default function ReaderControls({
                     {prefs.align === "justify" ? "Justificado" : "À esquerda"}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className={pal.menu}>
+                <DropdownMenuContent className={cn("z-[100000]", pal.menu)}>
                   <DropdownMenuItem className={pal.menuItem} onClick={() => setPrefs({ ...prefs, align: "justify" })}>
                     Justificado
                   </DropdownMenuItem>
@@ -251,7 +287,7 @@ export default function ReaderControls({
                     Tema
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={pal.menu}>
+                <DropdownMenuContent align="end" className={cn("z-[100000]", pal.menu)}>
                   <DropdownMenuItem className={pal.menuItem} onClick={() => setTheme("light")}>Claro</DropdownMenuItem>
                   <DropdownMenuItem className={pal.menuItem} onClick={() => setTheme("sepia")}>Sépia</DropdownMenuItem>
                   <DropdownMenuItem className={pal.menuItem} onClick={() => setTheme("dark")}>Escuro</DropdownMenuItem>
@@ -268,4 +304,10 @@ export default function ReaderControls({
       </div>
     </>
   );
+
+  if (!mounted || typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(ui, document.body);
 }
