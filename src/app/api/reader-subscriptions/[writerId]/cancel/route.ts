@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
+import { deleteSubscription } from "@/lib/asaas";
 
 export const runtime = "nodejs";
 
@@ -18,22 +18,26 @@ export async function POST(
     where: { reader_writer_unique: { readerId: session.user.id, writerId } },
   });
 
-  if (!sub?.stripeSubscriptionId) {
-    return NextResponse.json({ error: "Assinatura não encontrada" }, { status: 404 });
+  if (!sub?.asaasSubscriptionId) {
+    return NextResponse.json({ error: "Assinatura Asaas não encontrada" }, { status: 404 });
   }
 
-  const updated = await stripe.subscriptions.update(sub.stripeSubscriptionId, {
-    cancel_at_period_end: true,
-  });
+  try {
+    await deleteSubscription(sub.asaasSubscriptionId);
+  } catch (e: unknown) {
+    console.error(e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Falha ao cancelar no Asaas" },
+      { status: 502 }
+    );
+  }
 
   await db.readerSubscription.update({
     where: { id: sub.id },
     data: {
-      status: (updated.status || "canceled").toUpperCase() as any,
-      cancelAt: updated.cancel_at ? new Date(updated.cancel_at * 1000) : new Date(),
-      cancelAtPeriodEnd: !!updated.cancel_at_period_end,
-      currentPeriodStart: new Date(updated.start_date * 1000),
-      currentPeriodEnd: new Date((updated.ended_at ?? 0) * 1000),
+      status: "CANCELED",
+      cancelAt: new Date(),
+      cancelAtPeriodEnd: false,
     },
   });
 

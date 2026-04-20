@@ -22,6 +22,7 @@ model Writer {
   updatedAt               DateTime                 @updatedAt
   stripeAccountId         String?
   stripeCustomerId        String?
+  asaasCustomerId         String?                      @unique
   titleApp                String?                  @default("Deus seja sempre louvado!")
   titleHeader             String?                  @default("Vamos passar um tempo com Deus?")
   devotionals             Devotional[]
@@ -44,17 +45,19 @@ model Writer {
 }
 
 model WriterSubscription {
-  id          String    @id @default(uuid())
-  writerId    String
-  startedAt   DateTime  @default(now())
-  endedAt     DateTime?
-  amount      Int
-  description String?
-  stripeId    String?   @unique
-  stripe      Json?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  writer      Writer    @relation(fields: [writerId], references: [id])
+  id                  String    @id @default(uuid())
+  writerId            String
+  startedAt           DateTime  @default(now())
+  endedAt             DateTime?
+  amount              Int
+  description         String?
+  stripeId            String?   @unique
+  stripe              Json?
+  asaasSubscriptionId String?   @unique
+  asaas               Json?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  writer              Writer    @relation(fields: [writerId], references: [id])
 }
 
 model Domain {
@@ -131,6 +134,7 @@ model ReaderSubscription {
   writerId             String
   stripeCustomerId     String?
   stripeSubscriptionId String?
+  asaasSubscriptionId  String? @unique
   priceId              String
   status               SubscriptionStatus @default(INCOMPLETE)
   currentPeriodStart   DateTime?
@@ -254,7 +258,7 @@ model Purchase {
   fees                  Int?
   netAmount             Int?
   status                PurchaseStatus
-  provider              PaymentProvider @default(STRIPE)
+  provider              PaymentProvider @default(ASAAS)
   asaasPaymentId        String?         @unique
   stripeSessionId       String?
   stripePaymentIntentId String?
@@ -272,6 +276,12 @@ model Purchase {
 
   @@index([writerId, createdAt])
   @@index([publicationId, createdAt])
+}
+
+/// * Eventos de webhook Asaas já processados (idempotência).
+model AsaasWebhookEvent {
+  id        String   @id
+  createdAt DateTime @default(now())
 }
 
 /// *
@@ -490,7 +500,7 @@ enum PurchaseStatus {
   FAILED
 }
 
-/// * Provedor de pagamento (por enquanto só Stripe)
+/// * Provedor de pagamento (legado STRIPE; padrão ASAAS)
 enum PaymentProvider {
   STRIPE
   ASAAS

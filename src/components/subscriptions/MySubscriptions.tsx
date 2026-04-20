@@ -9,7 +9,7 @@ type Item = {
   status: string;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
-  stripeSubscriptionId: string | null;
+  asaasSubscriptionId: string | null;
   priceId: string;
   writer: { id: string; name: string; slug: string | null; logoUrl: string | null };
 };

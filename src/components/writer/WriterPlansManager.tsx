@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 
 type Plan = {
   id: string;
-  stripeProductId: string;
-  stripePriceId: string;
   interval: "DAY" | "WEEK" | "MONTH" | "YEAR" | "LIFETIME";
   amountCents: number;
   currency: string;

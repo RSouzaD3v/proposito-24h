@@ -7,7 +7,6 @@ import ManageSubscription from "./ManageSubscription";
 
 type Plan = {
   id: string;
-  stripePriceId: string;
   interval: "DAY" | "WEEK" | "MONTH" | "YEAR";
   amountCents: number;
   currency: string;
@@ -24,7 +23,7 @@ type StatusResp = {
   currentPeriodEnd?: string | null;
   cancelAtPeriodEnd?: boolean;
   latestInvoiceId?: string | null;
-  stripeSubscriptionId?: string | null;
+  asaasSubscriptionId?: string | null;
 };
 
 function centsToMoney(cents: number, currency = "BRL") {

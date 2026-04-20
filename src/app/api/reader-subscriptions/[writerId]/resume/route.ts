@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
+import { getSubscription } from "@/lib/asaas";
 
 export const runtime = "nodejs";
 
+/**
+ * Se a assinatura ainda existir no Asaas como ACTIVE, sincroniza o status local.
+ * Após cancelamento removido no Asaas, não há retomada automática — o leitor deve assinar de novo.
+ */
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ writerId: string }> }
@@ -18,24 +22,39 @@ export async function POST(
     where: { reader_writer_unique: { readerId: session.user.id, writerId } },
   });
 
-  if (!sub?.stripeSubscriptionId) {
-    return NextResponse.json({ error: "Assinatura não encontrada" }, { status: 404 });
+  if (!sub?.asaasSubscriptionId) {
+    return NextResponse.json(
+      { error: "Nenhuma assinatura recorrente ativa para retomar." },
+      { status: 404 }
+    );
   }
 
-  const updated = await stripe.subscriptions.update(sub.stripeSubscriptionId, {
-    cancel_at_period_end: false,
-  });
+  try {
+    const remote = await getSubscription(sub.asaasSubscriptionId);
+    if (remote.status === "ACTIVE") {
+      const nextEnd = remote.nextDueDate
+        ? new Date(`${remote.nextDueDate}T23:59:59.000Z`)
+        : null;
+      await db.readerSubscription.update({
+        where: { id: sub.id },
+        data: {
+          status: "ACTIVE",
+          cancelAtPeriodEnd: false,
+          cancelAt: null,
+          currentPeriodEnd: nextEnd,
+        },
+      });
+      return NextResponse.json({ ok: true });
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "Assinatura não encontrada no Asaas. Assine novamente." },
+      { status: 400 }
+    );
+  }
 
-  await db.readerSubscription.update({
-    where: { id: sub.id },
-    data: {
-      status: (updated.status || "active").toUpperCase() as any,
-      cancelAt: updated.cancel_at ? new Date(updated.cancel_at * 1000) : null,
-      cancelAtPeriodEnd: !!updated.cancel_at_period_end,
-      currentPeriodStart: new Date(updated.start_date * 1000),
-      currentPeriodEnd: updated.ended_at ? new Date(updated.ended_at * 1000) : null,
-    },
-  });
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json(
+    { error: "Não foi possível retomar. Inicie uma nova assinatura." },
+    { status: 400 }
+  );
 }

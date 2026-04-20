@@ -38,6 +38,6 @@ export async function GET(
     currentPeriodEnd: sub.currentPeriodEnd,
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
     latestInvoiceId: sub.latestInvoiceId ?? null,
-    stripeSubscriptionId: sub.stripeSubscriptionId ?? null,
+    asaasSubscriptionId: sub.asaasSubscriptionId ?? null,
   });
 }

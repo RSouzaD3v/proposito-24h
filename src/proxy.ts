@@ -11,8 +11,8 @@ export default withAuth(
       authorized: ({ req, token }) => {
         const pathname = req.nextUrl.pathname;
 
-        // 🔓 Libera o webhook do Stripe sem exigir token
-        if (pathname.startsWith("/api/stripe/webhook")) {
+        // 🔓 Webhooks de pagamento (sem sessão)
+        if (pathname.startsWith("/api/asaas/webhook")) {
           return true;
         }
 

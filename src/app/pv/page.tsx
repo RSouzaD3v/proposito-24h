@@ -82,7 +82,7 @@ export default function LandingProposito24h() {
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Badge variant="secondary" className="text-blue-950">Loja pronta em 1 dia</Badge>
-              <Badge variant="secondary" className="text-blue-950">Checkout com Stripe Connect</Badge>
+              <Badge variant="secondary" className="text-blue-950">Checkout com Asaas</Badge>
               <Badge variant="secondary" className="text-blue-950">Templates profissionais</Badge>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -143,7 +143,7 @@ export default function LandingProposito24h() {
           <FeatureCard
             title="Venda sem intermediários"
             icon={<Wallet className="size-5" />}
-            description="Receba direto na sua conta Stripe Connect, controle preços, cupons e bundles."
+            description="Pagamentos processados com segurança via Asaas (PIX, boleto, cartão). Controle preços e catálogo."
           />
           <FeatureCard
             title="Cresça com dados"
@@ -327,7 +327,7 @@ export default function LandingProposito24h() {
           <AccordionItem value="item-4">
             <AccordionTrigger>Quem fica com o lucro das vendas?</AccordionTrigger>
             <AccordionContent>
-              Você. O valor das vendas cai na sua conta conectada (Stripe Connect). Podem existir tarifas do processador.
+              Os pagamentos são processados pela plataforma via Asaas; repasses aos escritores seguem as regras da plataforma. Podem existir tarifas do processador.
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -407,7 +407,7 @@ const recursos = [
     title: "Vendas & Pagamentos",
     icon: <Wallet className="size-5" />,
     items: [
-      "Stripe Connect integrado",
+      "Integração Asaas (pagamentos)",
       "Cupons, bundles e upgrades",
       "Relatórios de receita"
     ]

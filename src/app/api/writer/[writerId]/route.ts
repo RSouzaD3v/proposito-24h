@@ -14,8 +14,6 @@ export async function GET(
     orderBy: [{ amountCents: "asc" }],
     select: {
       id: true,
-      stripeProductId: true,
-      stripePriceId: true,
       interval: true,
       amountCents: true,
       currency: true,

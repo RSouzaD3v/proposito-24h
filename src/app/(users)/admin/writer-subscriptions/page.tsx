@@ -51,7 +51,7 @@ export default async function AdminWriterSubscriptions({
  ]);
 
 
- const mrrNow = Number(mrrNowAgg._sum.amount ?? 0); // ← agora SEM /100
+ const mrrNow = Number(mrrNowAgg._sum.amount ?? 0) / 100;
 
   // Série MRR por mês (últimos 12 meses) – ativa no mês = startedAt < mês+1 e (endedAt null ou >= mês)
   const mrrSeries = await db.$queryRaw<Array<{ month: Date; mrr: number }>>`
@@ -79,6 +79,7 @@ export default async function AdminWriterSubscriptions({
   if (q) {
     where.OR = [
       ...(where.OR ?? []),
+      { asaasSubscriptionId: { contains: q, mode: "insensitive" } },
       { stripeId: { contains: q, mode: "insensitive" } },
       { description: { contains: q, mode: "insensitive" } },
       { writer: { name: { contains: q, mode: "insensitive" } } },
@@ -125,7 +126,7 @@ export default async function AdminWriterSubscriptions({
               <WriterSubsMRRAreaChart
                 data={mrrSeries.map((r) => ({
                   month: new Date(r.month),
-                  mrr: Number(r.mrr), // ← sem /100
+                  mrr: Number(r.mrr) / 100,
                 }))}
               />
             </Suspense>
@@ -157,11 +158,11 @@ export default async function AdminWriterSubscriptions({
               ))}
             </div>
 
-            {/* Busca por writer/stripe/descrição */}
+            {/* Busca por escritor / Asaas / descrição */}
             <form className="flex gap-2" action="/admin/writer-subscriptions" method="get">
               <input type="hidden" name="status" value={status} />
               <input type="hidden" name="range" value={range} />
-              <Input name="q" placeholder="Buscar por escritor, stripeId, descrição..." defaultValue={q} />
+              <Input name="q" placeholder="Buscar por escritor, asaasSubscriptionId, descrição..." defaultValue={q} />
               <Button type="submit" variant="secondary">Buscar</Button>
             </form>
           </CardContent>
@@ -184,7 +185,7 @@ export default async function AdminWriterSubscriptions({
                 <TableHead>Início</TableHead>
                 <TableHead>Fim</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Stripe</TableHead>
+                <TableHead>Asaas</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -198,13 +199,13 @@ export default async function AdminWriterSubscriptions({
                       ) : "-"}
                     </TableCell>
                     <TableCell className="max-w-[300px] truncate">{s.description ?? "-"}</TableCell>
-                    <TableCell className="text-right">{BRL.format(Number(s.amount))}</TableCell>
+                    <TableCell className="text-right">{BRL.format(Number(s.amount) / 100)}</TableCell>
                     <TableCell>{new Date(s.startedAt).toLocaleDateString()}</TableCell>
                     <TableCell>{s.endedAt ? new Date(s.endedAt).toLocaleDateString() : "-"}</TableCell>
                     <TableCell>
                       <Badge variant={active ? "default" : "secondary"}>{active ? "ATIVA" : "ENCERRADA"}</Badge>
                     </TableCell>
-                    <TableCell className="max-w-[180px] truncate">{s.stripeId ?? "-"}</TableCell>
+                    <TableCell className="max-w-[180px] truncate">{s.asaasSubscriptionId ?? s.stripeId ?? "-"}</TableCell>
                   </TableRow>
                 );
               })}

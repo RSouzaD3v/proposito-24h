@@ -8,12 +8,9 @@ export default function WriterSubscriptionPage() {
   async function handleSubscribe() {
     setLoading(true);
 
-    const res = await fetch("/api/stripe/create-subscription", {
+    const res = await fetch("/api/asaas/writer-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        writerId: "WRITER_ID_AQUI", // ⚡ em prod: pegar da session (NextAuth)
-      }),
     });
 
     const data = await res.json();
@@ -22,7 +19,7 @@ export default function WriterSubscriptionPage() {
     if (data.url) {
       window.location.href = data.url;
     } else {
-      alert("Erro: " + data.error);
+      alert("Erro: " + (data.error || "resposta inválida"));
     }
   }
 
@@ -30,7 +27,7 @@ export default function WriterSubscriptionPage() {
     <main className="flex flex-col items-center justify-center h-screen text-center">
       <h1 className="text-2xl font-bold mb-4">Assinatura da Plataforma</h1>
       <p className="text-gray-600 mb-6">
-        Ative sua assinatura para manter seu espaço white-label ativo.
+        Ative sua assinatura para manter seu espaço white-label ativo. Pagamento processado via Asaas.
       </p>
       <button
         onClick={handleSubscribe}

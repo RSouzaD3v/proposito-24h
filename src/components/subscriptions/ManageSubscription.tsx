@@ -6,7 +6,7 @@ type Props = {
   writerId: string;
   status: string | null;
   cancelAtPeriodEnd?: boolean;
-  currentPeriodEnd?: string | null; // ISO string
+  currentPeriodEnd?: string | null;
 };
 
 export default function ManageSubscription({
@@ -24,22 +24,22 @@ export default function ManageSubscription({
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Erro");
       window.location.reload();
-    } catch (e: any) {
-      alert(e.message || "Falha na operação.");
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Falha na operação.");
     } finally {
       setBusy(false);
     }
   };
 
-  const openPortal = async () => {
+  const openAccount = async () => {
     setBusy(true);
     try {
       const res = await fetch("/api/billing-portal", { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Erro ao abrir portal");
-      window.location.href = data.url;
-    } catch (e: any) {
-      alert(e.message || "Falha ao abrir portal de cobrança.");
+      if (!res.ok) throw new Error(data?.error || "Erro");
+      if (data.url) window.location.href = data.url;
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Falha ao abrir área da conta.");
     } finally {
       setBusy(false);
     }
@@ -57,14 +57,14 @@ export default function ManageSubscription({
         {cancelAtPeriodEnd ? " • Cancelará ao fim do período" : null}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {!cancelAtPeriodEnd && (
           <button
             disabled={busy}
             onClick={() => call(`/api/reader-subscriptions/${writerId}/cancel`)}
             className="px-3 py-2 rounded bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-60"
           >
-            Cancelar no fim do período
+            Cancelar assinatura
           </button>
         )}
 
@@ -80,10 +80,10 @@ export default function ManageSubscription({
 
         <button
           disabled={busy}
-          onClick={openPortal}
+          onClick={openAccount}
           className="px-3 py-2 rounded bg-neutral-200 hover:bg-neutral-300 disabled:opacity-60"
         >
-          Abrir Portal de Pagamentos
+          Área da conta
         </button>
       </div>
     </div>

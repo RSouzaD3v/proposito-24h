@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest) {
       status: true,
       currentPeriodEnd: true,
       cancelAtPeriodEnd: true,
-      stripeSubscriptionId: true,
+      asaasSubscriptionId: true,
       writer: { select: { id: true, name: true, slug: true, logoUrl: true } },
       priceId: true,
     },
