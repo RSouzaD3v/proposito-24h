@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import PlanClient from "./plan-client";
 import Link from "next/link";
 import { ScreenSubscription } from "../../../_components/ScreenSubscription";
+import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 
 type Props = { params: Promise<{ planRef: string }> };
 
@@ -55,26 +56,8 @@ export default async function PlanPage({ params }: Props) {
     );
   }
 
-  // Regras de acesso do writer
-  const verifyAccess = await db.writerReaderAccess.findFirst({
-    where: { writerId: userReader.writerId },
-  });
-
-  // Assinatura do leitor para esse writer
-  const subscription = await db.readerSubscription.findFirst({
-    where: { writerId: userReader.writerId, readerId: session.user.id },
-    // select: { status: true, endsAt: true } // opcional
-  });
-
-  // Defina aqui o que considera "ativa"
-  const hasActiveSubscription =
-    !!subscription &&
-    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
-    ((subscription as any).status === "ACTIVE" ||
-      (subscription as any).status === "active");
-
-  // 🔐 Regra: se o writer bloqueia o plano (biblePlan === true) e usuário NÃO tem assinatura ativa → mostrar paywall e PARAR aqui
-  if (!verifyAccess?.biblePlan && !hasActiveSubscription && !userReader.freePlan) {
+  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "biblePlan");
+  if (!gate.allowed) {
     return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
   }
 

@@ -33,14 +33,7 @@ export default async function ReaderGroupDailyDetailPage({
     );
   }
 
-  /* 1) Permissões do writer */
-  const access = await db.writerReaderAccess.findUnique({
-    where: { writerId: session.user.writerId },
-  });
-
-  if (!access) notFound();
-
-  /* 2) Agrupamento + conteúdos (ordenados) */
+  /* 1) Agrupamento + conteúdos (o bloqueio de acesso fica nas páginas de cada item) */
   const grouping = await db.groupingDaily.findFirst({
     where: {
       id: groupId,
@@ -48,18 +41,10 @@ export default async function ReaderGroupDailyDetailPage({
       active: true,
     },
     include: {
-      devotionals: access.devotional
-        ? { orderBy: { createdAt: "asc" } }
-        : false,
-      verses: access.verse
-        ? { orderBy: { createdAt: "asc" } }
-        : false,
-      prayers: access.prayer
-        ? { orderBy: { createdAt: "asc" } }
-        : false,
-      quotes: access.quote
-        ? { orderBy: { createdAt: "asc" } }
-        : false,
+      devotionals: { orderBy: { createdAt: "asc" } },
+      verses: { orderBy: { createdAt: "asc" } },
+      prayers: { orderBy: { createdAt: "asc" } },
+      quotes: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -117,22 +102,22 @@ export default async function ReaderGroupDailyDetailPage({
       {/* TABS */}
       <Tabs defaultValue="devotionals">
         <TabsList className="grid grid-cols-4">
-          {access.devotional && (
+          {grouping.devotionals.length > 0 && (
             <TabsTrigger value="devotionals">
               Devocionais
             </TabsTrigger>
           )}
-          {access.verse && (
+          {grouping.verses.length > 0 && (
             <TabsTrigger value="verses">
               Versículos
             </TabsTrigger>
           )}
-          {access.prayer && (
+          {grouping.prayers.length > 0 && (
             <TabsTrigger value="prayers">
               Orações
             </TabsTrigger>
           )}
-          {access.quote && (
+          {grouping.quotes.length > 0 && (
             <TabsTrigger value="quotes">
               Citações
             </TabsTrigger>
@@ -140,7 +125,7 @@ export default async function ReaderGroupDailyDetailPage({
         </TabsList>
 
         {/* DEVOCIONAIS */}
-        {access.devotional && (
+        {grouping.devotionals.length > 0 && (
           <TabsContent value="devotionals">
             <List>
               {grouping.devotionals.map(item => (
@@ -156,7 +141,7 @@ export default async function ReaderGroupDailyDetailPage({
         )}
 
         {/* VERSÍCULOS */}
-        {access.verse && (
+        {grouping.verses.length > 0 && (
           <TabsContent value="verses">
             <List>
               {grouping.verses.map(item => (
@@ -172,7 +157,7 @@ export default async function ReaderGroupDailyDetailPage({
         )}
 
         {/* ORAÇÕES */}
-        {access.prayer && (
+        {grouping.prayers.length > 0 && (
           <TabsContent value="prayers">
             <List>
               {grouping.prayers.map(item => (
@@ -188,7 +173,7 @@ export default async function ReaderGroupDailyDetailPage({
         )}
 
         {/* CITAÇÕES */}
-        {access.quote && (
+        {grouping.quotes.length > 0 && (
           <TabsContent value="quotes">
             <List>
               {grouping.quotes.map(item => (

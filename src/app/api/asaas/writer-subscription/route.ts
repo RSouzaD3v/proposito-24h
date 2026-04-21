@@ -7,17 +7,26 @@ import {
   centsToAsaasValue,
   createSubscription,
   formatDateYmd,
+  addDays,
   getFirstInvoiceUrlForSubscription,
   getOrCreateAsaasCustomerForWriter,
   type AsaasSubscriptionCycle,
 } from "@/lib/asaas";
+import { resolveCpfCnpjForAsaas } from "@/lib/billingCpf";
 
 export const runtime = "nodejs";
 
-export async function POST(_req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
+  }
+
+  let body: { cpfCnpj?: string } = {};
+  try {
+    body = (await req.json()) as { cpfCnpj?: string };
+  } catch {
+    body = {};
   }
 
   const userWriter = await db.user.findUnique({
@@ -27,6 +36,11 @@ export async function POST(_req: NextRequest) {
 
   if (!userWriter?.writerId || !userWriter.writer) {
     return NextResponse.json({ error: "Writer não encontrado" }, { status: 404 });
+  }
+
+  const cpf = resolveCpfCnpjForAsaas(body.cpfCnpj, userWriter.cpfCnpj);
+  if (!cpf.ok) {
+    return NextResponse.json({ error: cpf.message }, { status: 400 });
   }
 
   const writer = userWriter.writer;
@@ -40,12 +54,22 @@ export async function POST(_req: NextRequest) {
 
   const cycle = (process.env.ASAAS_WRITER_SUBSCRIPTION_CYCLE ?? "MONTHLY") as AsaasSubscriptionCycle;
 
+  const trialDaysRaw = process.env.ASAAS_WRITER_TRIAL_DAYS ?? "7";
+  const trialDays = Math.max(0, Math.min(365, Number(trialDaysRaw)));
+  const nextDueDate = formatDateYmd(addDays(new Date(), Number.isFinite(trialDays) ? trialDays : 7));
+
   try {
     const customerId = await getOrCreateAsaasCustomerForWriter({
       id: writer.id,
       email: userWriter.email,
       name: userWriter.name,
       asaasCustomerId: writer.asaasCustomerId,
+      cpfCnpj: cpf.digits,
+    });
+
+    await db.user.update({
+      where: { id: userWriter.id },
+      data: { cpfCnpj: cpf.digits },
     });
 
     await db.writer.update({
@@ -59,7 +83,7 @@ export async function POST(_req: NextRequest) {
     const sub = await createSubscription({
       customer: customerId,
       value: centsToAsaasValue(valueCents),
-      nextDueDate: formatDateYmd(new Date()),
+      nextDueDate,
       cycle,
       externalReference,
       description: "Assinatura escritor — plataforma",

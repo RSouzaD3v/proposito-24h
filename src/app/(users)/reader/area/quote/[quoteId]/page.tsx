@@ -3,6 +3,7 @@ import { CompleteQuote } from "./_components/CompleteQuote";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
+import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 
 export default async function QuoteDetails({ params }: { params: Promise<{ quoteId: string }>}) {
     const session = await getServerSession(authOptions);
@@ -43,25 +44,8 @@ export default async function QuoteDetails({ params }: { params: Promise<{ quote
     );
   }
 
-  // Regras de acesso do writer
-  const verifyAccess = await db.writerReaderAccess.findFirst({
-    where: { writerId: userReader.writerId },
-  });
-
-  // Assinatura do leitor para esse writer
-  const subscription = await db.readerSubscription.findFirst({
-    where: { writerId: userReader.writerId, readerId: session.user.id },
-    // select: { status: true, endsAt: true } // opcional
-  });
-
-  // Defina aqui o que considera "ativa"
-  const hasActiveSubscription =
-    !!subscription &&
-    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
-    ((subscription as any).status === "ACTIVE" ||
-      (subscription as any).status === "active");
-
-  if (!verifyAccess?.quote && !hasActiveSubscription && !userReader.freePlan) {
+  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "quote");
+  if (!gate.allowed) {
     return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
   }
 

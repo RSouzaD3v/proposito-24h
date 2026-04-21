@@ -28,6 +28,7 @@ export const config = {
     "/admin/:path*",
     "/writer/:path*",
     "/reader/area/:path*",
+    "/reader/account",
     "/app/:path*",
     // "/api/:path*", // mantém as rotas API, mas o webhook tem exceção no callback
     "/redirector",

@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 
 type Props = {
   writerId: string;
@@ -26,20 +29,6 @@ export default function ManageSubscription({
       window.location.reload();
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Falha na operação.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const openAccount = async () => {
-    setBusy(true);
-    try {
-      const res = await fetch("/api/billing-portal", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Erro");
-      if (data.url) window.location.href = data.url;
-    } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Falha ao abrir área da conta.");
     } finally {
       setBusy(false);
     }
@@ -78,13 +67,9 @@ export default function ManageSubscription({
           </button>
         )}
 
-        <button
-          disabled={busy}
-          onClick={openAccount}
-          className="px-3 py-2 rounded bg-neutral-200 hover:bg-neutral-300 disabled:opacity-60"
-        >
-          Área da conta
-        </button>
+        <Button variant="secondary" asChild>
+          <Link href="/reader/account">Área da conta</Link>
+        </Button>
       </div>
     </div>
   );

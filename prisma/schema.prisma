@@ -73,6 +73,8 @@ model User {
   id                         String                       @id @default(uuid())
   email                      String                       @unique
   name                       String?
+  /// CPF ou CNPJ (somente dígitos), exigido pelo Asaas em cobranças/assinaturas; preenchido no checkout.
+  cpfCnpj                    String?
   password                   String
   role                       Role                         @default(CLIENT)
   asaasCustomerId            String?                      @unique
@@ -116,7 +118,7 @@ model WriterSubscriptionPlan {
   interval          SubscriptionInterval @default(MONTH)
   amountCents       Int
   currency          String               @default("BRL")
-  trialDays         Int                  @default(0)
+  trialDays         Int                  @default(7)
   applicationFeePct Float?
   isActive          Boolean              @default(true)
   createdAt         DateTime             @default(now())
@@ -157,16 +159,16 @@ model ReaderSubscription {
 }
 
 model WriterReaderAccess {
-  id         String   @id @default(uuid())
-  writerId   String   @unique
-  quote      Boolean  @default(true)
-  devotional Boolean  @default(true)
-  verse      Boolean  @default(true)
-  prayer     Boolean  @default(true)
-  biblePlan  Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  writer     Writer   @relation(fields: [writerId], references: [id])
+  id         String           @id @default(uuid())
+  writerId   String           @unique
+  quote      ReaderAccessTier @default(FREE)
+  devotional ReaderAccessTier @default(FREE)
+  verse      ReaderAccessTier @default(FREE)
+  prayer     ReaderAccessTier @default(FREE)
+  biblePlan  ReaderAccessTier @default(FREE)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  writer     Writer           @relation(fields: [writerId], references: [id])
 
   @@index([quote, devotional, verse, prayer, biblePlan])
 }
@@ -492,6 +494,13 @@ enum PublicationStatus {
 enum Visibility {
   FREE
   PAID
+}
+
+/// Conteúdo do leitor: livre, só assinantes, ou compradores/assinantes (ex.: quem comprou ebook pago).
+enum ReaderAccessTier {
+  FREE
+  SUBSCRIPTION
+  PAID_PATRON
 }
 
 enum PurchaseStatus {

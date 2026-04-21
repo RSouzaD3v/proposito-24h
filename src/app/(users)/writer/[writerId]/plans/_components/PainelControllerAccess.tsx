@@ -1,118 +1,156 @@
 'use client'
-import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+type Tier = "FREE" | "SUBSCRIPTION" | "PAID_PATRON";
+
 type Access = {
-    quote: boolean;
-    devotional: boolean;
-    verse: boolean;
-    prayer: boolean;
-    biblePlan: boolean;
+  quote: Tier;
+  devotional: Tier;
+  verse: Tier;
+  prayer: Tier;
+  biblePlan: Tier;
 };
 
+const DEFAULT_ACCESS: Access = {
+  quote: "FREE",
+  devotional: "FREE",
+  verse: "FREE",
+  prayer: "FREE",
+  biblePlan: "FREE",
+};
+
+const TIER_LABEL: Record<Tier, string> = {
+  FREE: "Grátis (leitor logado)",
+  SUBSCRIPTION: "Só com assinatura",
+  PAID_PATRON: "Assinatura ou compra no escritor",
+};
+
+function coerceAccess(raw: unknown): Partial<Access> {
+  if (!raw || typeof raw !== "object") return {};
+  const o = raw as Record<string, unknown>;
+  const tier = (v: unknown): Tier | undefined =>
+    v === "FREE" || v === "SUBSCRIPTION" || v === "PAID_PATRON" ? v : undefined;
+  const fromBool = (b: unknown): Tier | undefined =>
+    typeof b === "boolean" ? (b ? "FREE" : "SUBSCRIPTION") : undefined;
+
+  return {
+    quote: tier(o.quote) ?? fromBool(o.quote),
+    devotional: tier(o.devotional) ?? fromBool(o.devotional),
+    verse: tier(o.verse) ?? fromBool(o.verse),
+    prayer: tier(o.prayer) ?? fromBool(o.prayer),
+    biblePlan: tier(o.biblePlan) ?? fromBool(o.biblePlan),
+  };
+}
+
 export const PainelControllerAccess = ({ writerId }: { writerId: string }) => {
-    const [data, setData] = useState<Access>({
-        quote: true,
-        devotional: true,
-        verse: true,
-        prayer: true,
-        biblePlan: true,
-    });
-    const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Access>(DEFAULT_ACCESS);
+  const [loading, setLoading] = useState(true);
 
-    // Para evitar corrida entre múltiplos PUTs
-    const abortRef = useRef<AbortController | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const resp = await fetch(`/api/writer/${writerId}/access`);
-                const result = (await resp.json()) as Partial<Access>;
-                setData(prev => ({ ...prev, ...result })); // merge seguro
-            } catch (err) {
-                console.error("Error fetching access data:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [writerId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const resp = await fetch(`/api/writer/${writerId}/access`);
+        const result = coerceAccess(await resp.json());
+        setData(prev => ({ ...prev, ...result }));
+      } catch (err) {
+        console.error("Error fetching access data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [writerId]);
 
-    const save = useCallback(async (next: Access) => {
-        try {
-            // aborta requisição anterior se ainda estiver em voo
-            abortRef.current?.abort();
-            const ctrl = new AbortController();
-            abortRef.current = ctrl;
+  const save = useCallback(async (next: Access) => {
+    try {
+      abortRef.current?.abort();
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
 
-            await fetch(`/api/writer/${writerId}/access`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(next),
-                signal: ctrl.signal,
-            });
-        } catch (err) {
-            if ((err as any)?.name !== "AbortError") {
-                console.error("Error updating access data:", err);
-            }
-        }
-    }, [writerId]);
+      await fetch(`/api/writer/${writerId}/access`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(next),
+        signal: ctrl.signal,
+      });
+    } catch (err) {
+      if ((err as { name?: string })?.name !== "AbortError") {
+        console.error("Error updating access data:", err);
+      }
+    }
+  }, [writerId]);
 
-    const handleToggle = useCallback(
-        (name: keyof Access) => (checked: boolean | "indeterminate") => {
-            setData(prev => {
-                const next: Access = { ...prev, [name]: !!checked };
-                // usa o "next" (estado já atualizado) no PUT -> sem atraso
-                void save(next);
-                return next;
-            });
-        },
-        [save]
-    );
+  const handleTier = useCallback(
+    (name: keyof Access) => (value: string) => {
+      const tier = value as Tier;
+      setData(prev => {
+        const next = { ...prev, [name]: tier };
+        void save(next);
+        return next;
+      });
+    },
+    [save]
+  );
 
-    const options: { name: keyof Access; label: string }[] = [
-        { name: "quote", label: "Citação" },
-        { name: "devotional", label: "Devocional" },
-        { name: "verse", label: "Versículo" },
-        { name: "prayer", label: "Oração" },
-        { name: "biblePlan", label: "Plano Bíblico" },
-    ];
+  const options: { name: keyof Access; label: string }[] = [
+    { name: "quote", label: "Citação" },
+    { name: "devotional", label: "Devocional" },
+    { name: "verse", label: "Versículo" },
+    { name: "prayer", label: "Oração" },
+    { name: "biblePlan", label: "Plano Bíblico" },
+  ];
 
-    return (
-        <div className="bg-white rounded-xl shadow-md p-8 mt-8">
-            <h2 className="text-2xl font-semibold mb-2 text-gray-800">
-                Acesso do Leitor
-            </h2>
-            <p className="text-gray-600 mb-6">
-                Gerencie o acesso dos leitores ao seu conteúdo.<br />
-                <span className="text-sm text-gray-400">
-                    (Marque onde deseja permitir o acesso sem assinatura.)
-                </span>
-            </p>
+  return (
+    <div className="bg-white rounded-xl shadow-md p-8 mt-8">
+      <h2 className="text-2xl font-semibold mb-2 text-gray-800">
+        Acesso do Leitor
+      </h2>
+      <p className="text-gray-600 mb-6">
+        Defina como cada tipo de conteúdo é liberado: grátis para quem está logado,
+        apenas para assinantes do escritor, ou para quem já comprou algo (ebook) ou mantém assinatura.
+      </p>
 
-            {loading ? (
-                <div className="flex justify-center items-center py-8">
-                    <span className="text-gray-500">Carregando...</span>
-                </div>
-            ) : (
-                <div className="flex flex-col gap-4">
-                    {options.map(opt => (
-                        <label
-                            key={opt.name}
-                            htmlFor={opt.name}
-                            className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg transition-colors bg-gray-50 hover:bg-gray-100"
-                        >
-                            <Checkbox
-                                id={opt.name}
-                                checked={data[opt.name]}
-                                onCheckedChange={handleToggle(opt.name)}
-                            />
-                            <span className="text-base text-gray-800">{opt.label}</span>
-                        </label>
-                    ))}
-                </div>
-            )}
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <span className="text-gray-500">Carregando...</span>
         </div>
-    );
+      ) : (
+        <div className="flex flex-col gap-5">
+          {options.map(opt => (
+            <div
+              key={opt.name}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-3 rounded-lg bg-gray-50"
+            >
+              <span className="text-base text-gray-800 font-medium">{opt.label}</span>
+              <Select
+                value={data[opt.name]}
+                onValueChange={handleTier(opt.name)}
+              >
+                <SelectTrigger className="w-full sm:w-[280px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(TIER_LABEL) as Tier[]).map(t => (
+                    <SelectItem key={t} value={t}>
+                      {TIER_LABEL[t]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };

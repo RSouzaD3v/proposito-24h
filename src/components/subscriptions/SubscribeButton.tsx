@@ -7,6 +7,8 @@ type Props = {
   planId: string;
   successUrl?: string;
   cancelUrl?: string;
+  /** CPF/CNPJ (com ou sem máscara); obrigatório no backend se ainda não salvo no usuário. */
+  cpfCnpj?: string;
   className?: string;
   children?: React.ReactNode;
 };
@@ -16,6 +18,7 @@ export default function SubscribeButton({
   planId,
   successUrl,
   cancelUrl,
+  cpfCnpj,
   className,
   children = "Assinar",
 }: Props) {
@@ -27,7 +30,7 @@ export default function SubscribeButton({
       const res = await fetch(`/api/writer/${writerId}/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, successUrl, cancelUrl }),
+        body: JSON.stringify({ planId, successUrl, cancelUrl, cpfCnpj }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Falha ao iniciar checkout");

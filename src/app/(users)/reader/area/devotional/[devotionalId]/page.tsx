@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
+import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 
 export default async function VerseDetails({ params }: { params: Promise<{ devotionalId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -43,25 +44,8 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
     );
   }
 
-  // Regras de acesso do writer
-  const verifyAccess = await db.writerReaderAccess.findFirst({
-    where: { writerId: userReader.writerId },
-  });
-
-  // Assinatura do leitor para esse writer
-  const subscription = await db.readerSubscription.findFirst({
-    where: { writerId: userReader.writerId, readerId: session.user.id },
-    // select: { status: true, endsAt: true } // opcional
-  });
-
-  // Defina aqui o que considera "ativa"
-  const hasActiveSubscription =
-    !!subscription &&
-    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
-    ((subscription as any).status === "ACTIVE" ||
-      (subscription as any).status === "active");
-
-  if (!verifyAccess?.devotional && !hasActiveSubscription && !userReader.freePlan) {
+  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "devotional");
+  if (!gate.allowed) {
     return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
   }
 

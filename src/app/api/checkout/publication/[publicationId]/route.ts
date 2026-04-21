@@ -9,9 +9,10 @@ import {
   formatDateYmd,
   getOrCreateAsaasCustomerForUser,
 } from "@/lib/asaas";
+import { resolveCpfCnpjForAsaas } from "@/lib/billingCpf";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ publicationId: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -37,6 +38,18 @@ export async function POST(
     return NextResponse.json({ error: "User não encontrado" }, { status: 404 });
   }
 
+  let body: { cpfCnpj?: string } = {};
+  try {
+    body = (await req.json()) as { cpfCnpj?: string };
+  } catch {
+    body = {};
+  }
+
+  const cpf = resolveCpfCnpjForAsaas(body.cpfCnpj, user.cpfCnpj);
+  if (!cpf.ok) {
+    return NextResponse.json({ error: cpf.message }, { status: 400 });
+  }
+
   const { publicationId } = await params;
 
   const pub = await db.publication.findUnique({
@@ -57,11 +70,12 @@ export async function POST(
     email: user.email,
     name: user.name,
     asaasCustomerId: user.asaasCustomerId,
+    cpfCnpj: cpf.digits,
   });
 
   await db.user.update({
     where: { id: user.id },
-    data: { asaasCustomerId: customerId },
+    data: { asaasCustomerId: customerId, cpfCnpj: cpf.digits },
   });
 
   const purchase = await db.purchase.create({

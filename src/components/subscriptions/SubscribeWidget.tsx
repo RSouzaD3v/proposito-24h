@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import SubscribeButton from "./SubscribeButton";
 import ManageSubscription from "./ManageSubscription";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Plan = {
   id: string;
@@ -58,6 +60,7 @@ export default function SubscribeWidget({
   const [loading, setLoading] = useState(true);
   const [unauth, setUnauth] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cpfCnpj, setCpfCnpj] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -84,6 +87,14 @@ export default function SubscribeWidget({
         if (!mounted) return;
         setPlans(Array.isArray(p) ? p : []);
         setSelected(Array.isArray(p) && p[0]?.id ? p[0].id : null);
+
+        const bRes = await fetch("/api/user/billing", { cache: "no-store" });
+        if (bRes.ok && mounted) {
+          const b = await bRes.json().catch(() => ({}));
+          if (typeof b?.cpfCnpj === "string" && b.cpfCnpj) {
+            setCpfCnpj(b.cpfCnpj);
+          }
+        }
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.message || "Erro ao carregar dados da assinatura.");
@@ -128,6 +139,15 @@ export default function SubscribeWidget({
 
         {!!plans.length && (
           <>
+            <div className="space-y-1 text-left w-full max-w-md mx-auto">
+              <Label htmlFor="cpf-guest">CPF ou CNPJ (para cobrança)</Label>
+              <Input
+                id="cpf-guest"
+                value={cpfCnpj}
+                onChange={(e) => setCpfCnpj(e.target.value)}
+                placeholder="Informe antes de entrar para assinar"
+              />
+            </div>
             <div className="grid gap-3">
               {plans.map((pl) => (
                 <label
@@ -179,6 +199,15 @@ export default function SubscribeWidget({
 
   return (
     <div className="border rounded-xl p-4 flex flex-col gap-4">
+      <div className="space-y-1">
+        <Label htmlFor="cpf-sub">CPF ou CNPJ</Label>
+        <Input
+          id="cpf-sub"
+          value={cpfCnpj}
+          onChange={(e) => setCpfCnpj(e.target.value)}
+          placeholder="Obrigatório para o Asaas (salvo após a 1ª assinatura)"
+        />
+      </div>
       <div className="grid gap-3">
         {plans.map((pl) => (
           <label
@@ -206,6 +235,7 @@ export default function SubscribeWidget({
             planId={selectedPlan.id}
             successUrl={successUrl}
             cancelUrl={cancelUrl}
+            cpfCnpj={cpfCnpj}
           >
             Assinar {centsToMoney(selectedPlan.amountCents, selectedPlan.currency)}
           </SubscribeButton>

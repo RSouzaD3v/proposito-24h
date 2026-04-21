@@ -11,6 +11,7 @@ import { startOfDay, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import clientPromise from "@/lib/mongodb";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
+import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 import { MenuPainel } from "../../_components/MenuPainel";
 
 const TZ = "America/Sao_Paulo";
@@ -98,25 +99,8 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  // Regras de acesso do writer
-  const verifyAccess = await db.writerReaderAccess.findFirst({
-    where: { writerId: userReader.writerId },
-  });
-
-  // Assinatura do leitor para esse writer
-  const subscription = await db.readerSubscription.findFirst({
-    where: { writerId: userReader.writerId, readerId: session.user.id },
-    // select: { status: true, endsAt: true } // opcional
-  });
-
-  // Defina aqui o que considera "ativa"
-  const hasActiveSubscription =
-    !!subscription &&
-    // ajuste conforme seu schema: 'ACTIVE' / 'active' / etc.
-    ((subscription as any).status === "ACTIVE" ||
-      (subscription as any).status === "active");
-
-  if (!verifyAccess?.prayer && !hasActiveSubscription && !userReader.freePlan) {
+  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "prayer");
+  if (!gate.allowed) {
     return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
   }
 

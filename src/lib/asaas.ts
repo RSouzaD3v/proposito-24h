@@ -148,6 +148,7 @@ async function asaasRequest<T>(
 export async function createCustomer(input: {
   name?: string | null;
   email: string;
+  cpfCnpj?: string;
   externalReference?: string;
 }): Promise<AsaasCustomer> {
   return asaasRequest<AsaasCustomer>("/customers", {
@@ -155,6 +156,7 @@ export async function createCustomer(input: {
     json: {
       name: input.name || input.email.split("@")[0],
       email: input.email,
+      ...(input.cpfCnpj ? { cpfCnpj: input.cpfCnpj } : {}),
       ...(input.externalReference ? { externalReference: input.externalReference } : {}),
     },
   });
@@ -162,6 +164,20 @@ export async function createCustomer(input: {
 
 export async function getCustomer(id: string): Promise<AsaasCustomer> {
   return asaasRequest<AsaasCustomer>(`/customers/${encodeURIComponent(id)}`, { method: "GET" });
+}
+
+export async function updateCustomer(
+  id: string,
+  input: { name?: string | null; email?: string; cpfCnpj?: string }
+): Promise<AsaasCustomer> {
+  return asaasRequest<AsaasCustomer>(`/customers/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    json: {
+      ...(input.name != null ? { name: input.name || undefined } : {}),
+      ...(input.email ? { email: input.email } : {}),
+      ...(input.cpfCnpj ? { cpfCnpj: input.cpfCnpj } : {}),
+    },
+  });
 }
 
 export async function createPayment(input: {
@@ -263,10 +279,19 @@ export async function getOrCreateAsaasCustomerForUser(user: {
   email: string;
   name?: string | null;
   asaasCustomerId?: string | null;
+  /** CPF/CNPJ somente dígitos; enviado ao Asaas na criação ou atualização do cliente. */
+  cpfCnpj?: string | null;
 }): Promise<string> {
   if (user.asaasCustomerId) {
     try {
       await getCustomer(user.asaasCustomerId);
+      if (user.cpfCnpj) {
+        await updateCustomer(user.asaasCustomerId, {
+          email: user.email,
+          name: user.name,
+          cpfCnpj: user.cpfCnpj,
+        });
+      }
       return user.asaasCustomerId;
     } catch {
       // recria se inválido
@@ -275,6 +300,7 @@ export async function getOrCreateAsaasCustomerForUser(user: {
   const c = await createCustomer({
     email: user.email,
     name: user.name,
+    cpfCnpj: user.cpfCnpj ?? undefined,
     externalReference: `user:${user.id}`,
   });
   return c.id;
@@ -285,10 +311,18 @@ export async function getOrCreateAsaasCustomerForWriter(writer: {
   email: string;
   name?: string | null;
   asaasCustomerId?: string | null;
+  cpfCnpj?: string | null;
 }): Promise<string> {
   if (writer.asaasCustomerId) {
     try {
       await getCustomer(writer.asaasCustomerId);
+      if (writer.cpfCnpj) {
+        await updateCustomer(writer.asaasCustomerId, {
+          email: writer.email,
+          name: writer.name,
+          cpfCnpj: writer.cpfCnpj,
+        });
+      }
       return writer.asaasCustomerId;
     } catch {
       //
@@ -297,6 +331,7 @@ export async function getOrCreateAsaasCustomerForWriter(writer: {
   const c = await createCustomer({
     email: writer.email,
     name: writer.name,
+    cpfCnpj: writer.cpfCnpj ?? undefined,
     externalReference: `writer:${writer.id}`,
   });
   return c.id;

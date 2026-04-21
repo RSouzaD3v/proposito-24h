@@ -19,7 +19,7 @@ export async function POST(_req: NextRequest) {
 
   const base = process.env.BASE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
   return NextResponse.json({
-    url: `${base}/account`,
+    url: `${base}/reader/account`,
     message:
       "O Asaas não oferece portal tipo Stripe. Gerencie assinaturas na área do leitor ou pelo link enviado por e-mail.",
   });

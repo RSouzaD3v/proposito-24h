@@ -14,6 +14,7 @@ import {
   subscriptionIntervalToCycle,
   type AsaasSubscriptionCycle,
 } from "@/lib/asaas";
+import { resolveCpfCnpjForAsaas } from "@/lib/billingCpf";
 
 export const runtime = "nodejs";
 
@@ -37,7 +38,13 @@ export async function POST(
 
   const userId = session.user.id;
   const { writerId } = await params;
-  const { planId, successUrl } = await req.json();
+  const body = (await req.json()) as {
+    planId?: string;
+    successUrl?: string;
+    cancelUrl?: string;
+    cpfCnpj?: string;
+  };
+  const { planId, successUrl } = body;
 
   const writer = await db.writer.findUnique({ where: { id: writerId } });
   if (!writer) {
@@ -57,16 +64,22 @@ export async function POST(
     return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
   }
 
+  const cpf = resolveCpfCnpjForAsaas(body.cpfCnpj, user.cpfCnpj);
+  if (!cpf.ok) {
+    return NextResponse.json({ error: cpf.message }, { status: 400 });
+  }
+
   const asaasCustomerId = await getOrCreateAsaasCustomerForUser({
     id: user.id,
     email: user.email,
     name: user.name,
     asaasCustomerId: user.asaasCustomerId,
+    cpfCnpj: cpf.digits,
   });
 
   await db.user.update({
     where: { id: userId },
-    data: { asaasCustomerId },
+    data: { asaasCustomerId, cpfCnpj: cpf.digits },
   });
 
   const readerSub = await db.readerSubscription.upsert({
@@ -126,7 +139,7 @@ export async function POST(
       return NextResponse.json({ url: payment.invoiceUrl });
     }
 
-    const trialDays = plan.trialDays ?? 0;
+    const trialDays = plan.trialDays;
     const nextDue = formatDateYmd(addDays(new Date(), trialDays));
 
     const sub = await createSubscription({
@@ -140,11 +153,21 @@ export async function POST(
       ...(redirectCb ? { callback: redirectCb } : {}),
     });
 
+    const trialStart = new Date();
+    const trialEnd = addDays(trialStart, trialDays);
+
     await db.readerSubscription.update({
       where: { id: readerSub.id },
       data: {
         asaasSubscriptionId: sub.id,
         lifetime: false,
+        ...(trialDays > 0
+          ? {
+              status: "TRIALING",
+              currentPeriodStart: trialStart,
+              currentPeriodEnd: trialEnd,
+            }
+          : {}),
       },
     });
 
