@@ -30,7 +30,7 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
     amountCents: 1990,
     currency: "BRL",
     interval: "MONTH" as "DAY" | "WEEK" | "MONTH" | "YEAR" | "LIFETIME",
-    trialDays: 0,
+    trialDays: 7,
     applicationFeePct: 0,
     isReaderVisible: true, // ✅ fica dentro do form e vai no POST
   });
@@ -120,14 +120,18 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
             value={form.currency}
             onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
           />
-          <input
-            className="border p-2 rounded"
-            type="number"
-            min={0}
-            placeholder="trialDays"
-            value={form.trialDays}
-            onChange={(e) => setForm((f) => ({ ...f, trialDays: Number(e.target.value) }))}
-          />
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-gray-700">Dias de teste grátis</span>
+            <input
+              className="border p-2 rounded"
+              type="number"
+              min={0}
+              max={90}
+              value={form.trialDays}
+              onChange={(e) => setForm((f) => ({ ...f, trialDays: Number(e.target.value) }))}
+            />
+            <span className="text-xs text-gray-500">Padrão 7 dias. Use 0 para cobrar desde o início.</span>
+          </label>
           <input
             className="border p-2 rounded"
             type="number"

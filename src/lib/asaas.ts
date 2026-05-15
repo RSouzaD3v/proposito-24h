@@ -11,7 +11,7 @@ function getBaseUrl(): string {
 }
 
 function getApiKey(): string {
-  const k = `$${process.env.ASAAS_API_KEY}`;
+  const k = process.env.ASAAS_API_KEY?.trim();
   if (!k) throw new Error("ASAAS_API_KEY não configurada");
   return k;
 }

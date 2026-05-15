@@ -116,8 +116,8 @@ export const PainelControllerAccess = ({ writerId }: { writerId: string }) => {
         Acesso do Leitor
       </h2>
       <p className="text-gray-600 mb-6">
-        Defina como cada tipo de conteúdo é liberado: grátis para quem está logado,
-        apenas para assinantes do escritor, ou para quem já comprou algo (ebook) ou mantém assinatura.
+        Defina como cada tipo de conteúdo diário é liberado. Nos ebooks, use &quot;Acesso do leitor&quot; na
+        publicação: grátis, venda avulsa ou somente assinantes (preço 0).
       </p>
 
       {loading ? (

@@ -21,6 +21,8 @@ type StatusResp = {
   exists: boolean;
   isActive: boolean;
   status: string | null;
+  isTrial?: boolean;
+  nextPaymentLabel?: string | null;
   currentPeriodStart?: string | null;
   currentPeriodEnd?: string | null;
   cancelAtPeriodEnd?: boolean;
@@ -180,15 +182,25 @@ export default function SubscribeWidget({
     );
   }
 
-  // Já assinante
   if (active && status) {
     return (
-      <ManageSubscription
-        writerId={writerId}
-        status={status.status}
-        cancelAtPeriodEnd={status.cancelAtPeriodEnd}
-        currentPeriodEnd={status.currentPeriodEnd ?? null}
-      />
+      <div className="space-y-3 rounded-xl border bg-card p-4">
+        {status.isTrial ? (
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            Você está no período de teste
+            {status.nextPaymentLabel ? ` — ${status.nextPaymentLabel}` : ""}.
+          </p>
+        ) : status.nextPaymentLabel ? (
+          <p className="text-sm text-muted-foreground">{status.nextPaymentLabel}</p>
+        ) : null}
+        <ManageSubscription
+          writerId={writerId}
+          status={status.status}
+          cancelAtPeriodEnd={status.cancelAtPeriodEnd}
+          currentPeriodEnd={status.currentPeriodEnd ?? null}
+          isTrial={status.isTrial}
+        />
+      </div>
     );
   }
 

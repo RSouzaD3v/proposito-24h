@@ -15,6 +15,7 @@ import {
   type AsaasSubscriptionCycle,
 } from "@/lib/asaas";
 import { resolveCpfCnpjForAsaas } from "@/lib/billingCpf";
+import { readerSubscriptionIsActive } from "@/lib/readerSubscription";
 
 export const runtime = "nodejs";
 
@@ -82,11 +83,24 @@ export async function POST(
     data: { asaasCustomerId, cpfCnpj: cpf.digits },
   });
 
+  const existing = await db.readerSubscription.findUnique({
+    where: { reader_writer_unique: { readerId: userId, writerId } },
+  });
+
+  if (existing && readerSubscriptionIsActive(existing)) {
+      return NextResponse.json(
+        { error: "Você já possui uma assinatura ativa ou em período de teste." },
+        { status: 400 }
+      );
+  }
+
   const readerSub = await db.readerSubscription.upsert({
     where: { reader_writer_unique: { readerId: userId, writerId } },
     update: {
       priceId: plan.id,
       status: "INCOMPLETE",
+      cancelAtPeriodEnd: false,
+      cancelAt: null,
     },
     create: {
       readerId: userId,

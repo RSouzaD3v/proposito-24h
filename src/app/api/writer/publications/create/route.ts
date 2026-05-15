@@ -6,8 +6,11 @@ import { notifyNewBook } from "@/lib/push/send";
 
 function assertPaidInputs(visibility: string, price?: number | null, currency?: string | null) {
   if (visibility !== "PAID") return;
-  if (price == null || price < 1) throw new Error("Para conteúdo pago, 'price' (centavos) é obrigatório.");
-  if (!currency) throw new Error("Para conteúdo pago, 'currency' é obrigatória (ex.: 'BRL').");
+  if (price == null) throw new Error("Informe o preço em centavos ou 0 para somente assinantes.");
+  if (price < 0) throw new Error("Preço inválido.");
+  if (price >= 1 && !currency) {
+    throw new Error("Para venda avulsa, 'currency' é obrigatória (ex.: 'BRL').");
+  }
 }
 
 export async function POST(req: NextRequest) {

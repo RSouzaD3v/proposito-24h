@@ -18,28 +18,45 @@ export async function POST(
     where: { reader_writer_unique: { readerId: session.user.id, writerId } },
   });
 
-  if (!sub?.asaasSubscriptionId) {
-    return NextResponse.json({ error: "Assinatura Asaas não encontrada" }, { status: 404 });
+  if (!sub) {
+    return NextResponse.json({ error: "Assinatura não encontrada" }, { status: 404 });
   }
 
-  try {
-    await deleteSubscription(sub.asaasSubscriptionId);
-  } catch (e: unknown) {
-    console.error(e);
+  if (sub.lifetime) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Falha ao cancelar no Asaas" },
-      { status: 502 }
+      { error: "Acesso vitalício não pode ser cancelado por aqui." },
+      { status: 400 }
     );
   }
+
+  const periodEnd = sub.currentPeriodEnd ?? new Date();
+  const now = new Date();
+
+  if (sub.asaasSubscriptionId) {
+    try {
+      await deleteSubscription(sub.asaasSubscriptionId);
+    } catch (e: unknown) {
+      console.error(e);
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "Falha ao cancelar no Asaas" },
+        { status: 502 }
+      );
+    }
+  }
+
+  const keepAccessUntilEnd = periodEnd > now;
 
   await db.readerSubscription.update({
     where: { id: sub.id },
     data: {
-      status: "CANCELED",
-      cancelAt: new Date(),
-      cancelAtPeriodEnd: false,
+      cancelAt: now,
+      cancelAtPeriodEnd: keepAccessUntilEnd,
+      status: keepAccessUntilEnd ? sub.status : "CANCELED",
     },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    accessUntil: keepAccessUntilEnd ? periodEnd.toISOString() : null,
+  });
 }

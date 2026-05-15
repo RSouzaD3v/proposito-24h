@@ -75,7 +75,7 @@ export async function POST(
       amountCents,
       currency = "BRL",
       interval = "MONTH",
-      trialDays = 0,
+      trialDays = 7,
       applicationFeePct = null as number | null,
       isReaderVisible = true,
     } = body;

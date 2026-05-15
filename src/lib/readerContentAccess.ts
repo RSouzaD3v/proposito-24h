@@ -1,27 +1,16 @@
 export type ReaderAccessTier = "FREE" | "SUBSCRIPTION" | "PAID_PATRON";
 
-type ReaderSubLite = {
-  status: string;
-  currentPeriodEnd: Date | null;
-  lifetime: boolean;
-} | null;
-
-export function readerSubscriptionIsActive(
-  sub: ReaderSubLite,
-  now = new Date()
-): boolean {
-  if (!sub) return false;
-  if (sub.lifetime && sub.status === "ACTIVE") return true;
-  if (sub.status !== "ACTIVE" && sub.status !== "TRIALING") return false;
-  if (sub.currentPeriodEnd && sub.currentPeriodEnd <= now) return false;
-  return true;
-}
+export {
+  readerSubscriptionIsActive,
+  daysUntil,
+  formatSubscriptionStatus,
+  subscriptionSummary,
+} from "@/lib/readerSubscription";
 
 export function readerTierAllowsAccess(
   tier: ReaderAccessTier,
   ctx: {
     hasActiveSubscription: boolean;
-    /** Pelo menos uma compra concluída com este escritor (ex.: ebook). */
     hasPatronPurchase: boolean;
     platformFreePlan: boolean;
   }

@@ -15,8 +15,9 @@ const publicationStatuses = [
 ];
 
 const visibilities = [
-  { value: "FREE", label: "Grátis" },
-  { value: "PAID", label: "Pago" },
+  { value: "FREE", label: "Grátis para leitores" },
+  { value: "PAID", label: "Venda avulsa (defina preço)" },
+  { value: "SUBSCRIPTION", label: "Somente assinantes" },
 ];
 
 export default function WriterPublicationCreatePage() {
@@ -161,13 +162,31 @@ export default function WriterPublicationCreatePage() {
             </select>
           </div>
 
-          {/* Visibilidade */}
           <div>
-            <label className="block font-semibold mb-1 text-gray-700">Visibilidade</label>
+            <label className="block font-semibold mb-1 text-gray-700">Acesso do leitor</label>
             <select
-              name="visibility"
-              value={form.visibility}
-              onChange={handleChange}
+              name="accessMode"
+              value={
+                form.visibility === "FREE"
+                  ? "FREE"
+                  : Number(form.price) === 0
+                    ? "SUBSCRIPTION"
+                    : "PAID"
+              }
+              onChange={(e) => {
+                const mode = e.target.value;
+                if (mode === "FREE") {
+                  setForm((prev) => ({ ...prev, visibility: "FREE", price: "" }));
+                } else if (mode === "SUBSCRIPTION") {
+                  setForm((prev) => ({ ...prev, visibility: "PAID", price: "0" }));
+                } else {
+                  setForm((prev) => ({
+                    ...prev,
+                    visibility: "PAID",
+                    price: prev.price === "0" ? "" : prev.price,
+                  }));
+                }
+              }}
               className="w-full border rounded-lg p-2"
             >
               {visibilities.map((v) => (
@@ -178,8 +197,7 @@ export default function WriterPublicationCreatePage() {
             </select>
           </div>
 
-          {/* Preço se pago */}
-          {form.visibility === "PAID" && (
+          {form.visibility === "PAID" && Number(form.price) > 0 && (
             <>
               <div>
                 <label className="block font-semibold mb-1 text-gray-700">

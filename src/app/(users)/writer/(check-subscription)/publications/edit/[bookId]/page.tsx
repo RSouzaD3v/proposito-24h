@@ -16,8 +16,9 @@ const publicationStatuses = [
 ];
 
 const visibilities = [
-    { value: "FREE", label: "Grátis" },
-    { value: "PAID", label: "Pago" },
+    { value: "FREE", label: "Grátis para leitores" },
+    { value: "PAID", label: "Venda avulsa (defina preço)" },
+    { value: "SUBSCRIPTION", label: "Somente assinantes" },
 ];
 
 export default function WriterPublicationCreatePage({ params }: { params: Promise<{ bookId: string }> }) {
@@ -115,14 +116,38 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                         </select>
                     </div>
                     <div>
-                        <label className="block font-semibold text-gray-700 mb-1">Visibilidade</label>
-                        <select name="visibility" value={form.visibility} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200">
+                        <label className="block font-semibold text-gray-700 mb-1">Acesso do leitor</label>
+                        <select
+                            name="accessMode"
+                            value={
+                                form.visibility === "FREE"
+                                    ? "FREE"
+                                    : Number(form.price) === 0
+                                      ? "SUBSCRIPTION"
+                                      : "PAID"
+                            }
+                            onChange={(e) => {
+                                const mode = e.target.value;
+                                if (mode === "FREE") {
+                                    setForm((prev) => ({ ...prev, visibility: "FREE", price: "" }));
+                                } else if (mode === "SUBSCRIPTION") {
+                                    setForm((prev) => ({ ...prev, visibility: "PAID", price: "0" }));
+                                } else {
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        visibility: "PAID",
+                                        price: prev.price === "0" ? "" : prev.price,
+                                    }));
+                                }
+                            }}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200"
+                        >
                             {visibilities.map((v) => (
                                 <option key={v.value} value={v.value}>{v.label}</option>
                             ))}
                         </select>
                     </div>
-                    {form.visibility === "PAID" && (
+                    {form.visibility === "PAID" && Number(form.price) > 0 && (
                         <div className="flex gap-2">
                             <div className="flex-1">
                                 <label className="block font-semibold text-gray-700 mb-1">Preço (centavos)</label>
