@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       coverUrl: coverUrl ?? null,
       body: content ?? null,
       tags: Array.isArray(tags) ? tags : [],
-      isPdf: isPdf ?? false,
+      isPdf: isPdf === true || isPdf === "true",
       pdfUrl: pdfUrl ?? null,
       category: category ?? "Outros",
     },

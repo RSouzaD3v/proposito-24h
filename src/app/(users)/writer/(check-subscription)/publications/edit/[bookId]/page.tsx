@@ -40,30 +40,38 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
     });
 
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
-            const { bookId } = await params;
-            const res = await fetch(`/api/writer/publications/edit/${bookId}`);
-            const data = await res.json();
-            setForm({
-                type: data.type ?? "EBOOK",
-                status: data.status ?? "DRAFT",
-                visibility: data.visibility ?? "FREE",
-                price: data.price != null ? String(data.price) : "",
-                currency: data.currency ?? "BRL",
-                title: data.title ?? "",
-                subtitle: data.subtitle ?? "",
-                description: data.description ?? "",
-                coverUrl: data.coverUrl ?? "",
-                body: data.body ?? "",
-                tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags ?? ""),
-                isPdf: data.isPdf === true || data.isPdf === "true",
-                pdfUrl: data.pdfUrl ?? "",
-                category: data.category ?? "Outros",
-            });
+            try {
+                const { bookId } = await params;
+                const res = await fetch(`/api/writer/publications/edit/${bookId}`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao carregar publicação");
+                setForm({
+                    type: data.type ?? "EBOOK",
+                    status: data.status ?? "DRAFT",
+                    visibility: data.visibility ?? "FREE",
+                    price: data.price != null ? String(data.price) : "",
+                    currency: data.currency ?? "BRL",
+                    title: data.title ?? "",
+                    subtitle: data.subtitle ?? "",
+                    description: data.description ?? "",
+                    coverUrl: data.coverUrl ?? "",
+                    body: data.body ?? "",
+                    tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags ?? ""),
+                    isPdf: data.isPdf === true || data.isPdf === "true",
+                    pdfUrl: data.pdfUrl ?? "",
+                    category: data.category ?? "Outros",
+                });
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Erro ao carregar publicação");
+            } finally {
+                setInitialLoading(false);
+            }
         };
         fetchData();
     }, [params]);
@@ -96,10 +104,24 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    ...form,
-                    isPdf: form.isPdf === true,
-                    price: form.visibility === "PAID" ? Number(form.price) : undefined,
+                    title: form.title,
+                    subtitle: form.subtitle,
+                    description: form.description,
+                    coverUrl: form.coverUrl,
+                    visibility: form.visibility,
+                    status: form.status,
+                    currency: form.currency,
+                    category: form.category,
+                    body: form.body,
                     tags: form.tags,
+                    isPdf: form.isPdf === true,
+                    pdfUrl: form.pdfUrl,
+                    price:
+                        form.visibility === "PAID"
+                            ? form.price === ""
+                                ? 0
+                                : Number(form.price)
+                            : null,
                 }),
             });
             const data = await res.json().catch(() => ({}));
@@ -121,6 +143,9 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
             </Link>
             <h1 className="text-3xl font-extrabold mb-2 text-center text-blue-700">Atualizar Publicação</h1>
             <p className="mb-8 text-center text-gray-500">Edite os detalhes da sua publicação abaixo</p>
+            {initialLoading ? (
+                <p className="text-center text-gray-500">Carregando publicação...</p>
+            ) : (
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <div>
@@ -316,8 +341,8 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                 <div className="md:col-span-2 flex flex-col gap-2">
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-lg shadow"
-                        disabled={loading}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-lg shadow disabled:opacity-60"
+                        disabled={loading || initialLoading}
                     >
                         {loading ? "Salvando..." : "Salvar Publicação"}
                     </button>
@@ -325,6 +350,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                     {error && <div className="text-red-600 font-semibold text-center">{error}</div>}
                 </div>
             </form>
+            )}
         </section>
     );
 }
