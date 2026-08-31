@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { ReactNode } from "react";
+import GateSignOut from "../_components/GateSignOut";
 
 export default async function SubscriptionWriter({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -58,6 +59,7 @@ export default async function SubscriptionWriter({ children }: { children: React
         >
           Assinar Agora
         </Link>
+        <GateSignOut />
       </div>
     );
   }

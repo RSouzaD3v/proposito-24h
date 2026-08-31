@@ -4,7 +4,6 @@ import S3UploaderPdf from "@/components/S3UploaderPdf";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { is } from "zod/v4/locales";
 
 const publicationTypes = [
     { value: "EBOOK", label: "Ebook" },
@@ -49,13 +48,36 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
             const { bookId } = await params;
             const res = await fetch(`/api/writer/publications/edit/${bookId}`);
             const data = await res.json();
-            setForm(data);
+            setForm({
+                type: data.type ?? "EBOOK",
+                status: data.status ?? "DRAFT",
+                visibility: data.visibility ?? "FREE",
+                price: data.price != null ? String(data.price) : "",
+                currency: data.currency ?? "BRL",
+                title: data.title ?? "",
+                subtitle: data.subtitle ?? "",
+                description: data.description ?? "",
+                coverUrl: data.coverUrl ?? "",
+                body: data.body ?? "",
+                tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags ?? ""),
+                isPdf: data.isPdf === true || data.isPdf === "true",
+                pdfUrl: data.pdfUrl ?? "",
+                category: data.category ?? "Outros",
+            });
         };
         fetchData();
     }, [params]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        if (name === "isPdf") {
+            setForm((prev) => ({
+                ...prev,
+                isPdf: value === "true",
+                pdfUrl: value === "false" ? "" : prev.pdfUrl,
+            }));
+            return;
+        }
         setForm((prev) => ({
             ...prev,
             [name]: value,
@@ -75,16 +97,18 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...form,
+                    isPdf: form.isPdf === true,
                     price: form.visibility === "PAID" ? Number(form.price) : undefined,
                     tags: form.tags,
                 }),
             });
-            if (!res.ok) throw new Error("Erro ao criar publicação");
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || "Erro ao atualizar publicação");
             setSuccess(true);
 
             router.push("/writer/publications");
         } catch (err) {
-            setError("Erro desconhecido");
+            setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
         }
@@ -297,7 +321,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                     >
                         {loading ? "Salvando..." : "Salvar Publicação"}
                     </button>
-                    {success && <div className="text-green-600 font-semibold text-center">Publicação criada com sucesso!</div>}
+                    {success && <div className="text-green-600 font-semibold text-center">Publicação atualizada com sucesso!</div>}
                     {error && <div className="text-red-600 font-semibold text-center">{error}</div>}
                 </div>
             </form>

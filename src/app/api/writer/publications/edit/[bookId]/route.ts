@@ -50,6 +50,7 @@ export async function PUT(
       pdfUrl,
       currency: bodyCurrency,
       category,
+      body: content,
     } = body ?? {};
 
     if (!title || !description || !coverUrl || !visibility || !status) {
@@ -82,6 +83,7 @@ export async function PUT(
 
     const currencyUpper = (bodyCurrency ?? existing.currency ?? "BRL").toUpperCase();
     const tagsNormalized = normalizeTags(tags);
+    const isPdfBool = isPdf === true || isPdf === "true";
 
     const updated = await db.publication.update({
       where: { id: bookId },
@@ -94,8 +96,9 @@ export async function PUT(
         price,
         subtitle,
         status,
-        isPdf,
-        pdfUrl,
+        isPdf: isPdfBool,
+        pdfUrl: isPdfBool ? (pdfUrl || null) : null,
+        body: content ?? null,
         currency: currencyUpper,
         category: category ?? "Outros",
       },
