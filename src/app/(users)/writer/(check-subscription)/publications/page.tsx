@@ -2,91 +2,83 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { CreateButton } from "@/components/ui/create-button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { Button } from "@/components/ui/button";
 
 export default async function WriterPublicationPage() {
     const session = await getServerSession(authOptions);
 
     if (!session || !session?.user.writerId) {
         return (
-            <div className="max-w-3xl mx-auto py-10 px-4 text-center">
-                <p className="text-red-500 text-lg font-medium">
-                    Acesso negado. Por favor, faça login.
-                </p>
-            </div>
+            <WriterShell maxWidth="2xl">
+                <GlassCard className="text-center">
+                    <p className="text-lg font-medium text-red-600">
+                        Acesso negado. Por favor, faça login.
+                    </p>
+                </GlassCard>
+            </WriterShell>
         );
     }
 
     const pubs = await db.publication.findMany({
         where: {
             writerId: session?.user?.writerId,
-        }
+        },
     });
 
     return (
-        <div className="max-w-4xl mx-auto py-10 px-6">
-            <Link
-                href="/writer/dashboard"
-                className="bg-blue-600 text-white mb-6 px-2 rounded-sm inline-block text-sm font-medium"
-            >
-                ← Voltar ao Painel
-            </Link>
+        <WriterShell maxWidth="4xl">
+            <PageHeader
+                title="Painel de Publicações"
+                description="Gerencie suas publicações de forma fácil e rápida."
+                backHref="/writer/dashboard"
+                backLabel="Voltar ao Painel"
+                actions={
+                    <>
+                        <Button asChild variant="glass" className="rounded-full px-5 font-semibold">
+                            <Link href="/writer/publications/my-vitrine">Minha Vitrine</Link>
+                        </Button>
+                        <CreateButton href="/writer/publications/create" label="Nova Publicação" />
+                    </>
+                }
+            />
 
-            <div className="flex items-center flex-wrap gap-4 justify-between mb-8">
-                <div>
-                    <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
-                        Painel de Publicações
-                    </h1>
-                    <p className="text-gray-600 text-lg">
-                        Gerencie suas publicações de forma fácil e rápida.
-                    </p>
-                </div>
-                <div className="flex items-center gap-4 flex-wrap">
-                    <Link href={"/writer/publications/my-vitrine"}>
-                        <span className="bg-blue-600 py-2 px-4 text-white rounded-sm">
-                            Minha Vitrine
-                        </span>
-                    </Link>
-                    <Link
-                        href="/writer/publications/create"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-sm shadow hover:bg-blue-700 transition"
-                    >
-                        + Nova Publicação
-                    </Link>
-                </div>
-            </div>
-
-            <div className="space-y-6">
-                {pubs.map(pub => (
-                    <div
+            <div className="space-y-4">
+                {pubs.map((pub, index) => (
+                    <GlassCard
                         key={pub.id}
-                        className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition"
+                        strong
+                        interactive
+                        className="animate-glass-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
                     >
-                        <h2 className="text-2xl font-semibold text-gray-800">
+                        <h2 className="text-xl font-semibold tracking-tight text-[var(--liquid-ink)] md:text-2xl">
                             {pub.title}
                         </h2>
-                        <p className="text-gray-700 mt-2">{pub.description}</p>
-                        <div className="flex items-center gap-4 mt-4">
-                            <Link
-                                href={`/writer/publications/edit/${pub.id}`}
-                                className="bg-blue-600 text-white p-2 rounded-sm"
-                            >
-                                Editar
-                            </Link>
-                            <Link
-                                href={`/writer/publications/${pub.slug}/chapters`}
-                                className="bg-blue-100 text-black p-2 rounded-sm"
-                            >
-                                Ver Capítulos
-                            </Link>
+                        <p className="mt-2 text-[var(--liquid-muted)]">{pub.description}</p>
+                        <div className="mt-5 flex flex-wrap items-center gap-3">
+                            <Button asChild variant="glass-primary" className="rounded-full px-4">
+                                <Link href={`/writer/publications/edit/${pub.id}`}>Editar</Link>
+                            </Button>
+                            <Button asChild variant="glass" className="rounded-full px-4">
+                                <Link href={`/writer/publications/${pub.slug}/chapters`}>
+                                    Ver Capítulos
+                                </Link>
+                            </Button>
                         </div>
-                    </div>
+                    </GlassCard>
                 ))}
                 {pubs.length === 0 && (
-                    <div className="text-gray-500 text-center py-12">
-                        <p className="text-lg">Nenhuma publicação encontrada.</p>
-                    </div>
+                    <GlassCard className="py-12 text-center">
+                        <p className="text-lg text-[var(--liquid-muted)]">
+                            Nenhuma publicação encontrada.
+                        </p>
+                    </GlassCard>
                 )}
             </div>
-        </div>
+        </WriterShell>
     );
 }

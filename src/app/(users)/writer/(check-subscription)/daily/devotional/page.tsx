@@ -2,7 +2,11 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
+import { CreateButton } from "@/components/ui/create-button";
+import { Button } from "@/components/ui/button";
 
 export default async function DevotionalPage() {
     const session = await getServerSession(authOptions);
@@ -23,54 +27,44 @@ export default async function DevotionalPage() {
     });
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center py-10">
-            <Link href="/writer/daily" className="mb-8 flex items-center gap-2 absolute top-5 left-5 text-indigo-700 font-bold text-lg">
-                <FiArrowLeft size={24}/>
-                Voltar
-            </Link>
-
-            <div className="w-full max-w-xl mx-auto mb-8 flex items-center justify-between bg-white/90 rounded-xl shadow p-6">
-                <span className="text-lg font-semibold text-indigo-700">Devocional do Dia</span>
-                <div className="flex items-center gap-4">
-                    {devotional && (
-                        <Link
-                            href={`/writer/daily/devotional/edit/${devotional.id}`}
-                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                        >
-                            Editar
-                        </Link>
-                    )}
-                    <Link
-                        href={`/writer/daily/devotional/new`}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                    >
-                        Novo
-                    </Link>
-
-                </div>
-            </div>
+        <WriterShell maxWidth="xl">
+            <PageHeader
+                title="Devocional do Dia"
+                backHref="/writer/daily"
+                actions={
+                    <>
+                        {devotional && (
+                            <Button asChild variant="glass" className="rounded-full px-4">
+                                <Link href={`/writer/daily/devotional/edit/${devotional.id}`}>
+                                    Editar
+                                </Link>
+                            </Button>
+                        )}
+                        <CreateButton href="/writer/daily/devotional/new" label="Novo" />
+                    </>
+                }
+            />
 
             {devotional ? (
-                <div className="bg-white/90 shadow rounded-xl px-8 py-10 w-full max-w-xl text-center">
-                    <h2 className="mb-4 text-indigo-400 text-xs font-semibold tracking-widest">PROPÓSITO 24H</h2>
-                    <span className="text-indigo-500 text-sm font-semibold">{devotional.title}</span>
+                <GlassCard strong className="text-center">
+                    <h2 className="mb-4 text-xs font-semibold tracking-widest text-[var(--liquid-accent)]">
+                        PROPÓSITO 24H
+                    </h2>
+                    <span className="mb-2 block text-sm font-semibold text-[var(--liquid-muted)]">
+                        {devotional.title}
+                    </span>
                     <blockquote className="mb-6">
-                        <p className="text-2xl font-light text-gray-800 italic whitespace-pre-line leading-relaxed">
+                        <p className="whitespace-pre-line text-2xl font-light italic leading-relaxed text-[var(--liquid-ink)]">
                             “{devotional.content}”
                         </p>
                     </blockquote>
-                </div>
+                </GlassCard>
             ) : (
-                <div className="w-full max-w-xl mx-auto text-center p-8 bg-white/80 rounded-xl shadow">
-                    <p className="mb-4 text-gray-600">Nenhum devocional criado hoje.</p>
-                    <Link
-                        href="/writer/daily/devotional/new"
-                        className="inline-block px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-                    >
-                        Criar Novo Devocional
-                    </Link>
-                </div>
+                <GlassCard strong className="text-center">
+                    <p className="mb-4 text-[var(--liquid-muted)]">Nenhum devocional criado hoje.</p>
+                    <CreateButton href="/writer/daily/devotional/new" label="Criar Novo Devocional" />
+                </GlassCard>
             )}
-        </div>
+        </WriterShell>
     );
 }

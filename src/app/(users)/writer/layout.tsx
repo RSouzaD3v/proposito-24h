@@ -1,4 +1,5 @@
 import { AuthWriterProvider } from "./(check-subscription)/_contexts/AuthContext";
+import { WriterShell } from "@/components/ui/writer-shell";
 
 export default function WriterLayout({
   children,
@@ -6,10 +7,10 @@ export default function WriterLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <AuthWriterProvider>
-          <section>
-              {children}
-          </section>
-      </AuthWriterProvider>
+    <AuthWriterProvider>
+      <WriterShell contained={false} className="min-h-screen">
+        {children}
+      </WriterShell>
+    </AuthWriterProvider>
   );
 }

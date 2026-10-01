@@ -51,7 +51,7 @@ export function ModalGroupDaily() {
     <Dialog open={open} onOpenChange={setOpen}>
       {/* BOTÃO */}
       <DialogTrigger asChild>
-        <Button className="gap-2">
+        <Button variant="glass-primary" className="gap-2 rounded-full">
           <Plus size={16} />
           Criar agrupamento diário
         </Button>

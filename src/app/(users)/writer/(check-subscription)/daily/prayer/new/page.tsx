@@ -1,9 +1,10 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
 import S3AudioUploader from "@/components/S3UploaderAudio";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
 
 export default function PrayerNewPage() {
     const [form, setForm] = useState({
@@ -51,10 +52,7 @@ export default function PrayerNewPage() {
 
     return (
         <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
-            <Link href="/writer/daily/prayer" className="flex items-center gap-2 mb-6 text-blue-600">
-                <FaArrowLeft size={24} />
-                Voltar
-            </Link>
+            <BackButton href="/writer/daily/prayer" className="mb-6" />
             <h1 className="text-2xl font-bold mb-6 text-center">Criar Nova Oração</h1>
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -155,13 +153,15 @@ export default function PrayerNewPage() {
                     </label>
                     <S3AudioUploader folder="audios" onUploaded={(file) => setForm({ ...form, audioUrl: file.publicUrl })} />
                 </div>
-                <button
+                <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                    variant="glass-primary"
+                    className="w-full rounded-full"
                 >
+                    {loading && <ButtonSpinner />}
                     {loading ? "Salvando..." : "Salvar Oração"}
-                </button>
+                </Button>
                 {success && (
                     <div className="text-green-600 text-center font-medium mt-2">
                         Oração criada com sucesso!

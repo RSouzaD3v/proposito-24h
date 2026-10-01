@@ -1,10 +1,10 @@
 // app/reader/register/page.tsx
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { GlassCard } from "@/components/ui/glass-card";
+import { WriterShell } from "@/components/ui/writer-shell";
 import { ReaderRegister } from "./_components/formRegister";
 
 export default async function ReaderRegisterPage() {
@@ -42,23 +42,23 @@ export default async function ReaderRegisterPage() {
 
   if (!writer) {
     return (
-      <div className="min-h-screen grid place-items-center bg-red-50">
-        <Card className="w-full max-w-md border-red-200 bg-white">
-          <CardContent className="p-8 text-center">
+      <WriterShell contained={false} className="grid place-items-center">
+        <WriterShell maxWidth="md">
+          <GlassCard strong className="text-center">
             <div className="mx-auto mb-4 size-12 rounded-full bg-red-100" />
             <h1 className="text-2xl font-bold text-red-600">Subdomínio inválido</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-[var(--liquid-muted)]">
               O subdomínio <b>{subdomain || "vazio"}</b> não está registrado para nenhum escritor.
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          </GlassCard>
+        </WriterShell>
+      </WriterShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="mx-auto w-full max-w-lg px-4 py-10">
+    <WriterShell contained={false}>
+      <WriterShell maxWidth="lg">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           {writer.logoUrl ? (
             <img
@@ -72,26 +72,24 @@ export default async function ReaderRegisterPage() {
             <div className="grid size-20 place-items-center rounded-xl bg-slate-200 text-slate-500">LOGO</div>
           )}
           <div>
-            <h1 className="text-2xl font-bold leading-tight">Criar conta</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold leading-tight text-[var(--liquid-ink)]">Criar conta</h1>
+            <p className="text-sm text-[var(--liquid-muted)]">
               Você está se registrando para <span className="font-medium">{writer.name}</span>
             </p>
           </div>
           <Badge variant="secondary">Leitor</Badge>
         </div>
 
-        <Card className="shadow-sm">
-          <CardContent className="p-6">
+        <GlassCard strong>
             <ReaderRegister writer={{ id: writer.id, name: writer.name }} />
             <Separator className="my-6" />
-            <p className="text-center text-xs text-muted-foreground">
+            <p className="text-center text-xs text-[var(--liquid-muted)]">
               Ao continuar, você concorda com nossa 
               <a className="underline hover:text-foreground" href="/privacy">Política de Privacidade</a> e 
               <a className="underline hover:text-foreground" href="/terms">Termos de Uso</a>.
             </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </GlassCard>
+      </WriterShell>
+    </WriterShell>
   );
 }

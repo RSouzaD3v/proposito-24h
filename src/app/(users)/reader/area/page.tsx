@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
 import { FiChevronRight } from "react-icons/fi";
-import { MenuPainel } from "./_components/MenuPainel";
 import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
 import { VerseCard } from "./_components/devotional/verse/VerseCard";
 import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
 import { PrayerCard } from "./_components/devotional/prayer/PrayerCard";
-import { ThemeWriterProvider } from "./_contexts/ThemeWriterContext";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db";
@@ -15,6 +13,7 @@ import { startOfDay, addDays, subDays, format, parse } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { WeekDayFilter } from "./_components/WeekDayFilter";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -131,76 +130,85 @@ export default async function AreaReader({
   ];
 
   return (
-    <ThemeWriterProvider>
-      <section className="container mx-auto min-h-screen md:px-1 px-5 py-36 transition-all">
-        <HeaderReader
-          colors={colors}
-          titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}
-        />
+    <section className="mx-auto w-full max-w-6xl px-4 py-36 transition-all sm:px-5">
+      <HeaderReader
+        colors={colors}
+        titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}
+      />
 
-        <div className="w-full flex items-center justify-center">
-          <WeekDayFilter colors={colors} />
-        </div>
+      <div className="flex w-full items-center justify-center">
+        <WeekDayFilter colors={colors} />
+      </div>
 
-        {/* 📅 Data baseada no filtro */}
-        <div className="px-2">
-          {activeDay.toLocaleDateString("pt-BR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}{" "}
-          -{" "}
-          {activeDay.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+      <div className="text-[var(--liquid-ink)]">
+        {activeDay.toLocaleDateString("pt-BR", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}{" "}
+        -{" "}
+        {activeDay.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
 
-          <h2 className="md:text-xl text-lg font-bold mt-1">
-            {userReader?.writer?.titleApp || "Meu Devocional"}
-          </h2>
-        </div>
+        <h2 className="mt-1 text-lg font-bold md:text-xl">
+          {userReader?.writer?.titleApp || "Meu Devocional"}
+        </h2>
+      </div>
 
-        {/* 📖 Cards principais (ainda sem receber o dayRange) */}
-        <h3 className="mt-6 mb-2 px-2 my-2">DEVOCIONAL DIÁRIO</h3>
-        <div className="grid md:grid-cols-4 grid-cols-1 gap-6 px-2 py-1">
+      <h3 className="my-2 mt-6 text-sm font-semibold tracking-wide text-[var(--liquid-muted)]">
+        DEVOCIONAL DIÁRIO
+      </h3>
+      <div className="grid w-full min-w-0 grid-cols-1 gap-4 py-1 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="min-w-0">
           <QuoteCard colors={colors} dayRange={dayRange} />
+        </div>
+        <div className="min-w-0">
           <VerseCard colors={colors} dayRange={dayRange} />
+        </div>
+        <div className="min-w-0">
           <DevotionalCard colors={colors} dayRange={dayRange} />
+        </div>
+        <div className="min-w-0">
           <PrayerCard colors={colors} dayRange={dayRange} />
         </div>
+      </div>
 
-        {/* ⚙️ Funcionalidades */}
-        <h3 className="mt-5 px-2 my-2">FUNCIONALIDADES & OUTROS</h3>
-        <div className="space-y-6 md:p-0 py-6 px-2">
-          {items.map((item) => (
-            <Link
-              key={item.id}
-              href={item.link}
-              style={{ backgroundColor: colors.background, color: colors.text }}
-              className="flex items-center justify-between p-5 rounded-2xl shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 group"
+      <h3 className="my-2 mt-5 text-sm font-semibold tracking-wide text-[var(--liquid-muted)]">
+        FUNCIONALIDADES & OUTROS
+      </h3>
+      <div className="space-y-4 py-4">
+        {items.map((item) => (
+          <Link key={item.id} href={item.link} className="group block min-w-0">
+            <GlassCard
+              interactive
+              padding="lg"
+              className="flex w-full min-w-0 items-center justify-between gap-4"
             >
-              <div>
-                <h2 className="md:text-2xl text-xl font-extrabold mb-2">
+              <div className="min-w-0">
+                <h2 className="mb-2 truncate text-xl font-extrabold text-[var(--liquid-ink)] md:text-2xl">
                   {item.name}
                 </h2>
                 <p
-                  style={{ color: colors.buttonText, backgroundColor: colors.buttonBg }}
-                  className="text-xs px-3 py-1 rounded-full w-fit font-semibold shadow"
+                  style={{
+                    color: colors.buttonText,
+                    backgroundColor: colors.buttonBg,
+                  }}
+                  className="w-fit rounded-full px-3 py-1 text-xs font-semibold shadow"
                 >
                   {item.type}
                 </p>
               </div>
               <FiChevronRight
-                size={40}
-                className="text-white group-hover:translate-x-2 transition-transform duration-200"
+                size={36}
+                className="shrink-0 text-[var(--liquid-muted)] transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[var(--liquid-ink)]"
               />
-            </Link>
-          ))}
-        </div>
-
-        <MenuPainel colors={colors} />
-      </section>
-    </ThemeWriterProvider>
+            </GlassCard>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

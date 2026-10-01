@@ -24,10 +24,6 @@ function assertPaidInputs(visibility: string, price?: number | null, currency?: 
   }
 }
 
-function parseBoolean(value: unknown): boolean {
-  return value === true || value === "true";
-}
-
 function parsePrice(value: unknown): number | null {
   if (value == null || value === "") return null;
   const n = Number(value);
@@ -56,7 +52,6 @@ export async function PUT(
       price,
       subtitle,
       status,
-      isPdf,
       pdfUrl,
       currency: bodyCurrency,
       category,
@@ -96,10 +91,14 @@ export async function PUT(
     const categoryFinal = category ?? existing.category ?? "Outros";
     const currencyUpper = (bodyCurrency ?? existing.currency ?? "BRL").toUpperCase();
     const tagsNormalized = normalizeTags(tags ?? existing.tags);
-    const isPdfBool = parseBoolean(isPdf ?? existing.isPdf);
-    const pdfUrlFinal = isPdfBool
-      ? (pdfUrl || existing.pdfUrl || null)
-      : null;
+    // pdfUrl explícito: string → usa; ""/null → remove; undefined → mantém existing
+    const pdfUrlFinal =
+      pdfUrl === undefined
+        ? existing.pdfUrl ?? null
+        : pdfUrl
+          ? String(pdfUrl)
+          : null;
+    const isPdfBool = Boolean(pdfUrlFinal);
     const contentFinal = content ?? existing.body ?? null;
 
     if (!titleFinal) {

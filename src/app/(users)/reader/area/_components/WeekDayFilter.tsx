@@ -57,7 +57,7 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
 
   return (
     <div
-      className="flex items-center gap-2 md:gap-6 mb-10 mt-3 px-2"
+      className="mb-10 mt-3 flex w-full max-w-full flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4"
       style={{
         ["--primary" as any]: colors.primary,
         ["--secondary" as any]: colors.secondary,
@@ -72,7 +72,7 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
         const isActive =
           activeDayParam
             ? dayParam === activeDayParam
-            : dayParam === todayParam; // 👈 fallback para hoje
+            : dayParam === todayParam;
 
         return (
           <button
@@ -87,16 +87,17 @@ export function WeekDayFilter({ colors }: WeekDayFilterProps) {
                 : undefined
             }
             className={`
-              w-10 h-10
+              size-9 shrink-0
               flex items-center justify-center
               rounded-full
               font-bold
               transition-all duration-200
+              sm:size-10
               ${
                 !selectable
                   ? "bg-secondary text-(--buttonText) opacity-25 cursor-not-allowed"
                   : isActive
-                    ? "bg-primary text-white shadow-lg scale-105 opacity-100"
+                    ? "bg-primary text-white shadow-lg opacity-100"
                     : "bg-secondary text-(--buttonText) opacity-20 hover:opacity-70"
               }
             `}

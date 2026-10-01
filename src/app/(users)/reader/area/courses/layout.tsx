@@ -4,8 +4,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-        <section className="bg-gray-950 text-white min-h-screen flex flex-col">
-            {children}
-        </section>
+    <section className="min-h-screen flex flex-col text-[var(--liquid-ink)]">
+      {children}
+    </section>
   );
 }

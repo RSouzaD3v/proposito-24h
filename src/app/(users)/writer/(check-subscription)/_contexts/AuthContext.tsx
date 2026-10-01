@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from "next/navigation";
 import { useContext, createContext, useState, useEffect } from "react";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface UserType {
   id: string;
@@ -25,7 +26,6 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
       setLoading(true);
 
       try {
-        // 1) Verifica cache
         const cached = localStorage.getItem("writerUser");
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -34,7 +34,6 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        // 2) Se não tem cache → faz request
         const response = await fetch("/api/writer/me");
         if (!response.ok) throw new Error("Network response was not ok");
 
@@ -45,7 +44,6 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        // 3) Salva no estado + cache
         setUser(data.user);
         localStorage.setItem("writerUser", JSON.stringify(data.user));
       } catch (error) {
@@ -59,14 +57,7 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
   }, [router]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-50 to-slate-200">
-        <div className="w-12 h-12 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
-        <span className="mt-4 text-blue-600 font-medium text-lg">
-          Carregando...
-        </span>
-      </div>
-    );
+    return <LoadingState variant="full" label="Carregando..." />;
   }
 
   if (!user) {

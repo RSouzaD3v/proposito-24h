@@ -1,20 +1,15 @@
 'use client';
 
 import S3Uploader from "@/components/S3Uploader";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardFooter,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
+import { BackButton } from "@/components/ui/back-button";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 
 interface DataTypes {
     userWriter: {
@@ -81,14 +76,12 @@ export const FormProfile = (data: DataTypes) => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
-            <Card className="w-full max-w-md shadow-xl border-none bg-background/80 backdrop-blur-md">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-center text-2xl font-semibold tracking-tight">
-                        Configurações do Perfil
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
+        <div className="space-y-4">
+            <BackButton href="/writer/dashboard" label="Voltar ao Painel" />
+            <GlassCard strong padding="lg" className="w-full">
+                <h1 className="mb-6 text-center text-2xl font-semibold tracking-tight text-[var(--liquid-ink)]">
+                    Configurações do Perfil
+                </h1>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <Label htmlFor="titleApp" className="mb-1">
@@ -179,23 +172,21 @@ export const FormProfile = (data: DataTypes) => {
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full mt-2"
-                            variant="default"
+                            className="mt-2 w-full rounded-full"
+                            variant="glass-primary"
                             size="lg"
                         >
-                            {loading ? "Salvando..." : "Salvar Perfil"}
+                            {loading ? (
+                                <>
+                                    <ButtonSpinner />
+                                    Salvando...
+                                </>
+                            ) : (
+                                "Salvar Perfil"
+                            )}
                         </Button>
                     </form>
-                </CardContent>
-                <CardFooter className="flex justify-center mt-2">
-                    <Link
-                        href="/writer/dashboard"
-                        className="text-muted-foreground text-sm hover:underline"
-                    >
-                        Voltar ao Dashboard
-                    </Link>
-                </CardFooter>
-            </Card>
+            </GlassCard>
         </div>
     );
 };

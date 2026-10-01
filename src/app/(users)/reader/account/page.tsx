@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, ChevronRight, CreditCard, Settings, UserRound } from "lucide-react";
+import { BookOpen, ChevronRight, CreditCard, Settings, UserRound } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -8,15 +8,9 @@ import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Separator } from "@/components/ui/separator";
 
 function initials(name: string | null | undefined, email: string) {
@@ -78,26 +72,19 @@ export default async function ReaderAccountPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100dvh-2rem)] bg-linear-to-b from-muted/50 via-background to-background">
-      <div className="mx-auto max-w-2xl space-y-8 px-4 py-8 md:px-6 md:py-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-3">
-            <Button variant="outline" size="icon" className="shrink-0" asChild>
-              <Link href="/reader/area" aria-label="Voltar para a área do leitor">
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Minha conta</h1>
-              <p className="text-muted-foreground mt-1 text-sm md:text-base">
-                Dados do perfil e atalhos para a sua experiência no app.
-              </p>
-            </div>
-          </div>
+    <div className="space-y-8">
+        <BackButton href="/reader/area" className="mb-2" />
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--liquid-ink)] md:text-3xl">
+            Minha conta
+          </h1>
+          <p className="mt-1 text-sm text-[var(--liquid-muted)] md:text-base">
+            Dados do perfil e atalhos para a sua experiência no app.
+          </p>
         </div>
 
-        <Card className="overflow-hidden border-border/60 shadow-sm">
-          <CardHeader className="pb-4">
+        <GlassCard strong padding="none" className="overflow-hidden">
+          <div className="p-6 pb-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <div
@@ -107,11 +94,11 @@ export default async function ReaderAccountPage() {
                   {label}
                 </div>
                 <div className="min-w-0 space-y-1">
-                  <CardTitle className="text-xl font-semibold leading-tight">
+                  <p className="text-xl font-semibold leading-tight text-[var(--liquid-ink)]">
                     {user.name?.trim() || "Leitor"}
-                  </CardTitle>
-                  <CardDescription className="truncate text-base">{user.email}</CardDescription>
-                  <p className="text-muted-foreground text-xs">Membro desde {memberSince}</p>
+                  </p>
+                  <p className="truncate text-base text-[var(--liquid-muted)]">{user.email}</p>
+                  <p className="text-xs text-[var(--liquid-muted)]">Membro desde {memberSince}</p>
                 </div>
               </div>
               {user.freePlan ? (
@@ -120,10 +107,10 @@ export default async function ReaderAccountPage() {
                 </Badge>
               ) : null}
             </div>
-          </CardHeader>
+          </div>
           <Separator />
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3 rounded-lg border border-dashed bg-muted/30 p-4">
+          <div className="p-6 pt-6">
+            <div className="flex items-start gap-3 rounded-lg border border-dashed border-[var(--liquid-border)] bg-white/20 p-4">
               <UserRound className="text-muted-foreground mt-0.5 size-5 shrink-0" />
               <div className="min-w-0 space-y-1">
                 <p className="text-sm font-medium">Escritor vinculado</p>
@@ -144,8 +131,8 @@ export default async function ReaderAccountPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </GlassCard>
 
         <div>
           <h2 className="text-muted-foreground mb-3 text-sm font-medium uppercase tracking-wide">
@@ -154,34 +141,29 @@ export default async function ReaderAccountPage() {
           <div className="grid gap-3 sm:grid-cols-1">
             {links.map(({ href, title, description, icon: Icon }) => (
               <Link key={href} href={href} className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                <Card className="h-full border-border/60 transition-colors group-hover:border-primary/30 group-hover:bg-accent/30">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 py-4">
+                <GlassCard padding="sm" interactive className="flex flex-row items-center gap-4">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1 space-y-1">
-                      <CardTitle className="text-base font-medium">{title}</CardTitle>
-                      <CardDescription className="text-sm">{description}</CardDescription>
+                      <p className="text-base font-medium text-[var(--liquid-ink)]">{title}</p>
+                      <p className="text-sm text-[var(--liquid-muted)]">{description}</p>
                     </div>
-                    <ChevronRight className="text-muted-foreground size-5 shrink-0 transition-transform group-hover:translate-x-0.5" />
-                  </CardHeader>
-                </Card>
+                    <ChevronRight className="size-5 shrink-0 text-[var(--liquid-muted)] transition-transform group-hover:translate-x-0.5" />
+                </GlassCard>
               </Link>
             ))}
           </div>
         </div>
 
-        <Card className="border-border/40 bg-muted/20">
-          <CardFooter className="flex flex-col items-stretch gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-muted-foreground text-sm">
+        <GlassCard padding="sm" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[var(--liquid-muted)]">
               Precisa sair desta conta neste dispositivo? Use o botão de sair nas configurações.
             </p>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="glass" size="sm" asChild>
               <Link href="/reader/area/settings">Abrir configurações</Link>
             </Button>
-          </CardFooter>
-        </Card>
-      </div>
+        </GlassCard>
     </div>
   );
 }

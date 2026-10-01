@@ -1,26 +1,29 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function BibleLayout({ children }: { children: ReactNode }) {
     return (
-        <main className="mx-auto max-w-5xl px-4 py-8">
-            <header className="mb-8">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <Link href="/reader/area/" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
-                        ← Ir para início
-                    </Link>
-                    <Link href={"/reader/area/reading/plan/365"} className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
-                        Ver meu progresso 📖
-                    </Link>
-                </div>
-                <h1 className="text-3xl font-bold mt-2">Bíblia (ACF)</h1>
-                <p className="text-sm text-muted-foreground">
-                    Navegue por livros, capítulos e versículos.
-                </p>
-                <Link href="/reader/area/bible-nvi" className="text-sm bg-gray-400 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors mt-2 inline-block">
-                    Ir para Biblia (NVI)
-                </Link>
-            </header>
+        <main className="mx-auto max-w-5xl px-4 py-8 pb-28">
+            <PageHeader
+                title="Bíblia (ACF)"
+                description="Navegue por livros, capítulos e versículos."
+                backHref="/reader/area"
+                backLabel="Ir para início"
+                actions={
+                    <>
+                        <Button asChild variant="glass" className="rounded-full">
+                            <Link href="/reader/area/reading/plan/365">
+                                Ver meu progresso
+                            </Link>
+                        </Button>
+                        <Button asChild variant="glass-primary" className="rounded-full">
+                            <Link href="/reader/area/bible-nvi">Bíblia NVI</Link>
+                        </Button>
+                    </>
+                }
+            />
             {children}
         </main>
     );

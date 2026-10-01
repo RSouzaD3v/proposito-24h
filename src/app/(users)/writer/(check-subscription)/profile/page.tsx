@@ -2,12 +2,18 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { FormProfile } from "./_components/FormProfile";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function ProfilePage() {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-        return <div>Acesso negado</div>;
+        return (
+            <WriterShell maxWidth="md">
+                <GlassCard className="text-center">Acesso negado</GlassCard>
+            </WriterShell>
+        );
     }
 
     const userWriter = await db.user.findUnique({
@@ -29,12 +35,18 @@ export default async function ProfilePage() {
     });
 
     if (!userWriter?.writer) {
-        return <div>Perfil de escritor não encontrado.</div>;
+        return (
+            <WriterShell maxWidth="md">
+                <GlassCard className="text-center">
+                    Perfil de escritor não encontrado.
+                </GlassCard>
+            </WriterShell>
+        );
     }
 
     return (
-        <section>
+        <WriterShell maxWidth="md">
             <FormProfile userWriter={userWriter}/>
-        </section>
+        </WriterShell>
     )
 }

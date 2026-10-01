@@ -87,9 +87,11 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
 
     return (
         <ThemeWriterContext.Provider value={{ theme, setTheme, mode, setMode, changeMode }}>
-            <section className={`${mode === "dark" ? "bg-propositoGray text-white" : "bg-white text-black"} transition-colors duration-300`}>
+            <div
+              className={`${mode === "dark" ? "text-white dark" : "text-[var(--liquid-ink)]"} transition-colors duration-300`}
+            >
                 {children}
-            </section>
+            </div>
         </ThemeWriterContext.Provider>
     );
 };

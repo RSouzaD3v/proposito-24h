@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBookByAbbrev, getChaptersOfBook } from "@/lib/bible";
+import { BackButton } from "@/components/ui/back-button";
 
 type RouteParams = { book: string };
 
@@ -32,7 +33,7 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
       </div>
 
       <div className="mt-6">
-        <Link href="/reader/area/bible-acf" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
+        <BackButton href="/reader/area/bible-acf" label="Todos os livros" />
       </div>
     </section>
   );

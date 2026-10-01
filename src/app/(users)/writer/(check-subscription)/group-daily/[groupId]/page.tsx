@@ -2,10 +2,8 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
 import { GroupingContentManager } from "./_components/GroupingContentManager";
 import { ModalEditGroupDaily } from "../_components/ModalEditGroupDaily";
 
@@ -123,12 +121,7 @@ export default async function GroupDailyDetailPage({ params }: PageProps) {
             initialImageUrl={grouping.imageUrl}
           />
         
-          <Button asChild variant="outline">
-            <Link href="/writer/group-daily" className="flex items-center gap-2">
-              <ArrowLeft size={16} />
-              Voltar
-            </Link>
-          </Button>
+          <BackButton href="/writer/group-daily" />
         </div>
       </div>
 

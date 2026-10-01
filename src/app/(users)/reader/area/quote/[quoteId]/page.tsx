@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
 import { getReaderContentGate } from "@/lib/readerAccessForWriter";
+import { BackButton } from "@/components/ui/back-button";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function QuoteDetails({ params }: { params: Promise<{ quoteId: string }>}) {
     const session = await getServerSession(authOptions);
@@ -51,7 +53,9 @@ export default async function QuoteDetails({ params }: { params: Promise<{ quote
 
     return (
         <div style={{ backgroundImage: quote?.imageUrl ? `url(${quote.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} className="min-h-screen px-4 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
-            <div className="bg-white/80 shadow-xl rounded-2xl px-8 py-10 max-w-xl w-full flex flex-col items-center">
+            <div className="flex w-full max-w-xl flex-col gap-4">
+                <BackButton href="/reader/area/daily" className="self-start" />
+                <GlassCard strong className="flex w-full flex-col items-center">
                 <h2 className="mb-8 text-gray-500 tracking-widest text-xs font-semibold">{quote?.writer.name}</h2>
                 <blockquote className="relative text-center">
                     <p className="text-2xl font-light text-gray-700 italic leading-relaxed z-10">{quote?.content}</p>
@@ -64,6 +68,7 @@ export default async function QuoteDetails({ params }: { params: Promise<{ quote
                         <CompleteQuote quoteId={quote.id} />
                     </div>
                 )}
+                </GlassCard>
             </div>
         </div>
     );

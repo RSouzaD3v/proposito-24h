@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 
 export function ReaderRegister({
   writer,
@@ -149,9 +150,11 @@ export function ReaderRegister({
         </div>
       </div>
 
-      <Button type="submit" disabled={loading} className="h-11 w-full">
+      <Button type="submit" variant="glass-primary" disabled={loading} className="h-11 w-full rounded-full">
         {loading ? (
-          <span className="inline-flex items-center gap-2"><Loader2 className="size-4 animate-spin" /> Registrando…</span>
+          <span className="inline-flex items-center gap-2">
+            <ButtonSpinner /> Registrando…
+          </span>
         ) : (
           "Registrar"
         )}

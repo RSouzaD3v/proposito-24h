@@ -4,9 +4,10 @@ import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function GameAreaPage() {
   const session = await getServerSession(authOptions);
@@ -29,28 +30,23 @@ export default async function GameAreaPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        <Link href={"/reader/area/games"} className="bg-black hover:bg-gray-800 text-white p-2 rounded-sm">
-            Voltar para Games
-        </Link>
-      {/* Header */}
-      <header className="space-y-2 mt-5">
-        <h1 className="text-3xl font-bold">Área de Jogos</h1>
-        <p className="text-muted-foreground">
-          Jogue, avance de nível e ganhe recompensas
-        </p>
-      </header>
+      <PageHeader
+        title="Área de Jogos"
+        description="Jogue, avance de nível e ganhe recompensas"
+        backHref="/reader/area/games"
+      />
 
-      {/* Empty state */}
       {games.length === 0 && (
-        <Card className="p-8 text-center">
-          <h2 className="text-lg font-semibold">Nenhum jogo disponível</h2>
-          <p className="text-sm text-muted-foreground mt-2">
+        <GlassCard strong className="p-8 text-center">
+          <h2 className="text-lg font-semibold text-[var(--liquid-ink)]">
+            Nenhum jogo disponível
+          </h2>
+          <p className="text-sm text-[var(--liquid-muted)] mt-2">
             Em breve novos jogos estarão disponíveis para você.
           </p>
-        </Card>
+        </GlassCard>
       )}
 
-      {/* Games */}
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {games.map((game) => {
           const playerGame = game.playerGames?.[0];
@@ -61,30 +57,24 @@ export default async function GameAreaPage() {
               : "Em progresso"
             : "Novo";
 
-          const statusVariant = playerGame
-            ? playerGame.completed
-              ? "success"
-              : "outline"
-            : "secondary";
-
           return (
-            <Card key={game.id} className="flex flex-col justify-between">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  {game.title}
-                  <Badge>{statusLabel}</Badge>
-                </CardTitle>
-              </CardHeader>
+            <GlassCard key={game.id} strong className="flex flex-col justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-semibold text-[var(--liquid-ink)]">
+                    {game.title}
+                  </h3>
+                  <Badge variant="secondary">{statusLabel}</Badge>
+                </div>
 
-              <CardContent className="space-y-4">
                 {game.description && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-[var(--liquid-muted)]">
                     {game.description}
                   </p>
                 )}
 
                 {playerGame && (
-                  <div className="text-sm space-y-1">
+                  <div className="text-sm space-y-1 text-[var(--liquid-ink)]">
                     <p>
                       <strong>Nível atual:</strong> {playerGame.currentLevel}
                     </p>
@@ -93,14 +83,14 @@ export default async function GameAreaPage() {
                     </p>
                   </div>
                 )}
+              </div>
 
-                <Button asChild className="w-full">
-                  <Link href={`/reader/area/game/${game.slug}/play`}>
-                    {playerGame ? "Continuar" : "Começar"}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+              <Button asChild variant="glass-primary" className="w-full rounded-full">
+                <Link href={`/reader/area/game/${game.slug}/play`}>
+                  {playerGame ? "Continuar" : "Começar"}
+                </Link>
+              </Button>
+            </GlassCard>
           );
         })}
       </section>

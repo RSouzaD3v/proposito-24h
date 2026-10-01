@@ -11,11 +11,10 @@ import { redirect } from "next/navigation";
 
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
+import { ReaderBottomNav } from "./_components/ReaderBottomNav";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
 import { TrackAccess } from "@/components/TrackAccess";
-// import { GroupingPickerGate } from "./_components/GroupingPickerGate";
-// import { GroupingCompletionGate } from "./_components/GroupingCompletionGate";
-
+import { WriterShell } from "@/components/ui/writer-shell";
 
 export default async function ReaderLayout({
   children,
@@ -38,7 +37,7 @@ export default async function ReaderLayout({
   if (!user?.writer?.id) {
     return (
       <section className="p-8">
-        <h1 className="text-xl font-bold mb-2">
+        <h1 className="mb-2 text-xl font-bold">
           Conta sem escritor vinculado
         </h1>
         <p className="opacity-80">
@@ -48,55 +47,19 @@ export default async function ReaderLayout({
     );
   }
 
-  // 🔹 Busca grouping ativo do usuário
-  // const userGrouping = await db.userGroupingDaily.findFirst({
-  //   where: {
-  //     userId: user.id,
-  //     status: "ACTIVE",
-  //   },
-  //   select: {
-  //     id: true,
-  //     status: true,
-  //   },
-  // });
-
-  // 🔹 Busca todos os groupings disponíveis do writer
-  // const groupings = await db.groupingDaily.findMany({
-  //   where: {
-  //     writerId: user.writer.id,
-  //     active: true,
-  //   },
-  //   select: {
-  //     id: true,
-  //     title: true,
-  //     description: true,
-  //     imageUrl: true,
-  //   },
-  // });
-
-  // 🔹 Decide se deve forçar escolha
-  // const shouldShowGroupingPicker =
-  //   !userGrouping || userGrouping.status === "COMPLETED";
-
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
-        <PushBootstrap writerId={user.writer.id} userId={user.id} />
-
-        {/* <GroupingCompletionGate /> */}
-
-        {/* 🔥 Modal FULLSCREEN se precisar */}
-        {/* <GroupingPickerGate
-          shouldShow={shouldShowGroupingPicker}
-          groupings={groupings}
-        /> */}
-
-        <PainelControl />
-
-        <section>{children}</section>
-
-        <TeacherBibleAI />
-        <TrackAccess />
+        <WriterShell contained={false} className="pb-28">
+          <PushBootstrap writerId={user.writer.id} userId={user.id} />
+          <PainelControl />
+          <section className="relative z-0 w-full">
+            {children}
+          </section>
+          <ReaderBottomNav />
+          <TeacherBibleAI />
+          <TrackAccess />
+        </WriterShell>
       </ThemeWriterProvider>
     </AuthReaderProvider>
   );

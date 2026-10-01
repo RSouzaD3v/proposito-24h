@@ -157,3 +157,97 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Liquid glass design system */
+:root {
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-bg-strong: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(255 255 255 / 0.65);
+  --glass-highlight: rgb(255 255 255 / 0.85);
+  --glass-shadow: 0 8px 32px rgb(15 40 80 / 0.08), 0 1px 2px rgb(15 40 80 / 0.04);
+  --glass-radius: 1.25rem;
+  --liquid-sky: #c8e4ff;
+  --liquid-mist: #e8f0ff;
+  --liquid-foam: #f5f9ff;
+  --liquid-accent: #2b6de5;
+  --liquid-ink: #1a2b4a;
+  --liquid-muted: #5a6b85;
+}
+
+.liquid-shell {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display",
+    "SF Pro Text", system-ui, sans-serif;
+  color: var(--liquid-ink);
+  -webkit-font-smoothing: antialiased;
+  /* clip evita overflow-x sem forçar overflow-y:auto (2ª scrollbar) */
+  overflow-x: clip;
+}
+
+.liquid-bg {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, var(--liquid-sky) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, #d4e8ff 0%, transparent 50%),
+    radial-gradient(ellipse 60% 45% at 50% 100%, #dde8f8 0%, transparent 55%),
+    linear-gradient(180deg, var(--liquid-foam) 0%, var(--liquid-mist) 50%, #eef3fb 100%);
+}
+
+.liquid-bg::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 40%, rgb(120 180 255 / 0.22), transparent 35%),
+    radial-gradient(circle at 78% 65%, rgb(160 200 255 / 0.18), transparent 40%);
+  animation: liquid-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes liquid-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2%, -1.5%, 0) scale(1.04);
+  }
+}
+
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  border-radius: var(--glass-radius);
+}
+
+.glass-surface-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  border-radius: var(--glass-radius);
+}
+
+.glass-border {
+  border: 1px solid var(--glass-border);
+}
+
+@keyframes glass-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-glass-in {
+  animation: glass-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

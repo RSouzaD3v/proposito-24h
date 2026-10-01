@@ -2,7 +2,9 @@
 
 import S3Uploader from "@/components/S3Uploader";
 import WriterAiButton from "@/components/WriterAi";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -24,6 +26,7 @@ export default function WriterPublicationChapterNewPage({
   const [slug, setSlug] = useState("");
   const router = useRouter();
   const [form, setForm] = useState<{ coverUrl?: string; content?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
 
   // pega o slug vindo do route segment
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function WriterPublicationChapterNewPage({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitting(true);
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData);
 
@@ -61,17 +65,18 @@ export default function WriterPublicationChapterNewPage({
       router.push(`/writer/publications/${slug}/chapters`);
     } catch (e) {
       console.log(e);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <section className="flex justify-center items-center min-h-screen bg-gray-50">
-      <Link
-        href={`/writer/publications/${slug}/chapters`}
-        className="absolute top-4 left-4 text-blue-600 hover:underline"
-      >
-        Voltar á Página Anterior
-      </Link>
+    <section className="relative flex justify-center items-center min-h-screen bg-gray-50 px-4">
+      <BackButton
+        href={slug ? `/writer/publications/${slug}/chapters` : "/writer/publications"}
+        label="Voltar aos capítulos"
+        className="absolute top-4 left-4"
+      />
 
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <header className="mb-8 text-center">
@@ -196,12 +201,15 @@ export default function WriterPublicationChapterNewPage({
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
+            variant="glass-primary"
+            className="w-full rounded-full py-3"
+            disabled={submitting}
           >
-            Criar Capítulo
-          </button>
+            {submitting && <ButtonSpinner />}
+            {submitting ? "Criando..." : "Criar Capítulo"}
+          </Button>
         </form>
       </div>
     </section>

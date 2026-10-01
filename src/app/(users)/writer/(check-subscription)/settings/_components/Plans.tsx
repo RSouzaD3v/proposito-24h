@@ -2,6 +2,7 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export async function Plans() {
     const session = await getServerSession(authOptions);
@@ -25,5 +26,9 @@ export async function Plans() {
     });
     
 
-    return <><Link className="bg-blue-600 text-white font-bold px-5 py-2 rounded-xl" href={`/writer/${userWriter?.writer?.id}/plans`}>Ver meus planos</Link></>
+    return (
+        <Button asChild variant="glass-primary" className="rounded-full px-5 font-bold">
+            <Link href={`/writer/${userWriter?.writer?.id}/plans`}>Ver meus planos</Link>
+        </Button>
+    );
 }

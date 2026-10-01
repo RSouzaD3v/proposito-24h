@@ -12,6 +12,7 @@ import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "../area/_components/PainelControl";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
 import { TrackAccess } from "@/components/TrackAccess";
+import { WriterShell } from "@/components/ui/writer-shell";
 
 export default async function ReaderAccountLayout({
   children,
@@ -45,11 +46,13 @@ export default async function ReaderAccountLayout({
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
-        <PushBootstrap writerId={user.writer.id} userId={user.id} />
-        <PainelControl />
-        <section>{children}</section>
-        <TeacherBibleAI />
-        <TrackAccess />
+        <WriterShell contained={false} className="min-h-screen">
+          <PushBootstrap writerId={user.writer.id} userId={user.id} />
+          <PainelControl />
+          <WriterShell maxWidth="2xl">{children}</WriterShell>
+          <TeacherBibleAI />
+          <TrackAccess />
+        </WriterShell>
       </ThemeWriterProvider>
     </AuthReaderProvider>
   );

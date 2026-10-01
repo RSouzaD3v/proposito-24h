@@ -1,11 +1,18 @@
-import { ButtonMode } from "../settings/_components/ButtonMode"
-import PlaySong from "./PlaySong"
+"use client";
+
+import { ButtonMode } from "../settings/_components/ButtonMode";
+import PlaySong from "./PlaySong";
+import { cn } from "@/lib/utils";
 
 export const PainelControl = () => {
-    return (
-        <div className="fixed max-w-40 flex items-center justify-center gap-1 bg-gray-100/50 backdrop-blur-sm p-1 md:p-2 rounded-3xl md:top-3 top-16 right-3 z-[999999]">
-            <PlaySong />
-            <ButtonMode />
-        </div>
-    )
-}
+  return (
+    <div
+      className={cn(
+        "glass-surface fixed right-3 top-16 z-[999999] flex max-w-40 items-center justify-center gap-1 rounded-full p-1 md:right-4 md:top-3 md:p-1.5"
+      )}
+    >
+      <PlaySong />
+      <ButtonMode />
+    </div>
+  );
+};

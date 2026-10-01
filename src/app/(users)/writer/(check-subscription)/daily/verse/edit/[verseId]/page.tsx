@@ -1,8 +1,9 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { ButtonSpinner, LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
 
 
 
@@ -72,25 +73,12 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
     }
 
     if (loadingData) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="flex flex-col items-center">
-                    <svg className="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                    </svg>
-                    <h1 className="text-lg font-semibold text-blue-700">Carregando dados...</h1>
-                </div>
-            </div>
-        );
+        return <LoadingState variant="full" label="Carregando dados..." />;
     }
 
     return (
         <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
-            <Link href="/writer/daily/verse" className="flex items-center gap-2 mb-6 text-blue-600">
-                <FaArrowLeft size={24} />
-                Voltar
-            </Link>
+            <BackButton href="/writer/daily/verse" className="mb-6" />
             <h1 className="text-2xl font-bold mb-6 text-center">Editar Passagem</h1>
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -184,13 +172,15 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
                     <S3Uploader folder="verse" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
                 </div>
 
-                <button
+                <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                    variant="glass-primary"
+                    className="w-full rounded-full"
                 >
+                    {loading && <ButtonSpinner />}
                     {loading ? "Salvando..." : "Salvar Citação"}
-                </button>
+                </Button>
                 {success && (
                     <div className="text-green-600 text-center font-medium mt-2">
                         Citação salva com sucesso!

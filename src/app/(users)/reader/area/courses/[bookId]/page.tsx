@@ -1,13 +1,13 @@
 import { db } from "@/lib/db";
-import ChapterSlider from "./_components/ChapterSlider";
+import BookFormatContent from "./_components/BookFormatContent";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { FaCrown } from "react-icons/fa";
 import { BuyButton } from "./_components/BuyButton";
 import SubscribeWidget from "@/components/subscriptions/SubscribeWidget";
-import PdfViewer from "@/app/(users)/writer/(check-subscription)/publications/my-vitrine/[bookId]/_components/PdfViewer";
 import { canAccessPublication, publicationAccessMode } from "@/lib/publicationAccess";
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
@@ -41,9 +41,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <p className="text-lg">Livro não encontrado.</p>
-        <Link href="/reader/area/courses" className="mt-4 text-blue-600 underline">
-          Voltar aos ebooks
-        </Link>
+        <BackButton href="/reader/area/courses" label="Voltar aos ebooks" className="mt-4" />
       </div>
     );
   }
@@ -88,9 +86,7 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
       const slug = bookDetails.writer?.slug ?? "";
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-          <Link className="absolute left-5 top-5 underline" href="/reader/area/courses">
-            Voltar aos ebooks
-          </Link>
+          <BackButton href="/reader/area/courses" label="Voltar aos ebooks" className="absolute left-5 top-5" />
           <h2 className="mb-4 flex flex-col items-center text-2xl font-bold text-white md:text-3xl">
             <FaCrown className="mb-2 inline" />
             {mode === "SUBSCRIPTION" ? "Conteúdo para assinantes" : "Este ebook é pago"}
@@ -118,40 +114,30 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <p className="mb-4 text-white">Faça login para acessar este conteúdo.</p>
-        <Link href="/sign-in" className="rounded-lg bg-blue-600 px-6 py-3 text-white">
-          Entrar
-        </Link>
+        <Button asChild variant="glass-primary" className="rounded-full">
+          <Link href="/sign-in">Entrar</Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="relative min-h-screen">
-      <Link
-        className="absolute left-[5px] top-[5px] z-50 flex w-fit items-center gap-1 rounded-sm bg-gray-100 p-2 text-black md:left-2 md:top-2"
+      <BackButton
         href="/reader/area/courses"
-      >
-        <FiArrowLeft className="mr-2 inline" />
-        Voltar
-      </Link>
+        className="absolute left-2 top-2 z-50 md:left-3 md:top-3"
+      />
 
-      {bookDetails.isPdf && bookDetails.pdfUrl ? (
-        <div className="p-4 md:p-8">
-          <PdfViewer url={bookDetails.pdfUrl} />
-        </div>
-      ) : bookDetails.chapters.length > 0 ? (
-        <ChapterSlider
-          bookId={bookId}
-          chapters={bookDetails.chapters.map((chapter) => ({
-            title: chapter.title,
-            subtitle: chapter.subtitle ?? "",
-            content: chapter.content,
-            coverUrl: chapter.coverUrl ?? undefined,
-          }))}
-        />
-      ) : (
-        <div className="py-20 text-center text-black">Nenhum capítulo encontrado.</div>
-      )}
+      <BookFormatContent
+        bookId={bookId}
+        pdfUrl={bookDetails.pdfUrl}
+        chapters={bookDetails.chapters.map((chapter) => ({
+          title: chapter.title,
+          subtitle: chapter.subtitle ?? "",
+          content: chapter.content,
+          coverUrl: chapter.coverUrl ?? undefined,
+        }))}
+      />
     </div>
   );
 }

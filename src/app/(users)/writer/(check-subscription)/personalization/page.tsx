@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/authOption";
 import PersonalizationForm from "./_components/PersonalizationForm";
-import Link from "next/link";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function WriterPersonalizationPage() {
   const session = await getServerSession(authOptions);
@@ -12,24 +14,27 @@ export default async function WriterPersonalizationPage() {
     redirect("/login");
   }
 
-  const writerId = (session.user as any)?.writerId;
+  const writerId = (session.user as { writerId?: string })?.writerId;
 
   if (!writerId) {
     return (
-      <div className="p-6">
-        <p className="text-muted-foreground">
-          Writer não identificado.
-        </p>
-      </div>
+      <WriterShell maxWidth="2xl">
+        <GlassCard>
+          <p className="text-[var(--liquid-muted)]">Writer não identificado.</p>
+        </GlassCard>
+      </WriterShell>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-        <Link href={"/writer/dashboard"} className="bg-black text-white p-2 rounded-sm">
-            Voltar para dashboard
-        </Link>
+    <WriterShell maxWidth="2xl">
+      <PageHeader
+        title="Personalização do cliente"
+        description="Ajuste as cores e a identidade visual do app do leitor."
+        backHref="/writer/dashboard"
+        backLabel="Voltar ao Painel"
+      />
       <PersonalizationForm writerId={writerId} />
-    </div>
+    </WriterShell>
   );
 }

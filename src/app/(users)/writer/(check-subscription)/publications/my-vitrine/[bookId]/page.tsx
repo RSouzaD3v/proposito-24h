@@ -1,12 +1,11 @@
 import { db } from "@/lib/db";
-import ChapterSlider from "./_components/ChapterSlider";
+import BookFormatContent from "./_components/BookFormatContent";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { BackButton } from "@/components/ui/back-button";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { FaCrown } from "react-icons/fa";
 import { BuyButton } from "./_components/BuyButton";
-import PdfViewer from "./_components/PdfViewer"; // novo componente
 
 export default async function BookDetailsPage({ params }: { params: Promise<{ bookId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -58,30 +57,18 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ bo
 
     return (
         <div className="bg-yellow-50 min-h-screen relative">
-            <Link
-                className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-gray-100 text-black p-2 rounded-sm w-fit"
-                href={"/writer/publications/my-vitrine"}
-            >
-                <FiArrowLeft className="inline mr-2" />
-                Voltar
-            </Link>
+            <div className="absolute top-2 left-2 z-50">
+                <BackButton href="/writer/publications/my-vitrine" />
+            </div>
 
-            {/* Se for PDF */}
-            {bookDetails?.isPdf && bookDetails?.pdfUrl ? (
-                <div className="p-4 md:p-8">
-                    <PdfViewer url={bookDetails.pdfUrl} />
-                </div>
-            ) : bookDetails?.chapters && bookDetails.chapters.length > 0 ? (
-                <ChapterSlider
-                    chapters={bookDetails.chapters.map((chapter) => ({
-                        ...chapter,
-                        subtitle: chapter.subtitle ?? "",
-                        coverUrl: chapter.coverUrl ?? undefined,
-                    }))}
-                />
-            ) : (
-                <div className="text-center text-black py-20">Nenhum capítulo encontrado.</div>
-            )}
+            <BookFormatContent
+                pdfUrl={bookDetails?.pdfUrl}
+                chapters={(bookDetails?.chapters ?? []).map((chapter) => ({
+                    ...chapter,
+                    subtitle: chapter.subtitle ?? "",
+                    coverUrl: chapter.coverUrl ?? undefined,
+                }))}
+            />
         </div>
     );
 }

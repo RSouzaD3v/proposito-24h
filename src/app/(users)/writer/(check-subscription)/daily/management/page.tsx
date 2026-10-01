@@ -2,17 +2,17 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { SectionsDaily } from "./_components/SectionsDaily";
-import Link from "next/link";
-import { FaArrowLeft } from "react-icons/fa";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function DailyManagementPage() {
     const session = await getServerSession(authOptions);
 
     if (!session) {
         return (
-            <div>
+            <WriterShell maxWidth="4xl">
                 <h1>Você não está autenticado</h1>
-            </div>
+            </WriterShell>
         );
     }
 
@@ -24,9 +24,9 @@ export default async function DailyManagementPage() {
 
     if (!userWriter || !userWriter.writerId) {
         return (
-            <div>
+            <WriterShell maxWidth="4xl">
                 <h1>Usuário não encontrado</h1>
-            </div>
+            </WriterShell>
         );
     }
 
@@ -56,14 +56,13 @@ export default async function DailyManagementPage() {
     })
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6">
-            <Link href={"/writer/daily"} className="flex items-center gap-2 mb-4 text-blue-600 hover:underline">
-                <FaArrowLeft size={24}/>
-                <h2 className="text-lg font-semibold">Voltar para daily page</h2>
-            </Link>
-            <h1 className="my-5 text-xl font-bold">Gerenciamento Daily</h1>
-
+        <WriterShell maxWidth="4xl">
+            <PageHeader
+                title="Gerenciamento Daily"
+                description="Gerencie todo o conteúdo do diário."
+                backHref="/writer/daily"
+            />
             <SectionsDaily quotes={quotes} verses={verses} devotionals={devotionals} prayers={prayers} />
-        </div>
+        </WriterShell>
     );
 }

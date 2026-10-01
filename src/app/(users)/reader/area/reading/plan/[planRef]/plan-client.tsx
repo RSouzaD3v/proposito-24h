@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
 
 type Day = { id: string; dayNumber: number; passages: string };
 
@@ -148,19 +150,11 @@ export default function PlanClient({
 
   return (
     <section className="mx-auto max-w-3xl p-4">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-1">
-        <Link
-          href="/reader/area"
-          className="bg-blue-600 text-white hover:bg-blue-800 p-2 rounded-sm flex items-center mb-4"
-        >
-          Voltar para área do leitor
-        </Link>
-        <Link
-          href="/reader/area/bible-nvi"
-          className="bg-blue-600 text-white hover:bg-blue-800 p-2 rounded-sm flex items-center mb-4"
-        >
-          Vamos ler a Bíblia 📖
-        </Link>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <BackButton href="/reader/area" label="Área do leitor" />
+        <Button asChild variant="glass-primary" size="sm" className="rounded-full">
+          <Link href="/reader/area/bible-nvi">Vamos ler a Bíblia 📖</Link>
+        </Button>
       </div>
 
       <header className="mb-4">

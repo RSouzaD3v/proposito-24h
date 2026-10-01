@@ -10,9 +10,10 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
+import { GlassCard } from "@/components/ui/glass-card";
 
 interface PageProps {
   params: Promise<{ groupId: string }>;
@@ -27,7 +28,7 @@ export default async function ReaderGroupDailyDetailPage({
 
   if (!session?.user?.id || !session.user.writerId) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-[var(--liquid-muted)] px-4 py-8">
         Você precisa estar logado para acessar este conteúdo.
       </p>
     );
@@ -83,118 +84,109 @@ export default async function ReaderGroupDailyDetailPage({
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-6 space-y-6">
-        <Link href={"/reader/area/group-daily"}>
-          <Button className="my-2 cursor-pointer">
-            Voltar
-          </Button>
-        </Link>
-      {/* HEADER */}
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <BackButton href="/reader/area/group-daily" className="mb-2" />
+
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold">{grouping.title}</h1>
+        <h1 className="text-xl font-semibold text-[var(--liquid-ink)]">
+          {grouping.title}
+        </h1>
         {grouping.description && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--liquid-muted)]">
             {grouping.description}
           </p>
         )}
       </div>
 
-      {/* TABS */}
-      <Tabs defaultValue="devotionals">
-        <TabsList className="grid grid-cols-4">
+      <GlassCard strong padding="md">
+        <Tabs defaultValue="devotionals">
+          <TabsList className="grid grid-cols-4">
+            {grouping.devotionals.length > 0 && (
+              <TabsTrigger value="devotionals">
+                Devocionais
+              </TabsTrigger>
+            )}
+            {grouping.verses.length > 0 && (
+              <TabsTrigger value="verses">
+                Versículos
+              </TabsTrigger>
+            )}
+            {grouping.prayers.length > 0 && (
+              <TabsTrigger value="prayers">
+                Orações
+              </TabsTrigger>
+            )}
+            {grouping.quotes.length > 0 && (
+              <TabsTrigger value="quotes">
+                Citações
+              </TabsTrigger>
+            )}
+          </TabsList>
+
           {grouping.devotionals.length > 0 && (
-            <TabsTrigger value="devotionals">
-              Devocionais
-            </TabsTrigger>
+            <TabsContent value="devotionals">
+              <List>
+                {grouping.devotionals.map(item => (
+                  <ReadRow
+                    key={item.id}
+                    title={item.title}
+                    href={`/reader/area/devotional/${item.id}`}
+                    completed={completed.devotionals.has(item.id)}
+                  />
+                ))}
+              </List>
+            </TabsContent>
           )}
+
           {grouping.verses.length > 0 && (
-            <TabsTrigger value="verses">
-              Versículos
-            </TabsTrigger>
+            <TabsContent value="verses">
+              <List>
+                {grouping.verses.map(item => (
+                  <ReadRow
+                    key={item.id}
+                    title={item.reference}
+                    href={`/reader/area/verse/${item.id}`}
+                    completed={completed.verses.has(item.id)}
+                  />
+                ))}
+              </List>
+            </TabsContent>
           )}
+
           {grouping.prayers.length > 0 && (
-            <TabsTrigger value="prayers">
-              Orações
-            </TabsTrigger>
+            <TabsContent value="prayers">
+              <List>
+                {grouping.prayers.map(item => (
+                  <ReadRow
+                    key={item.id}
+                    title={item.title}
+                    href={`/reader/area/prayer/${item.id}`}
+                    completed={completed.prayers.has(item.id)}
+                  />
+                ))}
+              </List>
+            </TabsContent>
           )}
+
           {grouping.quotes.length > 0 && (
-            <TabsTrigger value="quotes">
-              Citações
-            </TabsTrigger>
+            <TabsContent value="quotes">
+              <List>
+                {grouping.quotes.map(item => (
+                  <ReadRow
+                    key={item.id}
+                    title={item.verse}
+                    href={`/reader/area/quote/${item.id}`}
+                    completed={completed.quotes.has(item.id)}
+                  />
+                ))}
+              </List>
+            </TabsContent>
           )}
-        </TabsList>
-
-        {/* DEVOCIONAIS */}
-        {grouping.devotionals.length > 0 && (
-          <TabsContent value="devotionals">
-            <List>
-              {grouping.devotionals.map(item => (
-                <ReadRow
-                  key={item.id}
-                  title={item.title}
-                  href={`/reader/area/devotional/${item.id}`}
-                  completed={completed.devotionals.has(item.id)}
-                />
-              ))}
-            </List>
-          </TabsContent>
-        )}
-
-        {/* VERSÍCULOS */}
-        {grouping.verses.length > 0 && (
-          <TabsContent value="verses">
-            <List>
-              {grouping.verses.map(item => (
-                <ReadRow
-                  key={item.id}
-                  title={item.reference}
-                  href={`/reader/area/verse/${item.id}`}
-                  completed={completed.verses.has(item.id)}
-                />
-              ))}
-            </List>
-          </TabsContent>
-        )}
-
-        {/* ORAÇÕES */}
-        {grouping.prayers.length > 0 && (
-          <TabsContent value="prayers">
-            <List>
-              {grouping.prayers.map(item => (
-                <ReadRow
-                  key={item.id}
-                  title={item.title}
-                  href={`/reader/area/prayer/${item.id}`}
-                  completed={completed.prayers.has(item.id)}
-                />
-              ))}
-            </List>
-          </TabsContent>
-        )}
-
-        {/* CITAÇÕES */}
-        {grouping.quotes.length > 0 && (
-          <TabsContent value="quotes">
-            <List>
-              {grouping.quotes.map(item => (
-                <ReadRow
-                  key={item.id}
-                  title={item.verse}
-                  href={`/reader/area/quote/${item.id}`}
-                  completed={completed.quotes.has(item.id)}
-                />
-              ))}
-            </List>
-          </TabsContent>
-        )}
-      </Tabs>
+        </Tabs>
+      </GlassCard>
     </div>
   );
 }
-
-/* ======================================================
- * COMPONENTES AUXILIARES
- * ====================================================== */
 
 function List({ children }: { children: React.ReactNode }) {
   return <div className="space-y-3 mt-4">{children}</div>;
@@ -210,21 +202,19 @@ function ReadRow({
   completed: boolean;
 }) {
   return (
-    <Card>
-      <CardContent className="p-4 flex items-center justify-between gap-4">
-        <p className="text-sm font-medium">{title}</p>
+    <GlassCard padding="sm" className="flex items-center justify-between gap-4">
+      <p className="text-sm font-medium text-[var(--liquid-ink)]">{title}</p>
 
-        {completed ? (
-          <div className="flex items-center gap-1 text-green-600 text-sm">
-            <CheckCircle size={16} />
-            Lido
-          </div>
-        ) : (
-          <Button asChild size="sm">
-            <Link href={href}>Ler agora</Link>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+      {completed ? (
+        <div className="flex items-center gap-1 text-green-600 text-sm shrink-0">
+          <CheckCircle size={16} />
+          Lido
+        </div>
+      ) : (
+        <Button asChild size="sm" variant="glass-primary" className="rounded-full shrink-0">
+          <Link href={href}>Ler agora</Link>
+        </Button>
+      )}
+    </GlassCard>
   );
 }

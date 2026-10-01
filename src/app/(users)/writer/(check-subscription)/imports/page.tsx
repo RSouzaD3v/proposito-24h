@@ -1,5 +1,8 @@
 "use client";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useState, useMemo } from "react";
 
 type Kind = "devotional" | "quote" | "verse" | "prayer";
@@ -57,27 +60,25 @@ export default function ImportPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Link href="/writer/daily" className="absolute top-4 left-4 bg-indigo-600 p-2 rounded-sm text-white text-sm hover:bg-indigo-700 transition flex items-center gap-1">
-        ← Voltar ao Diario
-      </Link>
+    <main className="relative min-h-screen flex items-center justify-center liquid-shell liquid-bg px-4 py-8">
+      <BackButton href="/writer/daily" label="Voltar ao Diário" className="absolute top-4 left-4" />
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-indigo-700 text-center mb-2">Importar Arquivo</h1>
+      <GlassCard className="w-full max-w-md space-y-6" padding="lg">
+        <h1 className="text-2xl font-bold text-[var(--liquid-ink)] text-center mb-2">Importar Arquivo</h1>
 
         {/* Links de exemplos */}
         <div className="flex flex-col gap-2 text-sm">
-          <span className="font-medium text-indigo-600">Baixe um modelo de exemplo:</span>
-          <a href="/spreadsheets/devocional-exemplo.xlsx" download="devocional-exemplo.xlsx" className="text-indigo-600 hover:underline">
+          <span className="font-medium text-[var(--liquid-muted)]">Baixe um modelo de exemplo:</span>
+          <a href="/spreadsheets/devocional-exemplo.xlsx" download="devocional-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
             📘 Devocional (exemplo)
           </a>
-          <a href="/spreadsheets/citacao-exemplo.xlsx" download="citacao-exemplo.xlsx" className="text-indigo-600 hover:underline">
+          <a href="/spreadsheets/citacao-exemplo.xlsx" download="citacao-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
             💬 Citação (exemplo)
           </a>
-          <a href="/spreadsheets/versiculo-exemplo.xlsx" download="versiculo-exemplo.xlsx" className="text-indigo-600 hover:underline">
+          <a href="/spreadsheets/versiculo-exemplo.xlsx" download="versiculo-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
             ✝️ Versículo (exemplo)
           </a>
-          <a href="/spreadsheets/oracao-exemplo.xlsx" download="oracao-exemplo.xlsx" className="text-indigo-600 hover:underline">
+          <a href="/spreadsheets/oracao-exemplo.xlsx" download="oracao-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
             🙏 Oração/Prayer (exemplo)
           </a>
         </div>
@@ -99,7 +100,7 @@ export default function ImportPage() {
         {/* Upload */}
         <form onSubmit={handleUpload} className="space-y-4">
           <label className="block">
-            <span className="block text-sm font-medium text-indigo-600 mb-1">Arquivo (.xls, .xlsx)</span>
+            <span className="block text-sm font-medium text-[var(--liquid-muted)] mb-1">Arquivo (.xls, .xlsx)</span>
             <input
               key={file ? file.name : "empty"} // força reset visual ao limpar
               type="file"
@@ -114,22 +115,15 @@ export default function ImportPage() {
             )}
           </label>
 
-          <button
+          <Button
+            type="submit"
             disabled={!file || loading}
-            className="w-full px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="glass-primary"
+            className="w-full rounded-full"
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-                Enviando...
-              </span>
-            ) : (
-              "Enviar"
-            )}
-          </button>
+            {loading && <ButtonSpinner />}
+            {loading ? "Enviando..." : "Enviar"}
+          </Button>
         </form>
 
         {/* Erro */}
@@ -142,7 +136,7 @@ export default function ImportPage() {
         {/* Resposta */}
         {resp && (
           <div className="mt-2">
-            <span className="block text-sm font-medium text-indigo-600 mb-1">Resposta:</span>
+            <span className="block text-sm font-medium text-[var(--liquid-muted)] mb-1">Resposta:</span>
             <pre className="bg-zinc-900 text-zinc-100 p-4 rounded-lg text-xs overflow-auto max-h-64">
               {JSON.stringify(resp, null, 2)}
             </pre>
@@ -151,7 +145,7 @@ export default function ImportPage() {
 
         {/* Endpoint debug */}
         <p className="text-[11px] text-gray-400 text-center">POST {endpoint}</p>
-      </div>
+      </GlassCard>
     </main>
   );
 }

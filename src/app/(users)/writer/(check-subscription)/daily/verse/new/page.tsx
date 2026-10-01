@@ -1,8 +1,9 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
 
 
 
@@ -51,10 +52,7 @@ export default function VerseNewPage() {
 
     return (
         <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
-            <Link href="/writer/daily/verse" className="flex items-center gap-2 mb-6 text-blue-600">
-                <FaArrowLeft size={24} />
-                Voltar
-            </Link>
+            <BackButton href="/writer/daily/verse" className="mb-6" />
             <h1 className="text-2xl font-bold mb-6 text-center">Criar Nova Passagem</h1>
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -147,13 +145,15 @@ export default function VerseNewPage() {
                     </label>
                     <S3Uploader folder="verse" onUploaded={(file) => setForm({ ...form, imageUrl: file.publicUrl })} />
                 </div>
-                <button
+                <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                    variant="glass-primary"
+                    className="w-full rounded-full"
                 >
+                    {loading && <ButtonSpinner />}
                     {loading ? "Salvando..." : "Salvar Passagem"}
-                </button>
+                </Button>
                 {success && (
                     <div className="text-green-600 text-center font-medium mt-2">
                         Passagem criada com sucesso!

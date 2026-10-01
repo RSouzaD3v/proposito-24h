@@ -3,7 +3,8 @@ import { Gamepad } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaTree } from "react-icons/fa";
-import { FiHeart, FiBook, FiCheck } from "react-icons/fi";
+import { FiBook, FiCheck } from "react-icons/fi";
+import { cn } from "@/lib/utils";
 
 interface MenuPainelProps {
   colors?: {
@@ -19,14 +20,13 @@ interface MenuPainelProps {
 export const MenuPainel = ({ colors }: MenuPainelProps) => {
   const pathname = usePathname();
 
-  // Fallback seguro (nunca quebra)
   const safeColors = {
-    primary: colors?.primary || "#202020",
-    secondary: colors?.secondary || "#404040",
+    primary: colors?.primary || "#2b6de5",
+    secondary: colors?.secondary || "#5b9cff",
     background: colors?.background || "#ffffff",
-    buttonBg: colors?.buttonBg || "#22c55e",
+    buttonBg: colors?.buttonBg || "#2b6de5",
     buttonText: colors?.buttonText || "#ffffff",
-    text: colors?.text || "#000000",
+    text: colors?.text || "#1a2b4a",
   };
 
   const itemsNav = [
@@ -35,53 +35,65 @@ export const MenuPainel = ({ colors }: MenuPainelProps) => {
       name: "Hoje",
       icon: <FiCheck size={22} />,
       link: "/reader/area",
+      match: (path: string) => path === "/reader/area",
     },
     {
       id: 3,
       name: "Bíblia",
       icon: <FiBook size={22} />,
       link: "/reader/area/bible-nvi",
+      match: (path: string) =>
+        path.startsWith("/reader/area/bible-nvi") ||
+        path.startsWith("/reader/area/bible-acf"),
     },
     {
       id: 4,
       name: "Minha Jornada",
       icon: <FaTree size={22} />,
       link: "/reader/area/journey",
+      match: (path: string) => path.startsWith("/reader/area/journey"),
     },
     {
       id: 5,
       name: "Games",
       icon: <Gamepad size={22} />,
       link: "/reader/area/games",
+      match: (path: string) =>
+        path.startsWith("/reader/area/games") ||
+        path.startsWith("/reader/area/quiz") ||
+        path.startsWith("/reader/area/word-connect"),
     },
   ];
 
   return (
     <nav
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 shadow-2xl rounded-full px-6 py-3 z-50 backdrop-blur-md border transition-all bg-white/50"
+      className={cn(
+        "glass-surface-strong fixed bottom-6 left-1/2 z-50 -translate-x-1/2",
+        "max-w-[calc(100vw-1.5rem)] rounded-full border border-white/65 px-3 py-2 sm:px-5 md:px-6",
+        "shadow-[0_8px_32px_rgb(15_40_80_/_0.14)]"
+      )}
     >
-      <ul className="flex items-center md:gap-6 gap-3">
+      <ul className="flex items-center justify-center gap-1 sm:gap-2 md:gap-5">
         {itemsNav.map((item) => {
-          const isActive = pathname === item.link;
+          const isActive = item.match(pathname);
 
           return (
             <Link
               key={item.id}
               href={item.link}
-              className="flex flex-col items-center justify-center px-3 py-1 rounded-xl transition-all duration-150"
+              className="flex shrink-0 flex-col items-center justify-center rounded-2xl px-2 py-1.5 transition-all duration-200 sm:px-3"
               style={{
                 background: isActive
                   ? `linear-gradient(180deg, ${safeColors.primary}, ${safeColors.secondary})`
                   : "transparent",
                 color: isActive ? safeColors.buttonText : safeColors.text,
-                transform: isActive ? "scale(1.1)" : "scale(1)",
                 boxShadow: isActive
-                  ? `0 4px 15px ${safeColors.primary}40`
+                  ? `0 4px 16px ${safeColors.primary}40`
                   : "none",
               }}
             >
-              <span className="mb-1">{item.icon}</span>
-              <span className="text-xs md:block hidden font-semibold">
+              <span className="mb-0.5">{item.icon}</span>
+              <span className="hidden text-xs font-semibold md:block">
                 {item.name}
               </span>
             </Link>

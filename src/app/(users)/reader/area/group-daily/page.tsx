@@ -2,16 +2,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function ReaderGroupDailyPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id || !session.user.writerId) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-[var(--liquid-muted)] px-4 py-8">
         Você precisa estar logado para acessar esta área.
       </p>
     );
@@ -37,61 +37,43 @@ export default async function ReaderGroupDailyPage() {
     },
   });
 
-if (groupings.length === 0) {
-  return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4">
-      <Card className="max-w-md w-full text-center">
-        <CardContent className="p-8 space-y-4">
+  if (groupings.length === 0) {
+    return (
+      <div className="container mx-auto max-w-lg px-4 py-10">
+        <PageHeader title="Agrupamento de diários" backHref="/reader/area" />
+        <GlassCard strong className="text-center space-y-4">
           <div className="text-4xl">📖</div>
-
-          <h1 className="text-lg font-semibold">
+          <h2 className="text-lg font-semibold text-[var(--liquid-ink)]">
             Nenhum agrupamento disponível
-          </h1>
-
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          </h2>
+          <p className="text-sm text-[var(--liquid-muted)] leading-relaxed">
             Ainda não há devocionais organizados para hoje.
             Volte mais tarde ou explore outros conteúdos disponíveis.
           </p>
-
-          <div className="pt-4">
-            <Link href="/reader/area">
-              <Button className="w-full">
-                Voltar para a área
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
+          <Button asChild variant="glass-primary" className="w-full rounded-full">
+            <Link href="/reader/area">Voltar para a área</Link>
+          </Button>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto mt-6 px-3">
-      <Link href={"/reader/area"}>
-        <Button className="my-2 cursor-pointer">
-          Voltar para area
-        </Button>
-      </Link>
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold">
-          Agrupamento de diários
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Separe um tempo para estar com Deus hoje
-        </p>
-      </div>
+    <div className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <PageHeader
+        title="Agrupamento de diários"
+        description="Separe um tempo para estar com Deus hoje"
+        backHref="/reader/area"
+      />
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {groupings.map((group) => (
           <Link
             key={group.id}
             href={`/reader/area/group-daily/${group.id}`}
-            className="group"
+            className="group block"
           >
-            <Card className="overflow-hidden hover:shadow-md transition">
-              {/* IMAGEM */}
+            <GlassCard strong padding="none" interactive className="overflow-hidden h-full">
               {group.imageUrl && (
                 <div className="relative h-40 w-full overflow-hidden">
                   <img
@@ -102,18 +84,18 @@ if (groupings.length === 0) {
                 </div>
               )}
 
-              <CardContent className="p-4 space-y-2">
-                <h2 className="font-semibold text-base">
+              <div className="space-y-2 p-4">
+                <h2 className="font-semibold text-base text-[var(--liquid-ink)]">
                   {group.title}
                 </h2>
 
                 {group.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-3">
+                  <p className="text-sm text-[var(--liquid-muted)] line-clamp-3">
                     {group.description}
                   </p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </GlassCard>
           </Link>
         ))}
       </div>

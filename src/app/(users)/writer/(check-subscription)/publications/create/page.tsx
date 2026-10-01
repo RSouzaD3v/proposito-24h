@@ -1,7 +1,10 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
 import S3UploaderPdf from "@/components/S3UploaderPdf";
-import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -50,20 +53,10 @@ export default function WriterPublicationCreatePage() {
     >
   ) => {
     const { name, value } = e.target;
-
-    // trata boolean separado
-    if (name === "isPdf") {
-      setForm((prev) => ({
-        ...prev,
-        isPdf: value === "true",
-        pdfUrl: value === "false" ? "" : prev.pdfUrl, // limpa se desmarcar
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,12 +65,16 @@ export default function WriterPublicationCreatePage() {
     setError("");
     setSuccess(false);
 
+    const hasPdf = Boolean(form.pdfUrl);
+
     try {
       const res = await fetch("/api/writer/publications/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          isPdf: hasPdf,
+          pdfUrl: hasPdf ? form.pdfUrl : null,
           price:
             form.visibility === "PAID" ? Number(form.price) : undefined,
           tags: form.tags
@@ -117,10 +114,8 @@ export default function WriterPublicationCreatePage() {
   };
 
   return (
-    <section className="max-w-3xl mx-auto p-4 sm:p-8 bg-white rounded-xl shadow-lg mt-8">
-      <Link href="/writer/publications" className="text-blue-600 hover:underline">
-        Voltar para Publicações
-      </Link>
+    <GlassCard className="max-w-3xl mx-auto mt-8" padding="lg">
+      <BackButton href="/writer/publications" label="Voltar para Publicações" className="mb-4" />
 
       <h1 className="text-3xl font-extrabold mb-8 text-center text-blue-700">
         Nova Publicação
@@ -230,40 +225,35 @@ export default function WriterPublicationCreatePage() {
             </>
           )}
 
-          {/* Upload PDF */}
+          {/* PDF opcional — pode coexistir com a versão escrita (capítulos) */}
           <div className="sm:col-span-2">
             <label className="block font-semibold mb-1 text-gray-700">
-              É PDF?
+              PDF (opcional)
             </label>
-            <select
-              name="isPdf"
-              value={form.isPdf ? "true" : "false"}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-2"
-            >
-              <option value="false">Não</option>
-              <option value="true">Sim</option>
-            </select>
+            <p className="text-sm text-gray-500 mb-2">
+              Você pode enviar um PDF e também criar capítulos escritos no app.
+            </p>
+            <S3UploaderPdf
+              folder="ebook"
+              onUploaded={({ publicUrl }) =>
+                setForm((prev) => ({ ...prev, pdfUrl: publicUrl, isPdf: true }))
+              }
+            />
+            {form.pdfUrl && (
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-green-600">PDF enviado com sucesso.</p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, pdfUrl: "", isPdf: false }))
+                  }
+                  className="text-sm text-red-600 underline"
+                >
+                  Remover PDF
+                </button>
+              </div>
+            )}
           </div>
-
-          {form.isPdf && (
-            <div className="sm:col-span-2">
-              <label className="block font-semibold mb-1 text-gray-700">
-                Upload do PDF
-              </label>
-              <S3UploaderPdf
-                folder="ebook"
-                onUploaded={({ publicUrl }) =>
-                  setForm((prev) => ({ ...prev, pdfUrl: publicUrl, isPdf: true }))
-                }
-              />
-              {form.pdfUrl && (
-                <p className="text-sm text-green-600 mt-2">
-                  PDF enviado com sucesso.
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Slug */}
           <div className="sm:col-span-2">
@@ -360,20 +350,18 @@ export default function WriterPublicationCreatePage() {
           </div>
 
           {/* Conteúdo */}
-          {!form.isPdf && (
-            <div className="sm:col-span-2">
-              <label className="block font-semibold mb-1 text-gray-700">
-                Conteúdo
-              </label>
-              <textarea
-                name="body"
-                value={form.body}
-                onChange={handleChange}
-                className="w-full border rounded-lg p-2"
-                rows={6}
-              />
-            </div>
-          )}
+          <div className="sm:col-span-2">
+            <label className="block font-semibold mb-1 text-gray-700">
+              Conteúdo
+            </label>
+            <textarea
+              name="body"
+              value={form.body}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2"
+              rows={6}
+            />
+          </div>
 
           {/* Tags */}
           <div className="sm:col-span-2">
@@ -392,13 +380,15 @@ export default function WriterPublicationCreatePage() {
         </div>
 
         {/* Botão */}
-        <button
+        <Button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-lg shadow"
+          variant="glass-primary"
+          className="w-full rounded-full text-lg"
           disabled={loading}
         >
+          {loading && <ButtonSpinner />}
           {loading ? "Salvando..." : "Criar Publicação"}
-        </button>
+        </Button>
 
         {success && (
           <div className="text-green-600 font-semibold text-center">
@@ -409,6 +399,6 @@ export default function WriterPublicationCreatePage() {
           <div className="text-red-600 font-semibold text-center">{error}</div>
         )}
       </form>
-    </section>
+    </GlassCard>
   );
 }

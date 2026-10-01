@@ -1,6 +1,7 @@
 'use client';
 import { redirect } from "next/navigation";
 import { useContext, createContext, useState, useEffect } from "react";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface AuthContextType {
     user: { id: string, name: string, role: string, email: string };
@@ -23,11 +24,6 @@ export function AuthReaderProvider({ children }: { children: React.ReactNode }) 
                 }
 
                 const data = await response.json();
-
-                // if(data.user.role !== 'CLIENT') {
-                //     redirect("/login");
-                // };
-
                 setUser(data.user);
             } catch (error) {
                 console.error("Error fetching user:", error);
@@ -41,14 +37,7 @@ export function AuthReaderProvider({ children }: { children: React.ReactNode }) 
     }, []);
 
     if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-50 to-slate-200">
-                <div className="w-12 h-12 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
-                <span className="mt-4 text-blue-600 font-medium text-lg">
-                    Carregando...
-                </span>
-            </div>
-        );
+        return <LoadingState variant="full" label="Carregando..." />;
     }
 
     if (!user) {

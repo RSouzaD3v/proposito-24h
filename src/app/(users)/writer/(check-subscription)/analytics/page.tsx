@@ -120,9 +120,6 @@ export default async function WriterAnalyticsPage({
 
   return (
     <section className="min-h-screen w-full px-4 md:px-8 py-8">
-        <div className="my-2">
-            <Link className="text-sm text-white bg-blue-600 p-1 rounded-sm" href={"/writer/dashboard"}>Voltar para o Painel</Link>
-        </div>
       <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Painel do Escritor</h1>

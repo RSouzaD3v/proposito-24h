@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FiChevronLeft, FiLock } from "react-icons/fi";
+import { BackButton } from "@/components/ui/back-button";
+import { FiLock } from "react-icons/fi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { authOptions } from "@/lib/authOption";
@@ -60,13 +61,7 @@ export default async function CoursesPage() {
       {/* background gradiente sutil */}
       <div className="pointer-events-none absolute inset-0" />
 
-      <Link
-        href="/writer/publications"
-        className="z-10 my-2 inline-flex items-center bg-white/10 backdrop-blur-sm border rounded-xl border-white p-2 px-5 gap-2 self-start text-sm text-neutral-200 hover:text-white transition"
-      >
-        <FiChevronLeft className="text-xl" />
-        Voltar
-      </Link>
+      <BackButton href="/writer/publications" className="z-10 my-2 self-start" />
 
       <header className="z-10">
         <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow">Ebooks</h1>

@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 
 import DailyTabs from "./_components/DailyTabs";
-import Link from "next/link";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 interface PageProps {
   searchParams: Promise<{
@@ -45,38 +46,36 @@ export default async function DailyPage({ searchParams }: PageProps) {
       db.verse.count({ where: { writerId } }),
       db.devotional.count({ where: { writerId } }),
       db.quote.count({ where: { writerId } }),
-      db.prayer.count({ where: {  writerId } })
+      db.prayer.count({ where: { writerId } })
     ]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-        <Link href={"/reader/area"} className="bg-black text-white p-2 rounded-sm">
-            Voltar para area
-        </Link>
-      <header className="mb-6 mt-5">
-        <h1 className="text-3xl font-bold">Diário</h1>
-        <p className="text-muted-foreground">
-          Conteúdos diários organizados por data
-        </p>
-      </header>
-
-      <DailyTabs
-        tab={tab}
-        page={page}
-        pageSize={PAGE_SIZE}
-        data={{
-          verses,
-          devotionals,
-          quotes,
-          prayers
-        }}
-        total={{
-          verses: versesCount,
-          devotionals: devotionalsCount,
-          quotes: quotesCount,
-          prayers: prayersCount
-        }}
+      <PageHeader
+        title="Diário"
+        description="Conteúdos diários organizados por data"
+        backHref="/reader/area"
       />
+
+      <GlassCard strong padding="md">
+        <DailyTabs
+          tab={tab}
+          page={page}
+          pageSize={PAGE_SIZE}
+          data={{
+            verses,
+            devotionals,
+            quotes,
+            prayers
+          }}
+          total={{
+            verses: versesCount,
+            devotionals: devotionalsCount,
+            quotes: quotesCount,
+            prayers: prayersCount
+          }}
+        />
+      </GlassCard>
     </div>
   );
 }

@@ -2,15 +2,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function ReaderQuizPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return (
-      <p className="text-sm text-muted-foreground text-center mt-10">
+      <p className="text-sm text-[var(--liquid-muted)] text-center mt-10 px-4">
         Você precisa estar logado para acessar os quizzes.
       </p>
     );
@@ -38,46 +39,34 @@ export default async function ReaderQuizPage() {
 
   if (quizzes.length === 0) {
     return (
-      <div className="max-w-xl mx-auto mt-10 text-center space-y-4">
-        <h1 className="text-xl font-semibold">
-          Nenhum quiz disponível
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Em breve novos quizzes estarão disponíveis para você.
-        </p>
-
-        <Button asChild variant="outline">
-          <Link href="/reader/area/games">Voltar</Link>
-        </Button>
+      <div className="max-w-xl mx-auto px-4 py-10 text-center space-y-4">
+        <PageHeader title="Quizzes Bíblicos" backHref="/reader/area/games" />
+        <GlassCard strong className="space-y-3">
+          <h2 className="text-lg font-semibold text-[var(--liquid-ink)]">
+            Nenhum quiz disponível
+          </h2>
+          <p className="text-sm text-[var(--liquid-muted)]">
+            Em breve novos quizzes estarão disponíveis para você.
+          </p>
+          <Button asChild variant="glass" className="rounded-full">
+            <Link href="/reader/area/games">Voltar</Link>
+          </Button>
+        </GlassCard>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto mt-6 px-3 space-y-6">
-        <Link href={"/reader/area/games"}>
-            <Button className="cursor-pointer my-2">
-                Voltar para games
-            </Button>
-        </Link>
-      {/* HEADER */}
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold">
-          Quizzes Bíblicos
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Teste seus conhecimentos e acompanhe sua evolução
-        </p>
-      </div>
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <PageHeader
+        title="Quizzes Bíblicos"
+        description="Teste seus conhecimentos e acompanhe sua evolução"
+        backHref="/reader/area/games"
+      />
 
-      {/* GRID */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {quizzes.map((quiz) => (
-          <Card
-            key={quiz.id}
-            className="overflow-hidden hover:shadow-md transition"
-          >
-            {/* CAPA */}
+          <GlassCard key={quiz.id} strong padding="none" className="overflow-hidden flex flex-col">
             {quiz.coverUrl && (
               <div className="h-40 w-full overflow-hidden">
                 <img
@@ -88,32 +77,27 @@ export default async function ReaderQuizPage() {
               </div>
             )}
 
-            <CardContent className="p-4 space-y-3">
-              <h2 className="font-semibold text-base">
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              <h2 className="font-semibold text-base text-[var(--liquid-ink)]">
                 {quiz.title}
               </h2>
 
               {quiz.description && (
-                <p className="text-sm text-muted-foreground line-clamp-3">
+                <p className="text-sm text-[var(--liquid-muted)] line-clamp-3">
                   {quiz.description}
                 </p>
               )}
 
-              {/* INFO */}
-              <div className="text-xs text-muted-foreground flex justify-between">
-                {quiz.timeLimit && (
-                  <span>⏱ {quiz.timeLimit}s</span>
-                )}
+              <div className="text-xs text-[var(--liquid-muted)] flex justify-between">
+                {quiz.timeLimit && <span>⏱ {quiz.timeLimit}s</span>}
                 <span>⭐ {quiz.pointsPerHit} pts</span>
               </div>
 
-              <Button asChild className="w-full mt-2">
-                <Link href={`/reader/area/quiz/${quiz.id}`}>
-                  Jogar agora
-                </Link>
+              <Button asChild variant="glass-primary" className="w-full mt-auto rounded-full">
+                <Link href={`/reader/area/quiz/${quiz.id}`}>Jogar agora</Link>
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         ))}
       </div>
     </div>

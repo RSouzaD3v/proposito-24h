@@ -1,10 +1,9 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import MySubscriptions from "@/components/subscriptions/MySubscriptions";
-import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
+import { GlassCard } from "@/components/ui/glass-card";
 import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 
@@ -18,21 +17,19 @@ export default async function ReaderSubscriptionPage() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-6">
-      <div className="flex items-center gap-3">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/reader/account" aria-label="Voltar">
-            <ArrowLeft className="size-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Minhas assinaturas</h1>
-          <p className="text-muted-foreground text-sm">
-            Gerencie teste grátis, renovação e cancelamento.
-          </p>
-        </div>
+    <div className="container mx-auto max-w-3xl px-4 py-10">
+      <BackButton href="/reader/account" className="mb-6" />
+      <div className="mb-6 space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)]">
+          Minhas assinaturas
+        </h1>
+        <p className="text-sm text-[var(--liquid-muted)]">
+          Gerencie teste grátis, renovação e cancelamento.
+        </p>
       </div>
-      <MySubscriptions writerId={user?.writerId ?? undefined} />
-    </main>
+      <GlassCard strong>
+        <MySubscriptions writerId={user?.writerId ?? undefined} />
+      </GlassCard>
+    </div>
   );
 }

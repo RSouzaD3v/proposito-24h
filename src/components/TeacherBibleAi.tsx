@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, X, Minus, Maximize2, MessageCircle } from "lucide-react";
+import { Loader2, Send, X, Minus, Maximize2 } from "lucide-react";
 
 export default function TeacherBibleAI({
   initialPrompt = "",
@@ -18,6 +18,45 @@ export default function TeacherBibleAI({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
 
+  function toFriendlyError(raw: unknown): string {
+    const fallback =
+      "Não foi possível gerar a explicação agora. Tente novamente em instantes.";
+
+    if (raw == null) return fallback;
+
+    let text = "";
+    if (typeof raw === "string") {
+      text = raw;
+    } else if (typeof raw === "object") {
+      const obj = raw as { message?: string; error?: { message?: string } | string };
+      if (typeof obj.error === "string") text = obj.error;
+      else if (typeof obj.error?.message === "string") text = obj.error.message;
+      else if (typeof obj.message === "string") text = obj.message;
+      else {
+        try {
+          text = JSON.stringify(raw);
+        } catch {
+          return fallback;
+        }
+      }
+    } else {
+      text = String(raw);
+    }
+
+    // Never show technical / JSON payloads to the end user
+    if (
+      text.trim().startsWith("{") ||
+      /PERMISSION_DENIED|UNAUTHENTICATED|RESOURCE_EXHAUSTED|INVALID_ARGUMENT/i.test(
+        text
+      ) ||
+      /api key|unregistered callers|quota|rate limit/i.test(text)
+    ) {
+      return "O chat bíblico está temporariamente indisponível. Tente novamente em alguns minutos.";
+    }
+
+    return text || fallback;
+  }
+
   async function handleAsk() {
     if (!prompt?.trim()) return;
     setLoading(true);
@@ -29,11 +68,27 @@ export default function TeacherBibleAI({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Falha ao gerar explicação.");
+
+      let data: { text?: string; error?: unknown } = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(
+          "Não foi possível gerar a explicação agora. Tente novamente em instantes."
+        );
+      }
+
+      if (!res.ok) {
+        throw new Error(toFriendlyError(data?.error ?? data));
+      }
+
       setAnswer(data.text || "");
-    } catch (e: any) {
-      setErrorMsg(e?.message ?? "Erro inesperado.");
+    } catch (e: unknown) {
+      const message =
+        e instanceof TypeError
+          ? "Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente."
+          : toFriendlyError(e instanceof Error ? e.message : e);
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
@@ -44,15 +99,14 @@ export default function TeacherBibleAI({
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <Button
-          className="rounded-full shadow-lg"
-          size="icon"
+          className="rounded-full shadow-lg px-4 h-11"
           onClick={() => {
             setMinimized(false);
             setOpen(true);
           }}
-          aria-label="Abrir Professor"
+          aria-label="Abrir Chat bíblico"
         >
-          <MessageCircle className="h-6 w-6" />
+          Chat bíblico
         </Button>
       </div>
     );
@@ -69,7 +123,7 @@ export default function TeacherBibleAI({
         >
           <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold">
-              Pergunte ao Professor
+              Chat bíblico
             </CardTitle>
 
             <div className="flex items-center gap-2">

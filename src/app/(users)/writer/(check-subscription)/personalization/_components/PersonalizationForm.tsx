@@ -4,10 +4,11 @@ import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { LoadingState, ButtonSpinner } from "@/components/ui/loading-state";
 
 interface Personalization {
   writerId: string;
@@ -20,7 +21,6 @@ interface Personalization {
   buttonTextColor?: string;
   textColor?: string;
 
-  // 🎨 cores livres
   independenteColor1?: string;
   independenteColor2?: string;
 }
@@ -33,9 +33,6 @@ export default function PersonalizationForm({
   const [data, setData] = useState<Personalization | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  /* -------------------------
-     Load personalization
-  ------------------------- */
   useEffect(() => {
     fetch(`/api/personalization?writerId=${writerId}`)
       .then((res) => res.json())
@@ -57,9 +54,6 @@ export default function PersonalizationForm({
     setData({ ...data, [key]: value });
   }
 
-  /* -------------------------
-     Save
-  ------------------------- */
   function handleSave() {
     if (!data) return;
 
@@ -79,28 +73,15 @@ export default function PersonalizationForm({
   }
 
   if (!data) {
-    return (
-      <p className="text-muted-foreground mt-5">
-        Carregando personalização…
-      </p>
-    );
+    return <LoadingState label="Carregando personalização..." />;
   }
 
   return (
-    <div className="space-y-8 mt-5">
-      {/* Header */}
-      <header className="space-y-1">
-        <h1 className="text-3xl font-bold">Personalização</h1>
-        <p className="text-sm text-muted-foreground">
-          Defina as cores do seu aplicativo.
-        </p>
-      </header>
-
-      {/* Status */}
-      <Card className="p-6 flex items-center justify-between">
+    <div className="space-y-5">
+      <GlassCard strong className="flex items-center justify-between">
         <div>
-          <p className="font-medium">Personalização ativa</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-medium text-[var(--liquid-ink)]">Personalização ativa</p>
+          <p className="text-sm text-[var(--liquid-muted)]">
             Ative ou desative sua identidade visual
           </p>
         </div>
@@ -109,13 +90,12 @@ export default function PersonalizationForm({
           checked={data.active}
           onCheckedChange={(v) => updateField("active", v)}
         />
-      </Card>
+      </GlassCard>
 
-      {/* Colors */}
-      <Card className="p-6 space-y-6">
-        <h2 className="font-semibold">Cores</h2>
+      <GlassCard strong className="space-y-6">
+        <h2 className="font-semibold text-[var(--liquid-ink)]">Cores</h2>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <ColorField
             label="Cor primária"
             value={data.primaryColor}
@@ -152,7 +132,6 @@ export default function PersonalizationForm({
             onChange={(v) => updateField("textColor", v)}
           />
 
-          {/* 🎨 Cores independentes */}
           <ColorField
             label="Cor independente 1"
             value={data.independenteColor1}
@@ -165,21 +144,29 @@ export default function PersonalizationForm({
             onChange={(v) => updateField("independenteColor2", v)}
           />
         </div>
-      </Card>
+      </GlassCard>
 
-      {/* Save */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isPending}>
-          {isPending ? "Salvando..." : "Salvar alterações"}
+        <Button
+          variant="glass-primary"
+          className="rounded-full px-6"
+          onClick={handleSave}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <ButtonSpinner />
+              Salvando...
+            </>
+          ) : (
+            "Salvar alterações"
+          )}
         </Button>
       </div>
     </div>
   );
 }
 
-/* -------------------------
-   Helper
-------------------------- */
 function ColorField({
   label,
   value,
@@ -197,7 +184,7 @@ function ColorField({
           type="color"
           value={value || "#000000"}
           onChange={(e) => onChange(e.target.value)}
-          className="w-12 h-10 p-1"
+          className="h-10 w-12 p-1"
         />
         <Input
           type="text"

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from "react";
-import { FaClipboard } from "react-icons/fa";
+import { Clipboard } from "lucide-react";
+
 export const ClipboardLink = ({ slug }: { slug: string }) => {
     const [copied, setCopied] = useState(false);
 
@@ -13,13 +14,16 @@ export const ClipboardLink = ({ slug }: { slug: string }) => {
 
     return (
         <button
-            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer"
+            type="button"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-white/40"
             onClick={handleCopy}
         >
-            <FaClipboard className="inline-block mr-1" />
-            <h2>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/70 text-[var(--liquid-accent)] shadow-sm">
+                <Clipboard className="size-5" />
+            </span>
+            <span className="text-base font-medium text-[var(--liquid-ink)]">
                 {copied ? "Link copiado!" : "Copiar meu link para cliente."}
-            </h2>
+            </span>
         </button>
     );
 };

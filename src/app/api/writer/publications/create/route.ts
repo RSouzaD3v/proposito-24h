@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
     coverUrl,
     body: content,
     tags,
-    isPdf,
     pdfUrl,
     category,
   } = body;
@@ -80,8 +79,8 @@ export async function POST(req: NextRequest) {
       coverUrl: coverUrl ?? null,
       body: content ?? null,
       tags: Array.isArray(tags) ? tags : [],
-      isPdf: isPdf === true || isPdf === "true",
-      pdfUrl: pdfUrl ?? null,
+      isPdf: Boolean(pdfUrl),
+      pdfUrl: pdfUrl || null,
       category: category ?? "Outros",
     },
   });

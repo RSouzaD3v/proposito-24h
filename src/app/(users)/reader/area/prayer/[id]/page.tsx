@@ -6,14 +6,13 @@ import { CreatePrayerModal } from "./_components/CreatePrayerModal";
 import { DeletePrayerBtn } from "./_components/DeletePrayerBtn";
 import { FaCheck } from "react-icons/fa";
 import { CompletePrayer } from "./_components/CompletePrayer";
-import Link from "next/link";
 import { startOfDay, addDays } from "date-fns";
+import { BackButton } from "@/components/ui/back-button";
+import { GlassCard } from "@/components/ui/glass-card";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import clientPromise from "@/lib/mongodb";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
 import { getReaderContentGate } from "@/lib/readerAccessForWriter";
-import { MenuPainel } from "../../_components/MenuPainel";
-
 const TZ = "America/Sao_Paulo";
 
 function brasiliaDayRange(now = new Date()) {
@@ -107,19 +106,19 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
 
     return (
         <section style={{ backgroundImage: prayer?.imageUrl ? `url(${prayer?.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} 
-        className="w-screen flex items-center justify-center py-10 px-4 min-h-screen">
-            {/* <div className="flex items-center justify-between mb-8 w-fit bg-white/75 p-4 rounded-xl shadow-md">
-                <h2 className="text-4xl font-extrabold drop-shadow-sm">Minha Oração</h2>
-            </div> */}
+        className="w-screen flex flex-col items-center justify-center py-10 px-4 min-h-screen">
+            <div className="flex w-full max-w-xl flex-col gap-4">
+            <BackButton href="/reader/area/daily" className="self-start" />
             {!prayer ? (
-                <div className="bg-linear-to-r from-indigo-100 to-purple-100 rounded-xl p-10 shadow-md text-gray-500 text-center">
+                <GlassCard strong className="text-center text-gray-500">
                     <span className="block text-2xl mb-2">🙏</span>
                     Nenhuma oração encontrada.
-                </div>
+                </GlassCard>
             ) : (
                 <div className="space-y-8">
-                    <div
-                        className="bg-white/75 w-full px-5 md:w-125 flex items-center justify-center flex-col gap-4 rounded-2xl shadow-lg p-8 border border-indigo-100 hover:shadow-xl transition-shadow relative"
+                    <GlassCard
+                        strong
+                        className="relative flex w-full flex-col items-center justify-center gap-4 md:max-w-[31.25rem]"
                     >
                         <h3 className="text-2xl font-bold text-black mb-3 flex items-center gap-2">
                                 <span className="inline-block">🕊️</span>
@@ -146,11 +145,11 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
                             <div>
                                 <CompletePrayer prayerId={prayer.id} />
                             </div>
-                        </div>
+                        </GlassCard>
                 </div>
             )}
+            </div>
 
-            <MenuPainel colors={colors} />
         </section>
     );
 }

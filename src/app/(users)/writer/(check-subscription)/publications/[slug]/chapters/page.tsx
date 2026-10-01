@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { CreateButton } from "@/components/ui/create-button";
+import { PageHeader } from "@/components/ui/page-header";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -60,21 +62,20 @@ export default function WriterPublicationChapterPage({ params }: { params: Promi
 
     return (
         <section className="max-w-3xl mx-auto py-8">
-            <Link href={`/writer/publications`} className="text-blue-600 hover:underline mb-4 inline-block">
-                Voltar às Publicações
-            </Link>
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold mb-1">Capítulos</h1>
-                    <p className="text-gray-600">Gerencie os capítulos da sua publicação.</p>
-                </div>
-                <Link
-                    href={`/writer/publications/${slug}/chapters/new`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                >
-                    + Novo capítulo
-                </Link>
-            </div>
+            <PageHeader
+                title="Capítulos"
+                description="Gerencie os capítulos da sua publicação."
+                backHref="/writer/publications"
+                backLabel="Voltar às Publicações"
+                actions={
+                    slug ? (
+                        <CreateButton
+                            href={`/writer/publications/${slug}/chapters/new`}
+                            label="Novo capítulo"
+                        />
+                    ) : null
+                }
+            />
 
             {chapters && chapters.length > 0 ? (
                 <div className="grid gap-6">

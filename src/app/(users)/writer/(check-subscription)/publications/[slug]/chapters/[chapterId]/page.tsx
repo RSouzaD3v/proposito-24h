@@ -1,5 +1,8 @@
 "use client";
 import S3Uploader from "@/components/S3Uploader";
+import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading-state";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -88,15 +91,18 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
         }
     };
 
+    if (loading) {
+        return <LoadingState variant="full" label="Carregando dados..." />;
+    }
+
     return (
         <section className="max-w-4xl mx-auto py-10 px-4 md:px-8">
-            <Link className="bg-blue-600 p-2 rounded-sm text-white hover:bg-blue-700" href={`/writer/publications/${slug}/chapters`}>
-                Voltar aos Capítulos
-            </Link>
+            <BackButton
+                href={`/writer/publications/${slug}/chapters`}
+                label="Voltar aos Capítulos"
+                className="mb-4"
+            />
             <div className="bg-white shadow-2xl rounded-2xl p-6 md:p-12 flex flex-col md:flex-row gap-8">
-                {loading ? (
-                    <h2>Carregando...</h2>
-                ) : (
                     <div className="flex-1">
                         {coverUrl && (
                             <div className="flex-shrink-0 my-5 flex justify-center items-start md:w-1/3">
@@ -181,16 +187,16 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
                                 <button>
                                     
                                 </button>
-                                <button
+                                <Button
                                     type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 transition text-white font-bold py-3 px-8 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    variant="glass-primary"
+                                    className="rounded-full px-8 py-3"
                                 >
                                     Salvar
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     </div>
-                )}
             </div>
         </section>
     );

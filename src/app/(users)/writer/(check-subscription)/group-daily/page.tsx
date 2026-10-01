@@ -2,19 +2,23 @@ import { authOptions } from "@/lib/authOption";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { ModalGroupDaily } from "./_components/ModalGroupDaily";
+import { WriterShell } from "@/components/ui/writer-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function GroupDaily() {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user.writerId) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Você precisa estar logado para acessar esta página.
-      </p>
+      <WriterShell maxWidth="4xl">
+        <p className="text-sm text-[var(--liquid-muted)]">
+          Você precisa estar logado para acessar esta página.
+        </p>
+      </WriterShell>
     );
   }
 
@@ -28,59 +32,33 @@ export default async function GroupDaily() {
   });
 
   return (
-    <div className="space-y-6 mt-5 max-w-4xl mx-auto px-3">
-      {/* HEADER */}
-      <div className="flex flex-wrap gap-2 items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold">
-            Agrupamentos Diários
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Organize os conteúdos do seu devocional diário
-          </p>
-        </div>
+    <WriterShell maxWidth="4xl">
+      <PageHeader
+        title="Agrupamentos Diários"
+        description="Organize os conteúdos do seu devocional diário"
+        backHref="/writer/dashboard"
+        actions={<ModalGroupDaily />}
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ModalGroupDaily />
-
-          <Button asChild variant="outline">
-            <Link
-              href="/writer/dashboard"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft size={16} />
-              Voltar
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* SEM GROUPINGS */}
       {groupingDailies.length === 0 && (
-        <div className="flex justify-center mt-10">
-          <Card className="max-w-md w-full">
-            <CardContent className="p-6 text-center space-y-4">
-              <h2 className="text-lg font-semibold">
-                Nenhum agrupamento criado
-              </h2>
-
-              <p className="text-sm text-muted-foreground">
-                Você ainda não criou um agrupamento diário.
-                Crie um para organizar seus devocionais.
-              </p>
-
-              <ModalGroupDaily />
-            </CardContent>
-          </Card>
-        </div>
+        <GlassCard strong className="mx-auto max-w-md text-center space-y-4">
+          <h2 className="text-lg font-semibold text-[var(--liquid-ink)]">
+            Nenhum agrupamento criado
+          </h2>
+          <p className="text-sm text-[var(--liquid-muted)]">
+            Você ainda não criou um agrupamento diário. Crie um para organizar
+            seus devocionais.
+          </p>
+          <div className="flex justify-center">
+            <ModalGroupDaily />
+          </div>
+        </GlassCard>
       )}
 
-      {/* LISTA DE GROUPINGS */}
       {groupingDailies.length > 0 && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {groupingDailies.map((group) => (
-            <Card key={group.id} className="overflow-hidden">
-              {/* IMAGEM */}
+            <GlassCard key={group.id} strong padding="none" className="overflow-hidden">
               {group.imageUrl && (
                 <div className="h-40 w-full overflow-hidden">
                   <img
@@ -90,33 +68,28 @@ export default async function GroupDaily() {
                   />
                 </div>
               )}
-
-              <CardContent className="p-4 space-y-3">
+              <div className="space-y-3 p-4">
                 <div>
-                  <h3 className="font-semibold text-base">
+                  <h3 className="text-base font-semibold text-[var(--liquid-ink)]">
                     {group.title}
                   </h3>
-
                   {group.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-3">
+                    <p className="mt-1 line-clamp-3 text-sm text-[var(--liquid-muted)]">
                       {group.description}
                     </p>
                   )}
                 </div>
-
-                <Button asChild className="w-full gap-2">
-                  <Link
-                    href={`/writer/group-daily/${group.id}`}
-                  >
+                <Button asChild variant="glass-primary" className="w-full gap-2 rounded-full">
+                  <Link href={`/writer/group-daily/${group.id}`}>
                     <Pencil size={16} />
                     Entrar / Editar agrupamento
                   </Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </GlassCard>
           ))}
         </div>
       )}
-    </div>
+    </WriterShell>
   );
 }

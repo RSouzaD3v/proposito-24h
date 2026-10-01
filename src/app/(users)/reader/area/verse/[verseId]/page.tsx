@@ -2,9 +2,10 @@ import { db } from "@/lib/db";
 import { CompleteVerse } from "./_components/CompleteVerse";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
-import Link from "next/link";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
 import { getReaderContentGate } from "@/lib/readerAccessForWriter";
+import { BackButton } from "@/components/ui/back-button";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default async function VerseDetails({ params }: { params: Promise<{ verseId: string }> }) {
     const session = await getServerSession(authOptions);
@@ -52,7 +53,9 @@ export default async function VerseDetails({ params }: { params: Promise<{ verse
     return (
         <div style={{ backgroundImage: verse?.imageUrl ? `url(${verse.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} 
         className="min-h-screen flex items-center  px-4 justify-center bg-linear-to-br from-gray-50 to-gray-200">
-            <div className="bg-white/80 rounded-2xl shadow-xl p-8 max-w-xl w-full flex flex-col items-center space-y-8 border border-gray-200">
+            <div className="flex w-full max-w-xl flex-col gap-4">
+                <BackButton href="/reader/area/daily" className="self-start" />
+                <GlassCard strong className="flex w-full flex-col items-center space-y-8">
                 <span className="text-gray-500 italic text-lg tracking-wide font-serif">
                     {verse?.reference}
                 </span>
@@ -64,6 +67,7 @@ export default async function VerseDetails({ params }: { params: Promise<{ verse
                         <CompleteVerse verseId={verse.id} />
                     </div>
                 )}
+                </GlassCard>
             </div>
         </div>
     );
