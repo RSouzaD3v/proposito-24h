@@ -13,6 +13,7 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import clientPromise from "@/lib/mongodb";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
 import { getReaderContentGate } from "@/lib/readerAccessForWriter";
+import { resolveReaderBackHref } from "@/lib/readerBackHref";
 const TZ = "America/Sao_Paulo";
 
 function brasiliaDayRange(now = new Date()) {
@@ -25,8 +26,9 @@ function brasiliaDayRange(now = new Date()) {
   };
 }
 
-export default async function PrayerPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PrayerPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ from?: string | string[] }> }) {
     const session = await getServerSession(authOptions);
+    const backHref = resolveReaderBackHref((await searchParams).from);
 
     if (!session) return null;
 
@@ -108,7 +110,7 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
         <section style={{ backgroundImage: prayer?.imageUrl ? `url(${prayer?.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} 
         className="w-screen flex flex-col items-center justify-center py-10 px-4 min-h-screen">
             <div className="flex w-full max-w-xl flex-col gap-4">
-            <BackButton href="/reader/area/daily" className="self-start" />
+            <BackButton href={backHref} className="self-start" />
             {!prayer ? (
                 <GlassCard strong className="text-center text-gray-500">
                     <span className="block text-2xl mb-2">🙏</span>

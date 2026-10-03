@@ -46,7 +46,7 @@ export default async function ReaderAccountLayout({
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
-        <WriterShell contained={false} className="min-h-screen">
+        <WriterShell contained={false} background="plain" className="min-h-screen">
           <PushBootstrap writerId={user.writer.id} userId={user.id} />
           <PainelControl />
           <WriterShell maxWidth="2xl">{children}</WriterShell>

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { withReaderBackHref } from "@/lib/readerBackHref";
 
 interface PageProps {
   params: Promise<{ groupId: string }>;
@@ -23,6 +24,7 @@ export default async function ReaderGroupDailyDetailPage({
   params,
 }: PageProps) {
   const { groupId } = await params;
+  const from = `/reader/area/group-daily/${groupId}`;
 
   const session = await getServerSession(authOptions);
 
@@ -130,7 +132,7 @@ export default async function ReaderGroupDailyDetailPage({
                   <ReadRow
                     key={item.id}
                     title={item.title}
-                    href={`/reader/area/devotional/${item.id}`}
+                    href={withReaderBackHref(`/reader/area/devotional/${item.id}`, from)}
                     completed={completed.devotionals.has(item.id)}
                   />
                 ))}
@@ -145,7 +147,7 @@ export default async function ReaderGroupDailyDetailPage({
                   <ReadRow
                     key={item.id}
                     title={item.reference}
-                    href={`/reader/area/verse/${item.id}`}
+                    href={withReaderBackHref(`/reader/area/verse/${item.id}`, from)}
                     completed={completed.verses.has(item.id)}
                   />
                 ))}
@@ -160,7 +162,7 @@ export default async function ReaderGroupDailyDetailPage({
                   <ReadRow
                     key={item.id}
                     title={item.title}
-                    href={`/reader/area/prayer/${item.id}`}
+                    href={withReaderBackHref(`/reader/area/prayer/${item.id}`, from)}
                     completed={completed.prayers.has(item.id)}
                   />
                 ))}
@@ -175,7 +177,7 @@ export default async function ReaderGroupDailyDetailPage({
                   <ReadRow
                     key={item.id}
                     title={item.verse}
-                    href={`/reader/area/quote/${item.id}`}
+                    href={withReaderBackHref(`/reader/area/quote/${item.id}`, from)}
                     completed={completed.quotes.has(item.id)}
                   />
                 ))}

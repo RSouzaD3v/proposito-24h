@@ -50,7 +50,7 @@ export default async function ReaderLayout({
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
-        <WriterShell contained={false} className="pb-28">
+        <WriterShell contained={false} background="plain" className="pb-28">
           <PushBootstrap writerId={user.writer.id} userId={user.id} />
           <PainelControl />
           <section className="relative z-0 w-full">

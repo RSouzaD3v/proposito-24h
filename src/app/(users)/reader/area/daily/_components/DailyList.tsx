@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
+import { withReaderBackHref } from "@/lib/readerBackHref";
 
 export default function DailyList({
   items, type
@@ -11,6 +13,10 @@ export default function DailyList({
   items: any[];
   type: string
 }) {
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+  const from = query ? `/reader/area/daily?${query}` : "/reader/area/daily";
+
   if (items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -24,7 +30,7 @@ export default function DailyList({
       {items.map((item) => (
         <Link
           key={item.id}
-          href={`/reader/area/${type}/${item.id}`}
+          href={withReaderBackHref(`/reader/area/${type}/${item.id}`, from)}
           className="block"
         >
           <Card className="p-4 space-y-2 cursor-pointer transition hover:bg-muted/40">

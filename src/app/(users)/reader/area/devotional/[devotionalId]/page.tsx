@@ -6,13 +6,15 @@ import { ScreenSubscription } from "../../_components/ScreenSubscription";
 import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 import { BackButton } from "@/components/ui/back-button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { resolveReaderBackHref } from "@/lib/readerBackHref";
 
-export default async function VerseDetails({ params }: { params: Promise<{ devotionalId: string }> }) {
+export default async function VerseDetails({ params, searchParams }: { params: Promise<{ devotionalId: string }>; searchParams: Promise<{ from?: string | string[] }> }) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
         return (<div>Você precisa estar logado para ver este devocional.</div>);
     }
     const { devotionalId } = await params;
+    const backHref = resolveReaderBackHref((await searchParams).from);
 
     const devotional = await db.devotional.findUnique({
         where: { id: devotionalId },
@@ -56,7 +58,7 @@ export default async function VerseDetails({ params }: { params: Promise<{ devot
         backgroundSize: "cover", backgroundPosition: "center" }} className="min-h-screen flex items-center justify-center 
         bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] px-4 py-5">
             <div className="flex w-full max-w-xl flex-col gap-4">
-                <BackButton href="/reader/area/daily" className="self-start" />
+                <BackButton href={backHref} className="self-start" />
                 <GlassCard strong className="flex flex-col gap-8">
                 <div className="flex flex-col gap-2">
                     <h2 className="text-2xl font-semibold text-gray-900">{devotional?.title}</h2>

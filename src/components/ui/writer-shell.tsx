@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils"
 type WriterShellProps = React.ComponentProps<"div"> & {
   /** When false, only applies liquid background (for root layout). */
   contained?: boolean
+  /** Only used when `contained` is false. */
+  background?: "liquid" | "plain"
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl" | "5xl" | "full"
 }
 
@@ -22,6 +24,7 @@ function WriterShell({
   className,
   children,
   contained = true,
+  background = "liquid",
   maxWidth = "5xl",
   ...props
 }: WriterShellProps) {
@@ -29,7 +32,8 @@ function WriterShell({
     return (
       <div
         className={cn(
-          "liquid-shell liquid-bg min-h-screen w-full overflow-x-clip",
+          "liquid-shell min-h-screen w-full overflow-x-clip",
+          background === "plain" ? "bg-white dark:bg-neutral-950" : "liquid-bg",
           className
         )}
         {...props}
