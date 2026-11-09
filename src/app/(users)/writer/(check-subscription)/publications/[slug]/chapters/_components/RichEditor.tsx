@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -24,10 +24,11 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Quote, List, ListOrdered, Link as LinkIcon, Type, Highlighter,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Image as ImageIcon, Code2, Code, Minus, Undo2, Redo2, Eraser
+  Image as ImageIcon, Minus, Undo2, Redo2, Eraser
 } from "lucide-react";
+import { uploadImage } from "@/lib/uploadImage";
 
-type Props = { value?: string; onChange: (html: string) => void };
+type Props = { value?: string; onChange: (html: string) => void; toolbarClassName?: string };
 
 const FONT_SIZES = [14, 16, 18, 20, 24, 28, 32]; // px
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
@@ -48,7 +49,10 @@ function TB(props: React.ComponentProps<typeof Button>) {
   );
 }
 
-export default function RichEditor({ value, onChange }: Props) {
+export default function RichEditor({ value, onChange, toolbarClassName = "top-0" }: Props) {
+  const imageInput = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
@@ -97,10 +101,19 @@ export default function RichEditor({ value, onChange }: Props) {
     }
   }, [value, editor]);
 
-  const addImageByUrl = useCallback(() => {
-    const url = window.prompt("URL da imagem:");
-    if (!url) return;
-    editor?.chain().focus().setImage({ src: url, alt: "" }).run();
+  const insertImage = useCallback(async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const src = await uploadImage(file, "chapter-images");
+      editor?.chain().focus().setImage({ src, alt: "" }).run();
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "O envio da imagem falhou.");
+    } finally {
+      setUploading(false);
+      if (imageInput.current) imageInput.current.value = "";
+    }
   }, [editor]);
 
   const setLink = useCallback(() => {
@@ -145,7 +158,7 @@ export default function RichEditor({ value, onChange }: Props) {
   return (
     <div className="w-full">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 mb-2 rounded-lg border bg-white p-2 shadow-sm flex flex-wrap gap-1 not-prose">
+      <div className={`sticky z-10 mb-2 rounded-lg border bg-white p-2 shadow-sm flex flex-wrap gap-1 not-prose ${toolbarClassName}`}>
         <TB variant={isActive("bold") ? "default" : "outline"} size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()} title="Negrito (Ctrl/Cmd+B)">
           <Bold className="size-4" />
@@ -194,9 +207,16 @@ export default function RichEditor({ value, onChange }: Props) {
         <TB variant={isActive("link") ? "default" : "outline"} size="sm" onClick={setLink} title="Inserir link">
           <LinkIcon className="size-4" />
         </TB>
-        <TB variant="outline" size="sm" onClick={addImageByUrl} title="Inserir imagem por URL">
+        <TB variant="outline" size="sm" disabled={uploading} onClick={() => imageInput.current?.click()} title="Inserir imagem">
           <ImageIcon className="size-4" />
         </TB>
+        <input
+          ref={imageInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(event) => insertImage(event.target.files?.[0])}
+        />
 
         <Separator orientation="vertical" className="mx-1 h-6" />
         <TB variant={isActiveAlign("left") ? "default" : "outline"} size="sm"
@@ -217,14 +237,6 @@ export default function RichEditor({ value, onChange }: Props) {
         </TB>
 
         <Separator orientation="vertical" className="mx-1 h-6" />
-        <TB variant={isActive("code") ? "default" : "outline"} size="sm"
-          onClick={() => editor.chain().focus().toggleCode().run()} title="Código inline">
-          <Code className="size-4" />
-        </TB>
-        <TB variant={isActive("codeBlock") ? "default" : "outline"} size="sm"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()} title="Bloco de código">
-          <Code2 className="size-4" />
-        </TB>
         <TB variant="outline" size="sm"
           onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Separador">
           <Minus className="size-4" />
@@ -275,7 +287,10 @@ export default function RichEditor({ value, onChange }: Props) {
         </div> */}
       </div>
 
-      <div className="rounded-lg border bg-white p-4 shadow-sm">
+      {uploading && <p role="status" className="mb-2 text-sm text-[var(--liquid-muted)]">Enviando imagem...</p>}
+      {uploadError && <p role="alert" className="mb-2 text-sm text-red-700">{uploadError}</p>}
+
+      <div className="rounded-lg border bg-[#fffdf9] p-5 shadow-sm md:p-8" style={{ fontFamily: 'Georgia, "Iowan Old Style", "Times New Roman", serif' }}>
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -1,177 +1,207 @@
-import { apiFetch } from "@/lib/api/server";
-// app/writer/analytics/page.tsx
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { GlassCard } from "@/components/ui/glass-card";
+import { apiFetch } from "@/lib/api/server";
+import { cn } from "@/lib/utils";
+import { KpiTile } from "@/components/writer/KpiTile";
+import { PublicationStatusBadge } from "@/components/writer/PublicationStatusBadge";
+import { EngagementChart, NewSubscribersChart, RevenueChart, type EngagementDay } from "./_charts/InsightCharts";
+import { BRL, dayKey, daysBetween, deltaOf, INT, type Insights } from "./_lib/insights";
 
-// shadcn/ui
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+type Overview = {
+  start: string;
+  end: string;
+  totalReaders: number;
+  subsCount: number;
+  revenueByDay: { day: string; revenue_cents: number; sales: number }[];
+  topProducts: { id: string; title: string; revenue_cents: number; sales: number }[];
+  newSubsByDay: { day: string; new_subs: number }[];
+  statusDist: { status: string; count: number }[];
+};
 
-// icons
-import { FiBarChart2, FiShoppingBag, FiUsers, FiUserPlus, FiBookOpen, FiChevronRight } from "react-icons/fi";
+const RANGES = [
+  { key: "7d", label: "7 dias" },
+  { key: "30d", label: "30 dias" },
+  { key: "90d", label: "90 dias" },
+  { key: "365d", label: "1 ano" },
+];
 
-// client-side charts
-import RevenueAreaChart from "./_charts/RevenueAreaChart";
-import SalesBarChart from "./_charts/SalesBarChart";
-import SubscribersLineChart from "./_charts/SubscribersLineChart";
-import StatusDonutChart from "./_charts/StatusDonutChart";
+const STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Ativas",
+  TRIALING: "Em teste",
+  PAST_DUE: "Pagamento atrasado",
+  PAUSED: "Pausadas",
+  CANCELED: "Canceladas",
+  UNPAID: "Não pagas",
+  INCOMPLETE: "Incompletas",
+  INCOMPLETE_EXPIRED: "Expiradas",
+};
 
+const KIND_LABEL: Record<string, string> = { devotional: "Devocional", verse: "Versículo", quote: "Frase" };
 
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+export default async function WriterAnalyticsPage({ searchParams }: { searchParams?: Promise<{ range?: string }> }) {
+  const requested = (await searchParams)?.range ?? "30d";
+  const range = RANGES.some(({ key }) => key === requested) ? requested : "30d";
+  const query = `range=${encodeURIComponent(range)}`;
 
-export default async function WriterAnalyticsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ range?: string }>;
-}) {
-  const sp = (await searchParams) ?? {};
-  const range = sp.range ?? "30d";
+  const [overviewResponse, insightsResponse] = await Promise.all([
+    apiFetch<Overview>(`/writer/analytics?${query}`),
+    apiFetch<Insights>(`/writer/analytics/insights?${query}`),
+  ]);
+  if (!overviewResponse.ok || !insightsResponse.ok) return notFound();
+  const overview = overviewResponse.data;
+  const insights = insightsResponse.data;
+  const { current, previous } = insights;
 
-  const analytics = await apiFetch<any>(`/writer/analytics?range=${encodeURIComponent(range)}`);
-  if (!analytics.ok) return notFound();
-  const {
-    revenueByDay,
-    topProducts,
-    newSubsByDay,
-    statusDist,
-    totalReaders,
-    subsCount,
-    totalSalesInPeriod,
-    netCents,
-  } = analytics.data;
-  const start = new Date(analytics.data.start);
-  const end = new Date(analytics.data.end);
+  const days = daysBetween(overview.start, overview.end);
+  const revenue = new Map(overview.revenueByDay.map((row) => [dayKey(row.day), row.revenue_cents / 100]));
+  const subs = new Map(overview.newSubsByDay.map((row) => [dayKey(row.day), row.new_subs]));
+  const engagement = new Map<string, EngagementDay>(
+    days.map(({ key, label }) => [key, { label, devotional: 0, verse: 0, quote: 0 }]),
+  );
+  for (const { day, kind, count } of insights.engagementByDay) {
+    const entry = engagement.get(dayKey(day));
+    if (entry && (kind === "devotional" || kind === "verse" || kind === "quote")) entry[kind] = count;
+  }
+
+  const conversion = overview.totalReaders ? (overview.subsCount / overview.totalReaders) * 100 : 0;
+  const averageTicket = current.sales ? current.netCents / current.sales / 100 : 0;
+  const statusTotal = overview.statusDist.reduce((sum, { count }) => sum + count, 0);
+  const statuses = [...overview.statusDist].sort((a, b) => b.count - a.count);
+  const topContentMax = Math.max(1, ...insights.topContent.map(({ count }) => count));
 
   return (
-    <section className="min-h-screen w-full px-4 md:px-8 py-8">
-      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <section className="w-full space-y-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Painel do Escritor</h1>
-          <p className="text-sm text-muted-foreground">Acompanhe ganhos, vendas e sua base de leitores.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Meus insights</h1>
+          <p className="text-sm text-[var(--liquid-muted)]">Ganhos, leitores e o que mais toca quem lê você.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <RangeTabs initialRange={range} />
-          <Link href="/writer/publications">
-            <Button variant="secondary" className="gap-2"><FiBookOpen /> Publicações</Button>
-          </Link>
-        </div>
+        <nav aria-label="Período" className="glass-surface flex w-fit gap-0.5 rounded-full p-1">
+          {RANGES.map(({ key, label }) => (
+            <Link
+              key={key}
+              href={`?range=${key}`}
+              aria-current={key === range ? "page" : undefined}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                key === range ? "bg-[var(--liquid-accent)] text-white" : "text-[var(--liquid-muted)] hover:bg-white/70",
+              )}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       </header>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard title="Receita (período)" icon={<FiBarChart2 />} value={BRL.format(netCents / 100)} hint="líquido" />
-        <KpiCard title="Vendas (período)" icon={<FiShoppingBag />} value={String(totalSalesInPeriod)} hint="pagas" />
-        <KpiCard title="Assinantes" icon={<FiUserPlus />} value={String(subsCount)} hint="ativos + vitalícios" />
-        <KpiCard title="Leitores totais" icon={<FiUsers />} value={String(totalReaders)} hint="base do escritor" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <KpiTile label="Receita líquida" value={BRL.format(current.netCents / 100)} delta={deltaOf(current.netCents, previous.netCents)} />
+        <KpiTile label="Vendas" value={INT.format(current.sales)} delta={deltaOf(current.sales, previous.sales)} />
+        <KpiTile label="Novos assinantes" value={INT.format(current.newSubs)} delta={deltaOf(current.newSubs, previous.newSubs)} />
+        <KpiTile label="Novos leitores" value={INT.format(current.newReaders)} delta={deltaOf(current.newReaders, previous.newReaders)} />
+        <KpiTile label="Leitores ativos" value={INT.format(insights.activeReaders)} hint={`de ${INT.format(overview.totalReaders)} no total`} />
+        <KpiTile label="Leituras concluídas" value={INT.format(current.completions)} delta={deltaOf(current.completions, previous.completions)} />
+        <KpiTile label="Conversão em assinatura" value={`${conversion.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`} hint={`${INT.format(overview.subsCount)} de ${INT.format(overview.totalReaders)} leitores`} />
+        <KpiTile label="Cancelamentos" value={INT.format(insights.canceledSubs)} hint={`Ticket médio ${BRL.format(averageTicket)}`} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Receita & Vendas por dia */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Receita diária</CardTitle>
-            <CardDescription>Último período selecionado</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <RevenueAreaChart data={revenueByDay.map((r: any) => ({ day: new Date(r.day), revenue: Number(r.revenue_cents)/100, sales: r.sales }))} />
-            </Suspense>
-          </CardContent>
-          <CardFooter className="text-xs text-muted-foreground">Valores líquidos (quando disponível) ou bruto – taxas subtraídas quando possível.</CardFooter>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <GlassCard strong className="lg:col-span-2">
+          <h2 className="font-semibold text-[var(--liquid-ink)]">Receita por dia</h2>
+          <p className="mb-3 text-xs text-[var(--liquid-muted)]">Valores líquidos, já sem as taxas.</p>
+          <RevenueChart data={days.map(({ key, label }) => ({ label, value: revenue.get(key) ?? 0 }))} />
+        </GlassCard>
 
-        {/* Distribuição de status de assinatura */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Status das assinaturas</CardTitle>
-            <CardDescription>Panorama atual</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <StatusDonutChart data={statusDist} />
-            </Suspense>
-          </CardContent>
-        </Card>
+        <GlassCard strong>
+          <h2 className="mb-3 font-semibold text-[var(--liquid-ink)]">Situação das assinaturas</h2>
+          {statuses.length === 0 && <p className="text-sm text-[var(--liquid-muted)]">Nenhuma assinatura ainda.</p>}
+          <ul className="space-y-3">
+            {statuses.map(({ status, count }) => (
+              <li key={status}>
+                <div className="flex justify-between gap-3 text-sm">
+                  <span className="text-[var(--liquid-ink)]">{STATUS_LABEL[status] ?? status}</span>
+                  <span className="font-semibold tabular-nums text-[var(--liquid-ink)]">{INT.format(count)}</span>
+                </div>
+                <div className="mt-1 h-1.5 rounded-full bg-black/5">
+                  <div className="h-full rounded-full bg-[#2a78d6]" style={{ width: `${(count / statusTotal) * 100}%` }} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </GlassCard>
 
-        {/* Top produtos por receita */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Produtos mais vendidos</CardTitle>
-            <CardDescription>Receita e quantidade no período</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <SalesBarChart data={topProducts.map((p: any) => ({ title: p.title, revenue: Number(p.revenue_cents)/100, sales: p.sales }))} />
-            </Suspense>
-          </CardContent>
-        </Card>
+        <GlassCard strong className="lg:col-span-2">
+          <h2 className="font-semibold text-[var(--liquid-ink)]">Leituras concluídas</h2>
+          <p className="mb-3 text-xs text-[var(--liquid-muted)]">
+            {INT.format(insights.engagedReaders)} {insights.engagedReaders === 1 ? "leitor concluiu" : "leitores concluíram"} algum conteúdo diário no período.
+          </p>
+          <EngagementChart data={[...engagement.values()]} />
+        </GlassCard>
 
-        {/* Assinantes ao longo do tempo */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Evolução de assinantes</CardTitle>
-            <CardDescription>Novos por dia (acumulado)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <SubscribersLineChart data={newSubsByDay.map((d: any) => ({ day: new Date(d.day), newSubs: d.new_subs }))} />
-            </Suspense>
-          </CardContent>
-        </Card>
-      </div>
+        <GlassCard strong>
+          <h2 className="mb-3 font-semibold text-[var(--liquid-ink)]">Novos assinantes</h2>
+          <NewSubscribersChart data={days.map(({ key, label }) => ({ label, value: subs.get(key) ?? 0 }))} />
+        </GlassCard>
 
-      <Separator className="my-8" />
+        <GlassCard strong className="lg:col-span-2" padding="none">
+          <h2 className="p-5 pb-3 font-semibold text-[var(--liquid-ink)]">Seus livros</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[44rem] text-sm">
+              <thead>
+                <tr className="border-y border-black/5 text-left text-xs text-[var(--liquid-muted)]">
+                  <th className="px-5 py-2 font-medium">Livro</th>
+                  <th className="px-3 py-2 text-right font-medium">Capítulos</th>
+                  <th className="px-3 py-2 text-right font-medium">Palavras</th>
+                  <th className="px-3 py-2 text-right font-medium">Leram</th>
+                  <th className="px-3 py-2 text-right font-medium">Concluíram</th>
+                  <th className="px-3 py-2 text-right font-medium">Vendas</th>
+                  <th className="px-5 py-2 text-right font-medium">Receita</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insights.books.map((book) => (
+                  <tr key={book.id} className="border-b border-black/5 last:border-0">
+                    <td className="px-5 py-3">
+                      <Link href={`/writer/analytics/books/${book.id}`} className="font-medium text-[var(--liquid-ink)] hover:underline">
+                        {book.title}
+                      </Link>
+                      <span className="ml-2 align-middle"><PublicationStatusBadge status={book.status} /></span>
+                    </td>
+                    <td className="px-3 py-3 text-right tabular-nums">{INT.format(book.chapters)}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{INT.format(book.words)}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{INT.format(book.readers)}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{INT.format(book.completed)}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{INT.format(book.sales)}</td>
+                    <td className="px-5 py-3 text-right tabular-nums">{BRL.format(book.revenue_cents / 100)}</td>
+                  </tr>
+                ))}
+                {insights.books.length === 0 && (
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-[var(--liquid-muted)]">Nenhum livro criado ainda.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-        <Badge variant="secondary">Período: {range.toUpperCase()}</Badge>
-        <span>Início: {start.toLocaleDateString()}</span>
-        <span>Fim: {end.toLocaleDateString()}</span>
-        {/* <span className="inline-flex items-center gap-1"><FiChevronRight /> <Link href="/writer/payouts" className="underline">Ver repasses</Link></span> */}
+        <GlassCard strong>
+          <h2 className="mb-3 font-semibold text-[var(--liquid-ink)]">Conteúdos mais concluídos</h2>
+          {insights.topContent.length === 0 && <p className="text-sm text-[var(--liquid-muted)]">Nenhuma conclusão no período.</p>}
+          <ol className="space-y-3">
+            {insights.topContent.map((item) => (
+              <li key={`${item.kind}:${item.id}`}>
+                <div className="flex justify-between gap-3 text-sm">
+                  <span className="min-w-0 truncate text-[var(--liquid-ink)]" title={item.title}>{item.title}</span>
+                  <span className="font-semibold tabular-nums text-[var(--liquid-ink)]">{INT.format(item.count)}</span>
+                </div>
+                <p className="text-xs text-[var(--liquid-muted)]">{KIND_LABEL[item.kind] ?? item.kind}</p>
+                <div className="mt-1 h-1.5 rounded-full bg-black/5">
+                  <div className="h-full rounded-full bg-[#2a78d6]" style={{ width: `${(item.count / topContentMax) * 100}%` }} />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </GlassCard>
       </div>
     </section>
-  );
-}
-
-
-function KpiCard({ title, value, hint, icon }: { title: string; value: string; hint?: string; icon?: React.ReactNode }) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="text-muted-foreground">{icon}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {hint ? <p className="text-xs text-muted-foreground mt-1">{hint}</p> : null}
-      </CardContent>
-    </Card>
-  );
-}
-
-function RangeTabs({ initialRange }: { initialRange: string }) {
-  const ranges = [
-    { key: "7d", label: "7d" },
-    { key: "30d", label: "30d" },
-    { key: "90d", label: "90d" },
-    { key: "365d", label: "1 ano" },
-  ];
-  return (
-    <Tabs defaultValue={initialRange} className="w-fit">
-      <TabsList>
-        {ranges.map(r => (
-          <TabsTrigger key={r.key} value={r.key} asChild>
-            {/* Using Link to trigger server re-render via searchParams */}
-            <Link href={`?range=${r.key}`}>{r.label}</Link>
-          </TabsTrigger>
-        ))}
-      </TabsList>
-      {ranges.map(r => (
-        <TabsContent key={r.key} value={r.key} />
-      ))}
-    </Tabs>
   );
 }

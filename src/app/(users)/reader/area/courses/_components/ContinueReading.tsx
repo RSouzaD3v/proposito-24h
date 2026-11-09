@@ -3,23 +3,29 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { LibraryBook } from "@/lib/api/types";
+import type { LastRead, LibraryBook } from "@/lib/api/types";
 import { BookCover } from "./BookCover";
 
-export function ContinueReading({ books }: { books: LibraryBook[] }) {
+/** Vale a leitura mais recente, deste aparelho ou de outro. */
+export function ContinueReading({ books, lastRead }: { books: LibraryBook[]; lastRead: LastRead | null }) {
   const [last, setLast] = useState<{ book: LibraryBook; chapter: number } | null>(null);
 
   useEffect(() => {
     try {
       const id = localStorage.getItem("reader:lastBook");
-      const book = books.find((item) => item.id === id);
-      if (!book) return;
-      const index = Number(localStorage.getItem(`reader:${book.id}:chapterIndex`)) || 0;
-      setLast({ book, chapter: index + 1 });
+      const localBook = books.find((item) => item.id === id);
+      const localAt = localBook ? Number(localStorage.getItem(`reader:${localBook.id}:lastReadAt`)) || 0 : 0;
+      const remoteBook = lastRead && books.find((item) => item.id === lastRead.publicationId);
+      if (remoteBook && lastRead && new Date(lastRead.lastReadAt).getTime() > localAt) {
+        setLast({ book: remoteBook, chapter: lastRead.currentChapter + 1 });
+      } else if (localBook) {
+        const index = Number(localStorage.getItem(`reader:${localBook.id}:chapterIndex`)) || 0;
+        setLast({ book: localBook, chapter: index + 1 });
+      }
     } catch {
       // Sem acesso ao armazenamento, a seção simplesmente não aparece.
     }
-  }, [books]);
+  }, [books, lastRead]);
 
   if (!last) return null;
 

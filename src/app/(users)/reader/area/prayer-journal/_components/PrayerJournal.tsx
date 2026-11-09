@@ -7,6 +7,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import { PrayerFormDialog } from "./PrayerFormDialog";
+import { ThanksDialog } from "./ThanksDialog";
 
 export interface PrayerEntry {
   id: string;
@@ -15,6 +16,7 @@ export interface PrayerEntry {
   imageUrl: string | null;
   startDate: string;
   answeredOn: string | null;
+  thanksPrayer: string | null;
   daysPraying: number;
 }
 
@@ -58,6 +60,7 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [justAnswered, setJustAnswered] = useState<PrayerEntry | null>(null);
+  const [thanks, setThanks] = useState<{ entry: PrayerEntry; fresh: boolean } | null>(null);
 
   const praying = useMemo(
     () =>
@@ -93,12 +96,20 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
         entry.answeredOn ? "DELETE" : "POST",
       );
       replace(updated);
-      setJustAnswered(updated.answeredOn ? updated : null);
+      setJustAnswered(null);
+      if (updated.answeredOn) setThanks({ entry: updated, fresh: true });
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setBusyId(null);
     }
+  }
+
+  function closeThanks(saved?: PrayerEntry) {
+    if (saved) replace(saved);
+    // O aviso com "Desfazer" só aparece depois que a pessoa sai da oração.
+    if (thanks?.fresh) setJustAnswered(saved ?? thanks.entry);
+    setThanks(null);
   }
 
   function handleSaved(entry: PrayerEntry) {
@@ -202,6 +213,7 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
                 busy={busyId === entry.id}
                 onToggle={() => toggle(entry)}
                 onOpen={() => setForm({ entry })}
+                onThanks={() => setThanks({ entry, fresh: false })}
               />
             </li>
           ))}
@@ -218,6 +230,17 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
           onDeleted={handleDeleted}
         />
       )}
+
+      {thanks && (
+        <ThanksDialog
+          key={thanks.entry.id}
+          entry={thanks.entry}
+          fresh={thanks.fresh}
+          accent={accent}
+          onClose={() => closeThanks()}
+          onSaved={closeThanks}
+        />
+      )}
     </>
   );
 }
@@ -228,17 +251,20 @@ function EntryCard({
   busy,
   onToggle,
   onOpen,
+  onThanks,
 }: {
   entry: PrayerEntry;
   accent: string;
   busy: boolean;
   onToggle: () => void;
   onOpen: () => void;
+  onThanks: () => void;
 }) {
   const answered = !!entry.answeredOn;
 
   return (
-    <GlassCard strong padding="none" className="flex items-center gap-1 p-2 pr-4">
+    <GlassCard strong padding="none" className="p-2 pr-4">
+      <div className="flex items-center gap-1">
       <button
         type="button"
         role="checkbox"
@@ -309,6 +335,23 @@ function EntryCard({
           )}
         </span>
       </button>
+      </div>
+
+      {answered && (
+        <button
+          type="button"
+          onClick={onThanks}
+          aria-label={`${entry.thanksPrayer ? "Editar" : "Escrever"} oração de agradecimento de "${entry.title}"`}
+          className="ml-12 mt-1 flex min-h-11 w-[calc(100%-3rem)] items-center gap-2 rounded-xl px-1 py-2 text-left text-sm"
+        >
+          <HandHeart className="size-4 shrink-0 text-emerald-600" aria-hidden />
+          {entry.thanksPrayer ? (
+            <span className="line-clamp-3 min-w-0 whitespace-pre-line italic text-[var(--liquid-ink)]">{entry.thanksPrayer}</span>
+          ) : (
+            <span className="font-semibold text-emerald-700">Escrever oração de agradecimento</span>
+          )}
+        </button>
+      )}
     </GlassCard>
   );
 }
@@ -330,7 +373,7 @@ function EmptyState({ tab, accent, onCreate }: { tab: Tab; accent: string; onCre
       <p className="max-w-sm text-sm text-[var(--liquid-muted)]">
         {praying
           ? "Anote seu pedido, adicione uma foto que represente essa oração e acompanhe cada dia até a resposta."
-          : "Quando Deus responder, marque o pedido e guarde aqui o testemunho da fidelidade dele."}
+          : "Quando Deus responder, marque o pedido, faça sua oração de agradecimento e guarde aqui o testemunho da fidelidade dele."}
       </p>
       {praying && (
         <Button variant="glass" className="mt-1 h-11 rounded-full px-5" onClick={onCreate}>

@@ -1,119 +1,31 @@
-import { apiGetOrNull } from "@/lib/api/server";
-import Image from "next/image";
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
-import { FiLock } from "react-icons/fi";
-import { Card, CardContent } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { DevicePreview } from "@/components/writer/DevicePreview";
 
-export default async function CoursesPage() {
-  const publications = await apiGetOrNull<any[]>("/writer/publications");
-
-  if (!publications) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">Acesso Negado</h2>
-        <p className="text-gray-600 mb-6">Você precisa estar logado para acessar esta página.</p>
-        <Link
-          href="/login"
-          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Fazer Login
-        </Link>
-      </div>
-    );
-  }
-
-  const books = publications
-    .filter((book) => book.type === "EBOOK" && book.status === "PUBLISHED")
-    .sort((a, b) => a.title.localeCompare(b.title));
-
-  const booksByCategory = books.reduce<Record<string, any[]>>((acc, book) => {
-    const category = book.category || "Outros";
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(book);
-    return acc;
-  }, {});
-
-  const categories = Object.entries(booksByCategory);
+export default function WriterLibraryPreviewStudio() {
+  const [drafts, setDrafts] = useState(false);
 
   return (
-    <div className="relative flex flex-col gap-8 px-4 md:px-32 pb-16 bg-gray-950">
-      {/* background gradiente sutil */}
-      <div className="pointer-events-none absolute inset-0" />
-
-      <BackButton href="/writer/publications" className="z-10 my-2 self-start" />
-
-      <header className="z-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow">Ebooks</h1>
-        <p className="text-neutral-300 mt-2">Explore os seus livros</p>
+    <div className="flex h-screen flex-col gap-3 px-4 py-4 md:px-8">
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <BackButton href="/writer/publications" label="Publicações" />
+        <div>
+          <h1 className="text-xl font-bold text-[var(--liquid-ink)]">Prévia da sua biblioteca</h1>
+          <p className="text-sm text-[var(--liquid-muted)]">É a tela real do leitor. Clique em um livro para abrir.</p>
+        </div>
       </header>
-
-      {categories.length === 0 && (
-        <div className="z-10 text-neutral-300">Nenhum livro publicado ainda.</div>
-      )}
-
-      {categories.map(([category, books]) => (
-        <section key={category} className="z-10">
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-3">{category}</h2>
-
-          <Carousel opts={{ align: "start" }} className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {books.map((book: any) => (
-                <CarouselItem
-                  key={book.id}
-                  className="pl-2 md:pl-4 basis-40 sm:basis-44 md:basis-48 lg:basis-52"
-                >
-                  <Link href={`/writer/publications/my-vitrine/${book.id}`} className="group block">
-                    <Card className="bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 transition">
-                      <CardContent className="p-3 h-[320px]">
-                        {/* Wrapper de capa com proporção de LIVRO */}
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-xl">
-                          {book.coverUrl ? (
-                            <img
-                              src={book.coverUrl}
-                              alt={book.title}
-                              sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
-                              className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 grid place-items-center bg-neutral-800">
-                              <span className="text-neutral-400 text-sm">Sem capa</span>
-                            </div>
-                          )}
-
-                          {/* Overlay gradiente + lock para pagos */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90" />
-                          {book.visibility === "PAID" && (
-                            <div className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-xs text-neutral-200">
-                              <FiLock />
-                              Pago
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Título */}
-                        <div className="mt-3">
-                          <h3
-                            title={book.title}
-                            className="line-clamp-2 text-sm md:text-base font-medium text-neutral-100 group-hover:text-white transition"
-                          >
-                            {book.title}
-                          </h3>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-
-            {/* Setas estilizadas */}
-            <CarouselPrevious className="border-neutral-700 hidden md:flex bg-black/40 text-white hover:bg-black/70 hover:border-neutral-600" />
-            <CarouselNext className="border-neutral-700 hidden md:flex bg-black/40 text-white hover:bg-black/70 hover:border-neutral-600" />
-          </Carousel>
-        </section>
-      ))}
+      <DevicePreview
+        src={`/writer/preview/library${drafts ? "?drafts=1" : ""}`}
+        className="flex-1"
+        controls={
+          <label className="glass-surface flex h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium text-[var(--liquid-ink)]">
+            <input type="checkbox" checked={drafts} onChange={(event) => setDrafts(event.target.checked)} />
+            Incluir rascunhos
+          </label>
+        }
+      />
     </div>
   );
 }

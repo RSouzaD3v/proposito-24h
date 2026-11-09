@@ -55,6 +55,12 @@ export interface LibraryBook {
   slug: string;
 }
 
+export interface LastRead {
+  publicationId: string;
+  currentChapter: number;
+  lastReadAt: string;
+}
+
 export interface SectionProgress {
   pct: number;
   finished: boolean;

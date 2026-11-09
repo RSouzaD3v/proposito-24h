@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,12 +23,53 @@ type Props = {
   coverUrl?: string | null;
   pdfUrl?: string | null;
   chapters: Chapter[];
+  libraryHref?: string;
+  /** Só a leitura real registra progresso; a prévia do escritor não. */
+  trackProgress?: boolean;
+  /** Última posição registrada no servidor, possivelmente em outro aparelho. */
+  serverProgress?: { currentChapter: number; lastReadAt: string } | null;
 };
 
-export default function BookFormatContent({ bookId, title, subtitle, description, coverUrl, pdfUrl, chapters }: Props) {
+// Tempo no capítulo para contar como lido: folhear não entra nas métricas do escritor.
+const PROGRESS_DWELL_MS = 3000;
+
+export default function BookFormatContent({ bookId, title, subtitle, description, coverUrl, pdfUrl, chapters, libraryHref, trackProgress = false, serverProgress = null }: Props) {
   const [reading, setReading] = useState(false);
   const [storedIndex, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
   const index = Math.min(Math.max(storedIndex, 0), Math.max(chapters.length - 1, 0));
+
+  const readAtKey = `reader:${bookId}:lastReadAt`;
+
+  // Roda depois da leitura do localStorage; só a posição mais recente substitui a deste aparelho.
+  useEffect(() => {
+    if (!serverProgress) return;
+    try {
+      const localAt = Number(localStorage.getItem(readAtKey)) || 0;
+      if (new Date(serverProgress.lastReadAt).getTime() > localAt) setIndex(serverProgress.currentChapter);
+    } catch {
+      setIndex(serverProgress.currentChapter);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a posição só é aplicada ao abrir o livro.
+  }, []);
+
+  useEffect(() => {
+    if (!trackProgress || !reading) return;
+    try {
+      localStorage.setItem(readAtKey, String(Date.now()));
+    } catch {
+      // Sem armazenamento, a posição do servidor continua valendo.
+    }
+    const timer = setTimeout(() => {
+      // Falha aqui nunca atrapalha a leitura.
+      fetch(`/api/v1/reader/publications/${encodeURIComponent(bookId)}/progress`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chapterIndex: index }),
+        keepalive: true,
+      }).catch(() => undefined);
+    }, PROGRESS_DWELL_MS);
+    return () => clearTimeout(timer);
+  }, [trackProgress, reading, index, bookId]);
 
   function open(chapter: number) {
     setIndex(chapter);
@@ -49,6 +90,7 @@ export default function BookFormatContent({ bookId, title, subtitle, description
         index={index}
         onChange={setIndex}
         onExit={() => setReading(false)}
+        libraryHref={libraryHref}
       />
     );
   }
@@ -58,7 +100,7 @@ export default function BookFormatContent({ bookId, title, subtitle, description
 
   return (
     <>
-      <BookHero title={title} subtitle={subtitle} coverUrl={coverUrl} meta={meta} />
+      <BookHero title={title} subtitle={subtitle} coverUrl={coverUrl} meta={meta} backHref={libraryHref} />
 
       <div className="mx-auto w-full max-w-2xl space-y-8 px-5 pt-6 animate-glass-in">
         <div className="space-y-3">

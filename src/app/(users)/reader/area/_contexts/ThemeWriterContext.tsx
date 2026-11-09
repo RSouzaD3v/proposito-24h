@@ -38,7 +38,10 @@ export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
     changeMode: () => null
 });
 
-export const ThemeWriterProvider = ({ children }: { children: React.ReactNode }) => {
+type WriterTheme = ThemeWriterContextProps["theme"];
+
+/** `preview` usa as cores informadas e o modo da URL, sem ler nem gravar as preferências do leitor. */
+export const ThemeWriterProvider = ({ children, preview }: { children: React.ReactNode; preview?: WriterTheme }) => {
     const [theme, setTheme] = useState({
         logoUrl:        "",
         colorPrimary:   "",
@@ -49,6 +52,12 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
 
     useEffect(() => {
         const fetchTheme = async () => {
+            if (preview) {
+                setTheme(preview);
+                setMode(new URLSearchParams(window.location.search).get("mode") === "dark" ? "dark" : "light");
+                return;
+            }
+
             if (localStorage.getItem("themeMode")) {
                 setMode(localStorage.getItem("themeMode") as "light" | "dark");
             };
@@ -72,6 +81,7 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
         }
 
         fetchTheme();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- as cores valem desde a montagem.
     }, []);
 
     // Modais são renderizados no body, fora do wrapper do tema.

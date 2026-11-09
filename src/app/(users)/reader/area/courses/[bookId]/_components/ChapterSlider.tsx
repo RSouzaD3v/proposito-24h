@@ -22,6 +22,7 @@ type Props = {
   index: number;
   onChange: (index: number) => void;
   onExit: () => void;
+  libraryHref?: string;
 };
 
 const PALETTES: Record<ReaderTheme, Record<string, string>> = {
@@ -69,7 +70,7 @@ function toSafeHtml(raw: string) {
 
 const barButton = "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[var(--book-line)]";
 
-function Reader({ bookTitle, chapters, index, onChange, onExit }: Omit<Props, "bookId">) {
+function Reader({ bookTitle, chapters, index, onChange, onExit, libraryHref = "/reader/area/courses" }: Omit<Props, "bookId">) {
   const { prefs } = useReaderPrefs();
   const [panel, setPanel] = useState<ReaderPanel>(null);
 
@@ -144,7 +145,7 @@ function Reader({ bookTitle, chapters, index, onChange, onExit }: Omit<Props, "b
             <>
               <p className="reader-eyebrow">Fim do livro</p>
               <p className="reader-serif mt-2 text-2xl">Que esta leitura frutifique em você.</p>
-              <Link href="/reader/area/courses" className="mt-5 inline-flex h-12 items-center gap-2 rounded-full border border-[var(--book-line)] px-6 text-sm font-bold">
+              <Link href={libraryHref} className="mt-5 inline-flex h-12 items-center gap-2 rounded-full border border-[var(--book-line)] px-6 text-sm font-bold">
                 Voltar à biblioteca
               </Link>
             </>
