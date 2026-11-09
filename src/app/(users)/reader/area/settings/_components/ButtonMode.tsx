@@ -13,15 +13,12 @@ export const ButtonMode = () => {
             type="button"
             onClick={changeMode}
             className={[
-                "p-2 rounded-full transition",
-                isDarkMode
-                    ? "text-sky-400 hover:text-sky-300"
-                    : "text-yellow-400 hover:text-yellow-300",
+                "flex size-9 items-center justify-center rounded-full text-[var(--reader-gold)] transition hover:bg-[var(--muted)]",
             ].join(" ")}
             aria-label={isDarkMode ? "Ativar tema claro" : "Ativar tema escuro"}
             title={isDarkMode ? "Tema claro" : "Tema escuro"}
         >
-            {isDarkMode ? <Moon size={24} aria-hidden /> : <Sun size={24} aria-hidden />}
+            {isDarkMode ? <Moon size={16} aria-hidden /> : <Sun size={16} aria-hidden />}
         </button>
     );
 };

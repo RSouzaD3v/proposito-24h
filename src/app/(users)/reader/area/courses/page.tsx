@@ -1,27 +1,23 @@
+import Link from "next/link";
+import { Lock } from "lucide-react";
 import { apiGet, apiGetOrNull } from "@/lib/api/server";
 import type { LibraryBook, ReaderProfile } from "@/lib/api/types";
-import Link from "next/link";
-import { FiLock } from "react-icons/fi";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { BackButton } from "@/components/ui/back-button";
-import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { BookCover } from "./_components/BookCover";
+import { ContinueReading } from "./_components/ContinueReading";
 
 export default async function CoursesPage() {
   const userLogged = await apiGetOrNull<ReaderProfile>("/reader/profile");
 
   if (!userLogged || !userLogged.writerId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-5 text-center">
         <GlassCard strong className="max-w-md space-y-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--liquid-ink)]">
-            Acesso Negado
-          </h2>
-          <p className="text-[var(--liquid-muted)]">
-            Você precisa estar logado para acessar esta página.
-          </p>
+          <h2 className="text-2xl">Acesso negado</h2>
+          <p className="text-[var(--liquid-muted)]">Você precisa estar logado para acessar esta página.</p>
           <Button asChild variant="glass-primary" className="rounded-full">
-            <Link href="/login">Fazer Login</Link>
+            <Link href="/login">Fazer login</Link>
           </Button>
         </GlassCard>
       </div>
@@ -29,146 +25,63 @@ export default async function CoursesPage() {
   }
 
   const { books, myBooks } = await apiGet<{ books: LibraryBook[]; myBooks: LibraryBook[] }>("/reader/library");
+  const owned = new Set(myBooks.map((book) => book.id));
 
-  const booksByCategory = books.reduce((acc, book) => {
+  const categories = new Map<string, LibraryBook[]>();
+  for (const book of books) {
     const category = book.category || "Outros";
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(book);
-    return acc;
-  }, {} as Record<string, typeof books>);
-
-  const categories = Object.entries(booksByCategory);
+    categories.set(category, [...(categories.get(category) ?? []), book]);
+  }
 
   return (
-    <div className="relative flex flex-col gap-8 px-4 md:px-8 lg:px-16 pb-16 pt-8">
-      <BackButton href="/reader/area" className="self-start" />
-
-      <header>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--liquid-ink)]">
-          Ebooks
-        </h1>
-        <p className="text-[var(--liquid-muted)] mt-2">Explore os melhores livros</p>
+    <div className="mx-auto w-full max-w-5xl px-5 pb-10 pt-20 md:pt-10">
+      <header className="mb-8 animate-glass-in">
+        <p className="reader-eyebrow">Para a sua alma</p>
+        <h1 className="mt-1 text-4xl md:text-5xl">Biblioteca</h1>
       </header>
 
-      {myBooks.length > 0 && (
-        <section>
-          <h2 className="text-xl md:text-2xl font-bold text-[var(--liquid-ink)] mb-3">
-            Meus Livros
-          </h2>
+      <ContinueReading books={books} />
 
-          <Carousel opts={{ align: "start" }} className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {myBooks.map((book) => (
-                <CarouselItem
-                  key={book.id}
-                  className="pl-2 md:pl-4 basis-40 sm:basis-44 md:basis-48 lg:basis-52"
-                >
-                  <Link href={`/reader/area/courses/${book.id}`} className="group block">
-                    <GlassCard padding="sm" interactive className="h-[320px]">
-                      <div className="relative w-full aspect-[2/3] overflow-hidden rounded-xl">
-                        {book.coverUrl ? (
-                          <img
-                            src={book.coverUrl}
-                            alt={book.title}
-                            sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
-                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.04]"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 grid place-items-center bg-white/20">
-                            <span className="text-[var(--liquid-muted)] text-sm">Sem capa</span>
-                          </div>
-                        )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
-                        {book.visibility === "PAID" && (
-                          <div className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md glass-surface px-2 py-1 text-xs text-[var(--liquid-ink)]">
-                            <FiLock />
-                            Pago
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-3">
-                        <h3
-                          title={book.title}
-                          className="line-clamp-2 text-sm md:text-base font-medium text-[var(--liquid-ink)]"
-                        >
-                          {book.title}
-                        </h3>
-                      </div>
-                    </GlassCard>
-                  </Link>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
-        </section>
+      {books.length === 0 ? (
+        <GlassCard strong className="py-12 text-center">
+          <h2 className="text-xl">Sua estante está sendo preparada</h2>
+          <p className="mt-2 text-sm text-[var(--liquid-muted)]">Novos livros aparecerão aqui assim que forem publicados.</p>
+        </GlassCard>
+      ) : (
+        <div className="space-y-9">
+          {myBooks.length > 0 && <Shelf title="Meus livros" books={myBooks} owned={owned} />}
+          {[...categories].map(([category, shelf]) => (
+            <Shelf key={category} title={category} books={shelf} owned={owned} />
+          ))}
+        </div>
       )}
-
-      {categories.length === 0 && (
-        <div className="text-[var(--liquid-muted)]">Nenhum livro publicado ainda.</div>
-      )}
-
-      {categories.map(([category, booksInCategory]) => (
-        <section key={category}>
-          <h2 className="text-xl md:text-2xl font-bold text-[var(--liquid-ink)] mb-3">
-            {category}
-          </h2>
-
-          <Carousel opts={{ align: "start" }} className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {booksInCategory.map((book) => (
-                <CarouselItem
-                  key={book.id}
-                  className="pl-2 md:pl-4 basis-40 sm:basis-44 md:basis-48 lg:basis-52"
-                >
-                  <Link href={`/reader/area/courses/${book.id}`} className="group block">
-                    <GlassCard padding="sm" interactive className="h-[320px]">
-                      <div className="relative w-full aspect-[2/3] overflow-hidden rounded-xl">
-                        {book.coverUrl ? (
-                          <img
-                            src={book.coverUrl}
-                            alt={book.title}
-                            sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
-                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.04]"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 grid place-items-center bg-white/20">
-                            <span className="text-[var(--liquid-muted)] text-sm">Sem capa</span>
-                          </div>
-                        )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
-                        {book.visibility === "PAID" && (
-                          <div className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md glass-surface px-2 py-1 text-xs text-[var(--liquid-ink)]">
-                            <FiLock />
-                            Pago
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-3">
-                        <h3
-                          title={book.title}
-                          className="line-clamp-2 text-sm md:text-base font-medium text-[var(--liquid-ink)]"
-                        >
-                          {book.title}
-                        </h3>
-                      </div>
-                    </GlassCard>
-                  </Link>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
-        </section>
-      ))}
     </div>
+  );
+}
+
+function Shelf({ title, books, owned }: { title: string; books: LibraryBook[]; owned: Set<string> }) {
+  return (
+    <section>
+      <h2 className="mb-4 text-2xl">{title}</h2>
+      <ul className="-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none]">
+        {books.map((book) => (
+          <li key={book.id} className="w-32 shrink-0 snap-start sm:w-40">
+            <Link href={`/reader/area/courses/${book.id}`} className="group block">
+              <span className="relative block transition-transform duration-300 motion-safe:group-hover:-translate-y-1">
+                <BookCover title={book.title} coverUrl={book.coverUrl} />
+                {book.visibility === "PAID" && !owned.has(book.id) && (
+                  <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md">
+                    <Lock className="size-3.5" aria-label="Ebook pago" />
+                  </span>
+                )}
+              </span>
+              <span className="mt-3 line-clamp-2 text-sm font-semibold leading-snug text-[var(--liquid-ink)]">
+                {book.title}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

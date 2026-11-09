@@ -22,6 +22,7 @@ export interface HomeCard {
   nameAuthor?: string;
   reference?: string;
   audioUrl?: string | null;
+  imageUrl?: string | null;
   locked: boolean;
   completed: boolean;
 }

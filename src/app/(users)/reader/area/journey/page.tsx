@@ -1,125 +1,87 @@
 import { apiGet } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
-import { FaMedal, FaQuoteRight, FaBible } from "react-icons/fa";
-import { PageHeader } from "@/components/ui/page-header";
+import { BookOpen, Feather, Quote } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
+
+const GOAL = 365;
+
+const ACHIEVEMENTS = [
+  { key: "devotional", img: "/achievements/devotional.gif", label: "365 dias de devocionais" },
+  { key: "verse", img: "/achievements/verse.gif", label: "365 dias de versículos" },
+  { key: "quote", img: "/achievements/quote.gif", label: "365 dias de citações" },
+  { key: "all", img: "/achievements/365.gif", label: "365 dias completos" },
+];
 
 export default async function JourneyPage() {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
   const journey = await apiGet<{ devotionals: number; verses: number; quotes: number; achievements: string[] }>("/reader/journey");
-  const completedVerses = journey.verses;
-  const completedQuotes = journey.quotes;
-  const achievements = { completed: journey.achievements };
+  const total = journey.devotionals + journey.verses + journey.quotes;
+  const earned = ACHIEVEMENTS.filter(({ key }) => journey.achievements.includes(key));
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-      <PageHeader
-        title="Minha Jornada"
-        description="Seu progresso e conquistas na leitura diária"
-        backHref="/reader/area"
-        centered
-      />
-
-      <GlassCard strong className="mb-6">
-        <h3 className="text-lg md:text-xl font-semibold text-[var(--liquid-ink)] text-center mb-4">
-          Meu Progresso
-        </h3>
-        <div className="flex justify-around py-4 gap-4 text-center">
-          <ProgressBox
-            icon={<FaMedal className="text-[var(--liquid-accent)] text-3xl mb-1" />}
-            value={journey.devotionals}
-            label="Devocionais"
-          />
-          <ProgressBox
-            icon={<FaBible className="text-[var(--liquid-accent)] text-3xl mb-1 opacity-80" />}
-            value={completedVerses}
-            label="Versículos"
-          />
-          <ProgressBox
-            icon={<FaQuoteRight className="text-[var(--liquid-accent)] text-3xl mb-1 opacity-60" />}
-            value={completedQuotes}
-            label="Citações"
-          />
+    <>
+      <header className="reader-scene reader-scene-olive rounded-b-[2.5rem]">
+        <div className="mx-auto flex min-h-[20rem] w-full max-w-2xl flex-col justify-end px-5 pb-8 pt-20">
+          <p className="reader-eyebrow" style={{ color: "rgb(255 255 255 / 0.82)" }}>Minha jornada</p>
+          <p className="reader-serif mt-2 text-7xl leading-none tabular-nums">{total}</p>
+          <p className="mt-2 text-base text-white/85">
+            {total === 1 ? "momento com Deus registrado" : "momentos com Deus registrados"}
+          </p>
         </div>
-      </GlassCard>
+      </header>
 
-      <GlassCard strong>
-        <h3 className="text-lg md:text-xl font-semibold text-[var(--liquid-ink)] text-center mb-4">
-          Minhas Conquistas
-        </h3>
-        <div className="flex flex-wrap justify-center gap-6 py-4">
-          {achievements && achievements.completed.length > 0 ? (
-            <>
-              {achievements.completed.includes("devotional") && (
-                <AchievementCard
-                  img="/achievements/devotional.gif"
-                  label="365 Dias de Devocionais"
-                />
-              )}
-              {achievements.completed.includes("verse") && (
-                <AchievementCard
-                  img="/achievements/verse.gif"
-                  label="365 Dias de Versículos"
-                />
-              )}
-              {achievements.completed.includes("quote") && (
-                <AchievementCard
-                  img="/achievements/quote.gif"
-                  label="365 Dias de Citações"
-                />
-              )}
-              {achievements.completed.includes("all") && (
-                <AchievementCard
-                  img="/achievements/365.gif"
-                  label="365 Dias de Todos os Tipos"
-                />
-              )}
-            </>
+      <div className="mx-auto w-full max-w-2xl space-y-8 px-5 pt-6">
+        <section className="space-y-3">
+          <Progress icon={Feather} label="Devocionais" value={journey.devotionals} />
+          <Progress icon={BookOpen} label="Versículos" value={journey.verses} />
+          <Progress icon={Quote} label="Citações" value={journey.quotes} />
+        </section>
+
+        <section>
+          <p className="reader-eyebrow">Marcos</p>
+          <h2 className="mb-4 mt-1 text-2xl">Minhas conquistas</h2>
+          {earned.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {earned.map(({ key, img, label }) => (
+                <GlassCard key={key} strong padding="sm" className="flex flex-col items-center gap-2 text-center">
+                  <img src={img} alt="" className="size-20 rounded-full object-cover" />
+                  <span className="text-xs font-semibold">{label}</span>
+                </GlassCard>
+              ))}
+            </div>
           ) : (
-            <span className="text-[var(--liquid-muted)] text-sm font-medium">
-              Nenhuma conquista ainda
-            </span>
+            <GlassCard strong className="text-center text-sm text-[var(--liquid-muted)]">
+              Sua primeira conquista chega ao completar 365 dias. Continue um dia de cada vez.
+            </GlassCard>
           )}
-        </div>
-      </GlassCard>
-    </div>
-  );
-}
-
-function ProgressBox({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-}) {
-  return (
-    <div className="flex flex-col items-center min-w-[70px]">
-      {icon}
-      <span className="text-[var(--liquid-ink)] font-bold text-lg md:text-2xl">
-        {value} / 365
-      </span>
-      <span className="text-[var(--liquid-muted)] text-xs md:text-sm font-medium">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function AchievementCard({ img, label }: { img: string; label: string }) {
-  return (
-    <div className="flex flex-col items-center min-w-[80px]">
-      <div className="glass-surface shadow w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden">
-        <img src={img} alt={label} className="object-cover w-full h-full" />
+        </section>
       </div>
-      <span className="text-[var(--liquid-ink)] text-xs md:text-sm font-medium mt-2 text-center">
-        {label}
+    </>
+  );
+}
+
+function Progress({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
+  const percent = Math.min(100, (value / GOAL) * 100);
+  return (
+    <GlassCard strong padding="sm" className="flex items-center gap-4">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--muted)] text-[var(--reader-gold)]">
+        <Icon className="size-5" />
       </span>
-    </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-sm font-semibold">{label}</span>
+          <span className="text-sm tabular-nums text-[var(--liquid-muted)]">
+            <strong className="font-bold text-[var(--liquid-ink)]">{value}</strong> / {GOAL}
+          </span>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]" aria-hidden>
+          <div className="h-full rounded-full bg-[var(--reader-gold)]" style={{ width: `${percent}%` }} />
+        </div>
+      </div>
+    </GlassCard>
   );
 }

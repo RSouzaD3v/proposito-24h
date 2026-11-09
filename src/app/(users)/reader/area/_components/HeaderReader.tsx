@@ -1,67 +1,72 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight, Check } from "lucide-react";
 import { useAuth } from "../_contexts/AuthContext";
-import { cn } from "@/lib/utils";
 
 interface HeaderReaderProps {
   titleHeader?: string | null;
-  colors: {
-    primary: string;
-    secondary: string;
-    background: string;
-    buttonBg: string;
-    buttonText: string;
-    text: string;
-    independenteColor1: string;
-    independenteColor2: string;
-  };
+  writerName?: string | null;
+  greeting: string;
+  dateLabel: string;
+  imageUrl?: string | null;
+  next: { href: string; label: string } | null;
+  finished: boolean;
 }
 
 export const HeaderReader = ({
   titleHeader,
-  colors,
+  writerName,
+  greeting,
+  dateLabel,
+  imageUrl,
+  next,
+  finished,
 }: HeaderReaderProps) => {
   const { user } = useAuth();
-
-  const firstName = user?.name?.split(" ")[0] || "Usuário";
-  const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "?";
+  const firstName = user?.name?.split(" ")[0];
+  const initial = user?.name?.charAt(0)?.toUpperCase() || "?";
 
   return (
-    <header
-      style={{
-        background: `linear-gradient(135deg, ${colors.independenteColor1}ee, ${colors.independenteColor2 || colors.independenteColor1}cc)`,
-      }}
-      className={cn(
-        "fixed top-0 left-0 z-50 w-full",
-        "flex items-center justify-center gap-5 p-4 md:gap-10",
-        "rounded-b-[2rem] border-b border-white/30",
-        "shadow-[0_8px_32px_rgb(15_40_80_/_0.12)]",
-        "backdrop-blur-xl"
-      )}
-    >
-      <Link
-        href="/reader/area/settings"
-        style={{
-          backgroundColor: colors.buttonBg,
-          color: colors.buttonText,
-        }}
-        className={cn(
-          "flex size-11 items-center justify-center rounded-full font-bold text-xl md:size-[4.375rem] md:text-2xl",
-          "border border-white/40 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.35)]",
-          "transition-transform duration-300 hover:scale-105"
-        )}
-      >
-        <span>{firstLetter}</span>
-      </Link>
+    <header className="reader-scene reader-scene-dawn rounded-b-[2.5rem]">
+      {imageUrl && <img src={imageUrl} alt="" />}
+      <div className="mx-auto flex min-h-[30rem] w-full max-w-3xl flex-col justify-between px-5 pb-8 pt-4">
+        <div className="flex items-center gap-3 pr-28">
+          <Link
+            href="/reader/area/settings"
+            aria-label="Abrir configurações"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 font-semibold backdrop-blur-md transition-colors hover:bg-white/25"
+          >
+            {initial}
+          </Link>
+          {writerName && <p className="truncate text-sm font-medium text-white/85">{writerName}</p>}
+        </div>
 
-      <div>
-        <h1 className="text-lg font-bold tracking-tight text-white md:text-3xl">
-          Olá, {firstName}
-        </h1>
-        <p className="text-sm text-white/90 md:text-lg">
-          {titleHeader || "Vamos passar um tempo com Deus?"}
-        </p>
+        <div className="animate-glass-in">
+          <p className="text-sm text-white/80 first-letter:uppercase">{dateLabel}</p>
+          <p className="mt-3 text-lg text-white/90">
+            {greeting}
+            {firstName ? `, ${firstName}` : ""}
+          </p>
+          <h1 className="mt-1 text-[2.5rem] leading-[1.08] md:text-[3.25rem]">
+            {titleHeader || "Vamos passar um tempo com Deus?"}
+          </h1>
+
+          {next ? (
+            <Link
+              href={next.href}
+              className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-[#241c15] shadow-lg transition-transform motion-safe:hover:scale-[1.02]"
+            >
+              {next.label} <ArrowRight className="size-4" />
+            </Link>
+          ) : (
+            finished && (
+              <p className="mt-6 inline-flex h-12 items-center gap-2 rounded-full border border-white/30 bg-white/15 px-5 text-sm font-semibold backdrop-blur-md">
+                <Check className="size-4" /> Jornada de hoje concluída
+              </p>
+            )
+          )}
+        </div>
       </div>
     </header>
   );

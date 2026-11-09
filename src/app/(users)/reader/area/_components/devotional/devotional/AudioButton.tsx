@@ -1,28 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { FiPlay, FiPause, FiHeadphones } from "react-icons/fi";
+import { Pause, Play } from "lucide-react";
 
-type Props = {
-  src?: string | null;
-  className?: string;
-  labelPlay?: string;   // padrão: "Ouvir"
-  labelPause?: string;  // padrão: "Parar"
-  style?: React.CSSProperties;
-};
-
-export default function AudioButton({
-  src,
-  className = "",
-  labelPlay = "Ouvir",
-  labelPause = "Parar",
-  style
-}: Props) {
+export default function AudioButton({ src }: { src?: string | null }) {
   const [playing, setPlaying] = React.useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
-  // (Re)cria o elemento de áudio quando a URL muda
   React.useEffect(() => {
     if (!src) return;
 
@@ -48,10 +32,10 @@ export default function AudioButton({
 
     try {
       if (playing) {
-        audio.pause();            // pausa e mantém o ponto atual
+        audio.pause();
         setPlaying(false);
       } else {
-        await audio.play();       // continua de onde parou
+        await audio.play();
         setPlaying(true);
       }
     } catch (err) {
@@ -61,15 +45,13 @@ export default function AudioButton({
 
   return (
     <button
+      type="button"
       onClick={toggle}
       aria-pressed={playing}
-      aria-label={playing ? "Parar áudio" : "Tocar áudio"}
-      className={className + " flex items-center justify-center gap-2 text-xl font-bold"}
-      style={style}
+      aria-label={playing ? "Pausar áudio" : "Ouvir áudio"}
+      className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--liquid-ink)] transition-colors hover:bg-[var(--input)]"
     >
-      {playing ? <FiPause /> : <FiPlay />}
-      {playing ? labelPause : labelPlay}
-      <FiHeadphones className="opacity-70" />
+      {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
     </button>
   );
 }

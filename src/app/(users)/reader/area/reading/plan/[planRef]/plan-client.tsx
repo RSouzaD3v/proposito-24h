@@ -149,7 +149,7 @@ export default function PlanClient({
   }
 
   return (
-    <section className="mx-auto max-w-3xl p-4">
+    <section className="mx-auto max-w-3xl px-5 pb-4 pt-20 md:pt-10">
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <BackButton href="/reader/area" label="Área do leitor" />
         <Button asChild variant="glass-primary" size="sm" className="rounded-full">
@@ -191,8 +191,8 @@ export default function PlanClient({
 
                 <Link
                   href={href}
-                  className={`bg-blue-600 text-white p-1 my-1 text-sm rounded-sm inline-block ${
-                    disabled ? "pointer-events-none opacity-50" : "hover:bg-blue-800"
+                  className={`my-1 inline-block rounded-full bg-[var(--liquid-accent)] px-3 py-1.5 text-sm font-semibold text-[var(--liquid-on-accent)] ${
+                    disabled ? "pointer-events-none opacity-50" : "hover:opacity-90"
                   }`}
                 >
                   Ir para o capítulo

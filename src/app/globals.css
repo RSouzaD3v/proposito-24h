@@ -251,3 +251,262 @@
 .animate-glass-in {
   animation: glass-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Tema premium da área do leitor: reaproveita os tokens usados pelas telas. */
+.reader-premium,
+.reader-app {
+  --reader-bg: #f6f1e8;
+  --reader-surface: #fffdf9;
+  --reader-gold: #a4752a;
+  --reader-nav: rgb(255 253 249 / 0.86);
+  --liquid-ink: #241c15;
+  --liquid-muted: #75685a;
+  --liquid-accent: var(--reader-writer-accent, #8a6a35);
+  --liquid-on-accent: var(--reader-writer-on-accent, #ffffff);
+  --glass-bg: rgb(255 253 249 / 0.78);
+  --glass-bg-strong: var(--reader-surface);
+  --glass-border: rgb(70 48 24 / 0.08);
+  --glass-highlight: rgb(255 255 255 / 0.6);
+  --glass-shadow: 0 1px 2px rgb(70 48 24 / 0.04), 0 18px 40px -24px rgb(70 48 24 / 0.28);
+  --glass-radius: 1.5rem;
+  --background: #fffdf9;
+  --foreground: #241c15;
+  --card: #fffdf9;
+  --card-foreground: #241c15;
+  --popover: #fffdf9;
+  --popover-foreground: #241c15;
+  --muted: #efe8db;
+  --muted-foreground: #75685a;
+  --accent: #efe8db;
+  --accent-foreground: #241c15;
+  --border: rgb(70 48 24 / 0.12);
+  --input: rgb(70 48 24 / 0.16);
+}
+
+.dark .reader-premium,
+.dark.reader-app {
+  --reader-bg: #0e0d16;
+  --reader-surface: #1a1824;
+  --reader-gold: #dcb36a;
+  --reader-nav: rgb(26 24 36 / 0.86);
+  --liquid-ink: #f6efe4;
+  --liquid-muted: #aaa093;
+  --glass-bg: rgb(255 255 255 / 0.06);
+  --glass-border: rgb(255 255 255 / 0.09);
+  --glass-highlight: rgb(255 255 255 / 0.05);
+  --glass-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+  --background: #1a1824;
+  --foreground: #f6efe4;
+  --card: #1a1824;
+  --card-foreground: #f6efe4;
+  --popover: #1a1824;
+  --popover-foreground: #f6efe4;
+  --muted: #2a2735;
+  --muted-foreground: #aaa093;
+  --accent: #2a2735;
+  --accent-foreground: #f6efe4;
+  --border: rgb(255 255 255 / 0.1);
+  --input: rgb(255 255 255 / 0.14);
+}
+
+body.reader-app {
+  background: var(--reader-bg);
+}
+
+.reader-premium,
+.reader-app [data-slot="dialog-content"] {
+  font-family: var(--font-reader-sans), system-ui, sans-serif;
+}
+
+.reader-premium :is(h1, h2, h3),
+.reader-serif,
+.reader-app [data-slot="dialog-title"] {
+  font-family: var(--font-reader-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.reader-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--reader-gold);
+}
+
+.reader-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #1b1730;
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.reader-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgb(12 9 22 / 0.42) 0%, rgb(12 9 22 / 0.2) 42%, rgb(12 9 22 / 0.78) 100%);
+}
+
+.reader-scene > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reader-scene-dawn {
+  background-image:
+    radial-gradient(circle at 72% 78%, rgb(255 203 128 / 0.95), transparent 34%),
+    linear-gradient(170deg, #1d1a3f 0%, #5b3a6b 48%, #d07a5f 100%);
+}
+
+.reader-scene-dusk {
+  background-image:
+    radial-gradient(circle at 24% 18%, rgb(255 171 120 / 0.65), transparent 38%),
+    linear-gradient(200deg, #2b1b3d 0%, #7a3b56 58%, #dd9a64 100%);
+}
+
+.reader-scene-night {
+  background-image:
+    radial-gradient(circle at 80% 16%, rgb(190 205 255 / 0.5), transparent 28%),
+    linear-gradient(165deg, #0d1230 0%, #1f2b5c 62%, #475a8c 100%);
+}
+
+.reader-scene-olive {
+  background-image:
+    radial-gradient(circle at 20% 82%, rgb(232 208 140 / 0.7), transparent 36%),
+    linear-gradient(190deg, #17281f 0%, #3a5540 58%, #a59a5c 100%);
+}
+
+.reader-premium,
+.reader-app {
+  --glass-button: rgb(255 253 249 / 0.9);
+  --glass-button-hover: #fffdf9;
+}
+
+.dark .reader-premium,
+.dark.reader-app {
+  --glass-button: rgb(38 35 50 / 0.82);
+  --glass-button-hover: rgb(52 48 66 / 0.9);
+}
+
+/* Telas antigas com cores fixas passam a seguir o tema do leitor. */
+.reader-premium :is(.bg-gray-50, .bg-gray-100, .bg-slate-50, .bg-slate-100):not(.reader-scene *) {
+  background-color: var(--reader-surface);
+}
+
+.dark .reader-premium .bg-white:not(.reader-scene *) {
+  background-color: var(--reader-surface);
+}
+
+.dark .reader-premium :is(.text-black, .text-gray-900, .text-gray-800, .text-gray-700):not(.reader-scene *) {
+  color: var(--liquid-ink);
+}
+
+.dark .reader-premium :is(.text-gray-600, .text-gray-500, .text-gray-400):not(.reader-scene *) {
+  color: var(--liquid-muted);
+}
+
+.reader-app [data-slot="sheet-content"] {
+  font-family: var(--font-reader-sans), system-ui, sans-serif;
+}
+
+.reader-immersive [data-reader-chrome] {
+  display: none;
+}
+
+.reader-book p {
+  margin: 0 0 1.15em;
+}
+
+.reader-book > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.08em 0.1em 0 0;
+  font-family: var(--font-reader-serif), Georgia, serif;
+  font-size: 3.4em;
+  line-height: 0.82;
+  color: var(--reader-gold);
+}
+
+.reader-book :is(h2, h3) {
+  margin: 1.8em 0 0.6em;
+  line-height: 1.25;
+}
+
+.reader-book h2 {
+  font-size: 1.5em;
+}
+
+.reader-book h3 {
+  font-size: 1.22em;
+}
+
+.reader-book blockquote {
+  margin: 1.5em 0;
+  padding-left: 1.1em;
+  border-left: 2px solid var(--reader-gold);
+  font-style: italic;
+}
+
+.reader-book :is(ul, ol) {
+  margin: 0 0 1.15em;
+  padding-left: 1.4em;
+}
+
+.reader-book ul {
+  list-style: disc;
+}
+
+.reader-book ol {
+  list-style: decimal;
+}
+
+.reader-book li {
+  margin: 0.35em 0;
+}
+
+.reader-book a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reader-book img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em auto;
+  border-radius: 1rem;
+}
+
+.reader-book hr {
+  width: 4rem;
+  margin: 2em auto;
+  border: 0;
+  border-top: 1px solid var(--book-line);
+}
+
+.reader-book mark {
+  padding: 0 0.15em;
+  border-radius: 0.2em;
+  background: rgb(220 179 106 / 0.45);
+  color: inherit;
+}
+
+.reader-book pre {
+  overflow-x: auto;
+  padding: 1em;
+  border-radius: 0.75rem;
+  background: var(--book-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-premium .animate-glass-in {
+    animation: none;
+  }
+}

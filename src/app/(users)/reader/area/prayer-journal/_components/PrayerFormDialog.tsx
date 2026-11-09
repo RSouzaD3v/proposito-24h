@@ -24,6 +24,15 @@ async function uploadImage(file: File): Promise<string> {
   return publicUrl;
 }
 
+/** O navegador só abre o calendário pelo ícone; aqui o campo inteiro abre. */
+function openDatePicker(event: React.MouseEvent<HTMLInputElement>) {
+  try {
+    event.currentTarget.showPicker();
+  } catch {
+    // Sem suporte a showPicker, o campo continua funcionando do jeito nativo.
+  }
+}
+
 export function PrayerFormDialog({
   entry,
   today,
@@ -204,7 +213,8 @@ export function PrayerFormDialog({
               value={startDate}
               max={entry?.answeredOn ?? today}
               onChange={(event) => setStartDate(event.target.value)}
-              className="h-11"
+              onClick={openDatePicker}
+              className="block h-11 cursor-pointer"
               required
             />
           </div>

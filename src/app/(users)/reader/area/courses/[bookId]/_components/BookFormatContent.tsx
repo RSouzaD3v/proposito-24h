@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { BookOpen, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { BookHero } from "./BookHero";
 import ChapterSlider from "./ChapterSlider";
-import PdfViewer from "@/app/(users)/writer/(check-subscription)/publications/my-vitrine/[bookId]/_components/PdfViewer";
+import { useLocalStorage } from "./useLocalStorage";
 
 type Chapter = {
   title: string;
@@ -13,70 +17,98 @@ type Chapter = {
 
 type Props = {
   bookId: string;
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  coverUrl?: string | null;
   pdfUrl?: string | null;
   chapters: Chapter[];
 };
 
-export default function BookFormatContent({ bookId, pdfUrl, chapters }: Props) {
-  const hasPdf = Boolean(pdfUrl);
-  const hasChapters = chapters.length > 0;
-  const [view, setView] = useState<"read" | "pdf">(
-    hasChapters ? "read" : "pdf"
-  );
+export default function BookFormatContent({ bookId, title, subtitle, description, coverUrl, pdfUrl, chapters }: Props) {
+  const [reading, setReading] = useState(false);
+  const [storedIndex, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
+  const index = Math.min(Math.max(storedIndex, 0), Math.max(chapters.length - 1, 0));
 
-  if (!hasPdf && !hasChapters) {
+  function open(chapter: number) {
+    setIndex(chapter);
+    setReading(true);
+    try {
+      localStorage.setItem("reader:lastBook", bookId);
+    } catch {
+      // A leitura segue funcionando sem o atalho "Continue lendo".
+    }
+  }
+
+  if (reading) {
     return (
-      <div className="py-20 text-center text-black">
-        Nenhum capítulo encontrado.
-      </div>
+      <ChapterSlider
+        bookId={bookId}
+        bookTitle={title}
+        chapters={chapters}
+        index={index}
+        onChange={setIndex}
+        onExit={() => setReading(false)}
+      />
     );
   }
 
-  if (hasPdf && hasChapters) {
-    return (
-      <div>
-        <div className="sticky top-0 z-40 flex justify-center gap-2 border-b bg-white/90 px-4 py-3 backdrop-blur">
-          <button
-            type="button"
-            onClick={() => setView("read")}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              view === "read"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Ler no app
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("pdf")}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              view === "pdf"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Abrir PDF
-          </button>
+  const count = chapters.length;
+  const meta = count > 0 ? `${count} ${count === 1 ? "capítulo" : "capítulos"}` : "Livro em PDF";
+
+  return (
+    <>
+      <BookHero title={title} subtitle={subtitle} coverUrl={coverUrl} meta={meta} />
+
+      <div className="mx-auto w-full max-w-2xl space-y-8 px-5 pt-6 animate-glass-in">
+        <div className="space-y-3">
+          {count > 0 && (
+            <Button variant="glass-primary" onClick={() => open(index)} className="h-12 w-full rounded-full text-sm font-bold">
+              <BookOpen className="size-4" />
+              {index > 0 ? `Continuar no capítulo ${index + 1}` : "Começar a ler"}
+            </Button>
+          )}
+          {pdfUrl && (
+            <Button asChild variant={count > 0 ? "glass" : "glass-primary"} className="h-12 w-full rounded-full text-sm font-bold">
+              <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                <FileText className="size-4" /> Abrir PDF
+              </a>
+            </Button>
+          )}
+          {count === 0 && !pdfUrl && (
+            <p className="text-center text-sm text-[var(--liquid-muted)]">Este livro ainda não tem conteúdo disponível.</p>
+          )}
         </div>
-        {view === "read" ? (
-          <ChapterSlider bookId={bookId} chapters={chapters} />
-        ) : (
-          <div className="p-4 md:p-8">
-            <PdfViewer url={pdfUrl!} />
-          </div>
+
+        {description && (
+          <section>
+            <h2 className="mb-2 text-xl">Sobre este livro</h2>
+            <p className="whitespace-pre-line leading-relaxed text-[var(--liquid-muted)]">{description}</p>
+          </section>
+        )}
+
+        {count > 0 && (
+          <section>
+            <h2 className="mb-3 text-xl">Capítulos</h2>
+            <ol className="glass-surface-strong divide-y divide-[var(--border)] overflow-hidden">
+              {chapters.map((chapter, chapterIndex) => (
+                <li key={chapterIndex}>
+                  <button
+                    type="button"
+                    onClick={() => open(chapterIndex)}
+                    className="flex min-h-14 w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[var(--muted)]"
+                  >
+                    <span className="reader-serif w-6 shrink-0 text-center text-[var(--reader-gold)] tabular-nums">{chapterIndex + 1}</span>
+                    <span className={cn("min-w-0 flex-1 text-sm font-semibold", chapterIndex === index && index > 0 && "text-[var(--reader-gold)]")}>
+                      {chapter.title}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </section>
         )}
       </div>
-    );
-  }
-
-  if (hasPdf) {
-    return (
-      <div className="p-4 md:p-8">
-        <PdfViewer url={pdfUrl!} />
-      </div>
-    );
-  }
-
-  return <ChapterSlider bookId={bookId} chapters={chapters} />;
+    </>
+  );
 }

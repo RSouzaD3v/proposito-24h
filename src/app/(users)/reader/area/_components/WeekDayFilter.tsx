@@ -1,108 +1,55 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { addDays, startOfWeek, format, startOfDay, subDays, isSameDay } from "date-fns";
+import { addDays, format, isSameDay, startOfDay, startOfWeek, subDays } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { cn } from "@/lib/utils";
 
-const DAYS_LABEL = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg → Dom
+const DAYS_LABEL = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const TZ = "America/Sao_Paulo";
 
-function formatDayParam(date: Date) {
-  return format(date, "yyyy-MM-dd");
-}
+const dayParam = (date: Date) => format(date, "yyyy-MM-dd");
 
-interface WeekDayFilterProps {
-  colors: {
-    primary: string;
-    secondary: string;
-    background: string;
-    buttonBg: string;
-    buttonText: string;
-    text: string;
-    independenteColor1: string;
-    independenteColor2: string;
-  };
-}
-
-export function WeekDayFilter({ colors }: WeekDayFilterProps) {
+export function WeekDayFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const activeDayParam = searchParams.get("day");
-
   const now = toZonedTime(new Date(), TZ);
-
-  const todayParam = formatDayParam(now);
-
+  const today = startOfDay(now);
+  const yesterday = subDays(today, 1);
+  const selected = searchParams.get("day") ?? dayParam(now);
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-  const days = Array.from({ length: 7 }).map((_, i) =>
-    addDays(weekStart, i)
-  );
 
-  const todayStart = startOfDay(now);
-  const yesterdayStart = subDays(todayStart, 1);
-
-  /** Só permite selecionar ontem ou hoje (calendário em SP). */
-  function isSelectableDay(day: Date) {
-    const d = startOfDay(day);
-    return isSameDay(d, todayStart) || isSameDay(d, yesterdayStart);
-  }
-
-  function handleSelectDay(day: Date) {
-    if (!isSelectableDay(day)) return;
+  function select(day: Date) {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("day", formatDayParam(day));
+    params.set("day", dayParam(day));
     router.push(`?${params.toString()}`);
   }
 
   return (
-    <div
-      className="mb-10 mt-3 flex w-full max-w-full flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4"
-      style={{
-        ["--primary" as any]: colors.primary,
-        ["--secondary" as any]: colors.secondary,
-        ["--buttonText" as any]: colors.buttonText,
-      }}
-    >
-      {days.map((day, index) => {
-        const dayParam = formatDayParam(day);
-
-        const selectable = isSelectableDay(day);
-
-        const isActive =
-          activeDayParam
-            ? dayParam === activeDayParam
-            : dayParam === todayParam;
-
+    <div className="grid grid-cols-7 gap-1.5">
+      {Array.from({ length: 7 }, (_, index) => {
+        const day = addDays(weekStart, index);
+        const selectable = isSameDay(day, today) || isSameDay(day, yesterday);
+        const active = dayParam(day) === selected;
         return (
           <button
-            key={dayParam}
+            key={index}
             type="button"
             disabled={!selectable}
-            onClick={() => handleSelectDay(day)}
-            aria-disabled={!selectable}
-            title={
-              !selectable
-                ? "Disponível apenas para ontem ou hoje"
-                : undefined
-            }
-            className={`
-              size-9 shrink-0
-              flex items-center justify-center
-              rounded-full
-              font-bold
-              transition-all duration-200
-              sm:size-10
-              ${
-                !selectable
-                  ? "bg-secondary text-(--buttonText) opacity-25 cursor-not-allowed"
-                  : isActive
-                    ? "bg-primary text-white shadow-lg opacity-100"
-                    : "bg-secondary text-(--buttonText) opacity-20 hover:opacity-70"
-              }
-            `}
+            aria-pressed={active}
+            title={selectable ? undefined : "Disponível apenas para ontem ou hoje"}
+            onClick={() => select(day)}
+            className={cn(
+              "flex h-16 flex-col items-center justify-center rounded-2xl transition-colors",
+              active
+                ? "bg-[var(--liquid-accent)] text-[var(--liquid-on-accent)]"
+                : selectable
+                  ? "text-[var(--liquid-ink)] hover:bg-[var(--muted)]"
+                  : "cursor-not-allowed text-[var(--liquid-muted)] opacity-45",
+            )}
           >
-            {DAYS_LABEL[index]}
+            <span className="text-[0.6875rem] font-semibold">{DAYS_LABEL[index]}</span>
+            <span className="mt-0.5 text-base font-bold tabular-nums">{format(day, "d")}</span>
           </button>
         );
       })}

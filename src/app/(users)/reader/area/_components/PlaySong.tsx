@@ -117,14 +117,13 @@ export default function PlaySong({
         }
         title={isPlaying ? "Pausar música de fundo" : "Tocar música de fundo"}
         className={[
-          "rounded-full md:px-4 px-2 py-1  md:py-2 shadow-lg backdrop-blur border border-white/20",
+          "flex size-9 items-center justify-center rounded-full transition-colors",
           isPlaying
-            ? "bg-emerald-600 text-white hover:bg-emerald-700"
-            : "bg-neutral-900/80 text-white hover:bg-neutral-800",
-          "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500",
+            ? "bg-[var(--liquid-accent)] text-[var(--liquid-on-accent)]"
+            : "text-[var(--liquid-ink)] hover:bg-[var(--muted)]",
         ].join(" ")}
       >
-        <span className="inline-flex md:w-5 w-10 items-center justify-center gap-2 font-medium">
+        <span className="inline-flex items-center justify-center [&_svg]:size-4">
           {isPlaying ? <Pause /> : <Play />}
           {/* Mostra a faixa atual opcionalmente */}
           {/* {currentIndex != null && (

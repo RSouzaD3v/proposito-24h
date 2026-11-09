@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
-import { useThemeWriter } from "../../_contexts/ThemeWriterContext";
 import { PrayerFormDialog } from "./PrayerFormDialog";
 
 export interface PrayerEntry {
@@ -51,8 +50,7 @@ export async function journalRequest<T>(path: string, method: string, body?: unk
 }
 
 export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
-  const { theme } = useThemeWriter();
-  const accent = theme.colorPrimary || "#2b6de5";
+  const accent = "var(--liquid-accent)";
 
   const [items, setItems] = useState(initial.items);
   const [tab, setTab] = useState<Tab>("praying");
@@ -154,7 +152,7 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
                 "flex h-11 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors",
                 !active && "text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]",
               )}
-              style={active ? { backgroundColor: accent, color: "#fff" } : undefined}
+              style={active ? { backgroundColor: accent, color: "var(--liquid-on-accent)" } : undefined}
             >
               {label}
               <span
@@ -321,8 +319,8 @@ function EmptyState({ tab, accent, onCreate }: { tab: Tab; accent: string; onCre
   return (
     <GlassCard strong className="flex flex-col items-center gap-3 py-12 text-center">
       <span
-        className="flex size-14 items-center justify-center rounded-full text-white"
-        style={{ backgroundColor: praying ? accent : "#10b981" }}
+        className="flex size-14 items-center justify-center rounded-full"
+        style={praying ? { backgroundColor: accent, color: "var(--liquid-on-accent)" } : { backgroundColor: "#10b981", color: "#fff" }}
       >
         {praying ? <HandHeart className="size-7" /> : <Check className="size-7" strokeWidth={3} />}
       </span>

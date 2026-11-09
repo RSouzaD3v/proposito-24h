@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, X, Minus, Maximize2 } from "lucide-react";
+import { Loader2, MessageCircle, Send, X, Minus, Maximize2 } from "lucide-react";
 
 export default function TeacherBibleAI({
   initialPrompt = "",
@@ -99,14 +99,15 @@ export default function TeacherBibleAI({
     return (
       <div className="fixed bottom-24 right-4 z-50 md:bottom-4">
         <Button
-          className="rounded-full shadow-lg px-4 h-11"
+          className="h-11 rounded-full border border-[var(--glass-border)] bg-[var(--reader-nav)] px-3 text-[var(--liquid-ink)] shadow-lg backdrop-blur-xl hover:bg-[var(--reader-nav)] md:px-4"
           onClick={() => {
             setMinimized(false);
             setOpen(true);
           }}
           aria-label="Abrir Chat bíblico"
         >
-          Chat bíblico
+          <MessageCircle className="size-5" />
+          <span className="hidden md:inline">Chat bíblico</span>
         </Button>
       </div>
     );

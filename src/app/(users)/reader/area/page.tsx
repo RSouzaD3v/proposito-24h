@@ -2,23 +2,26 @@ import { apiFetch } from "@/lib/api/server";
 import type { ReaderHome } from "@/lib/api/types";
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
-import { FiChevronRight } from "react-icons/fi";
-import { QuoteCard } from "./_components/devotional/quota/QuoteCard";
-import { VerseCard } from "./_components/devotional/verse/VerseCard";
-import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCard";
-import { PrayerCard } from "./_components/devotional/prayer/PrayerCard";
+import { BarChart3, BookMarked, CalendarDays, NotebookPen } from "lucide-react";
+import { buildSteps, DailyJourney } from "./_components/DailyJourney";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
 import { startOfDay, addDays, subDays, format, parse } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { WeekDayFilter } from "./_components/WeekDayFilter";
-import { GlassCard } from "@/components/ui/glass-card";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const TZ = "America/Sao_Paulo";
+
+const EXPLORE = [
+  { name: "Caderno de Oração", type: "Seus pedidos", link: "/reader/area/prayer-journal", scene: "reader-scene-dusk", icon: NotebookPen },
+  { name: "Bíblia em 365 Dias", type: "Plano de leitura", link: "/reader/area/reading/plan/365", scene: "reader-scene-olive", icon: CalendarDays },
+  { name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses", scene: "reader-scene-night", icon: BookMarked },
+  { name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard", scene: "reader-scene-dawn", icon: BarChart3 },
+];
 
 function formatDayParamSp(date: Date) {
   return format(toZonedTime(date, TZ), "yyyy-MM-dd");
@@ -75,97 +78,51 @@ export default async function AreaReader({
       </section>
     );
   }
-  const { colors, writer } = home.data;
-  const userReader = { writer };
-
-  const items = [
-    // { id: 5, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
-    // { id: 1, name: "Oração de Hoje", type: "Oração", link: "/reader/area/prayer" },
-    { id: 2, name: "Plano Bíblia em 365 Dias", type: "Plano de Leitura", link: "/reader/area/reading/plan/365" },
-    { id: 3, name: "Biblioteca", type: "Ebooks", link: "/reader/area/courses" },
-    { id: 4, name: "Dashboard Bíblico", type: "Conquistas", link: "/reader/area/dashboard" },
-  ];
+  const { writer } = home.data;
+  const steps = buildSteps(home.data);
+  const available = steps.filter((step) => step.item);
+  const next = available.find((step) => !step.item!.completed);
+  const hour = nowSp.getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const dateLabel = activeDay.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  const heroImage = home.data.devotional?.imageUrl ?? steps.find((step) => step.item?.imageUrl)?.item?.imageUrl;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-36 transition-all sm:px-5">
+    <>
       <HeaderReader
-        colors={colors}
-        titleHeader={userReader?.writer?.titleHeader || "Vamos passar tempo com Deus ?"}
+        titleHeader={writer.titleHeader}
+        writerName={writer.titleApp || writer.name}
+        greeting={greeting}
+        dateLabel={dateLabel}
+        imageUrl={heroImage}
+        next={next ? { href: next.href, label: `Começar: ${next.label}` } : null}
+        finished={available.length > 0 && !next}
       />
 
-      <div className="flex w-full items-center justify-center">
-        <WeekDayFilter colors={colors} />
-      </div>
+      <div className="mx-auto w-full max-w-3xl space-y-9 px-5 pt-6">
+        <WeekDayFilter />
+        <DailyJourney steps={steps} />
 
-      <div className="text-[var(--liquid-ink)]">
-        {activeDay.toLocaleDateString("pt-BR", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}{" "}
-        -{" "}
-        {activeDay.toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-
-        <h2 className="mt-1 text-lg font-bold md:text-xl">
-          {userReader?.writer?.titleApp || "Meu Devocional"}
-        </h2>
+        <section aria-labelledby="explore">
+          <p className="reader-eyebrow">Continue crescendo</p>
+          <h2 id="explore" className="mb-4 mt-1 text-2xl">Explore</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {EXPLORE.map(({ name, type, link, scene, icon: Icon }) => (
+              <Link
+                key={link}
+                href={link}
+                className={`reader-scene ${scene} flex h-40 flex-col justify-between rounded-3xl p-4 transition-transform motion-safe:hover:-translate-y-0.5`}
+              >
+                <Icon className="size-6" />
+                <span>
+                  <span className="block text-xs font-medium text-white/80">{type}</span>
+                  <span className="reader-serif mt-0.5 block text-lg leading-tight">{name}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
-
-      <h3 className="my-2 mt-6 text-sm font-semibold tracking-wide text-[var(--liquid-muted)]">
-        DEVOCIONAL DIÁRIO
-      </h3>
-      <div className="grid w-full min-w-0 grid-cols-1 gap-4 py-1 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="min-w-0">
-          <QuoteCard colors={colors} item={home.data.quote} />
-        </div>
-        <div className="min-w-0">
-          <VerseCard colors={colors} item={home.data.verse} />
-        </div>
-        <div className="min-w-0">
-          <DevotionalCard colors={colors} item={home.data.devotional} />
-        </div>
-        <div className="min-w-0">
-          <PrayerCard colors={colors} item={home.data.prayer} />
-        </div>
-      </div>
-
-      <h3 className="my-2 mt-5 text-sm font-semibold tracking-wide text-[var(--liquid-muted)]">
-        FUNCIONALIDADES & OUTROS
-      </h3>
-      <div className="space-y-4 py-4">
-        {items.map((item) => (
-          <Link key={item.id} href={item.link} className="group block min-w-0">
-            <GlassCard
-              interactive
-              padding="lg"
-              className="flex w-full min-w-0 items-center justify-between gap-4"
-            >
-              <div className="min-w-0">
-                <h2 className="mb-2 truncate text-xl font-extrabold text-[var(--liquid-ink)] md:text-2xl">
-                  {item.name}
-                </h2>
-                <p
-                  style={{
-                    color: colors.buttonText,
-                    backgroundColor: colors.buttonBg,
-                  }}
-                  className="w-fit rounded-full px-3 py-1 text-xs font-semibold shadow"
-                >
-                  {item.type}
-                </p>
-              </div>
-              <FiChevronRight
-                size={36}
-                className="shrink-0 text-[var(--liquid-muted)] transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[var(--liquid-ink)]"
-              />
-            </GlassCard>
-          </Link>
-        ))}
-      </div>
-    </section>
+    </>
   );
 }

@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 export const PainelControl = () => {
   return (
     <div
+      data-reader-chrome
       className={cn(
-        "glass-surface fixed right-3 top-16 z-[999999] flex max-w-40 items-center justify-center gap-1 rounded-full p-1 md:right-4 md:top-3 md:p-1.5"
+        "glass-surface fixed right-3 top-3 z-[60] flex items-center justify-center gap-0.5 rounded-full p-1 md:right-4"
       )}
     >
       <PlaySong />

@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 
 import PushBootstrap from "@/components/PushBootstrap";
 import { PainelControl } from "./_components/PainelControl";
-import { ReaderBottomNav } from "./_components/ReaderBottomNav";
+import { MenuPainel } from "./_components/MenuPainel";
 import TeacherBibleAI from "@/components/TeacherBibleAi";
 import { TrackAccess } from "@/components/TrackAccess";
 import { WriterShell } from "@/components/ui/writer-shell";
@@ -45,14 +45,16 @@ export default async function ReaderLayout({
   return (
     <AuthReaderProvider>
       <ThemeWriterProvider>
-        <WriterShell contained={false} background="plain" className="pb-28">
+        <WriterShell contained={false} background="plain" className="reader-premium bg-[var(--reader-bg)] pb-28 dark:bg-[var(--reader-bg)]">
           <PushBootstrap writerId={user.writer.id} userId={user.id} />
           <PainelControl />
           <section className="relative z-0 w-full">
             {children}
           </section>
-          <ReaderBottomNav />
-          <TeacherBibleAI />
+          <MenuPainel />
+          <div data-reader-chrome>
+            <TeacherBibleAI />
+          </div>
           <TrackAccess />
         </WriterShell>
       </ThemeWriterProvider>
