@@ -1,203 +1,327 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { Check } from "lucide-react";
 import S3Uploader from "@/components/S3Uploader";
-import { WhatIsSlug } from "./_components/WhatIsSlug";
+import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
+import {
+  AuthAlert,
+  AuthField,
+  AuthSubmit,
+  PasswordField,
+  authInputClass,
+  authLinkClass,
+} from "@/components/auth/auth-fields";
+import { Input } from "@/components/ui/input";
+import { readableOn } from "@/lib/readable-on";
+
+const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || "devotionalapp.com.br";
+
+const BENEFITS = [
+  "Devocionais, orações e versículos diários",
+  "Publicações e e-books em um só lugar",
+  "Endereço próprio, com sua logo e suas cores",
+];
+
+/** Mantém o endereço no formato aceito para subdomínios. */
+function toSlug(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+/, "")
+    .slice(0, 63);
+}
+
+const trimSlug = (slug: string) => slug.replace(/-+$/, "");
+
+function FormSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <fieldset className="grid gap-5 border-t border-[var(--border)] pt-7 first:border-t-0 first:pt-0">
+      <legend className="contents">
+        <span className="reader-serif block text-xl">{title}</span>
+      </legend>
+      {description && <p className="-mt-3 text-[13px] text-[var(--liquid-muted)]">{description}</p>}
+      {children}
+    </fieldset>
+  );
+}
+
+function ColorField({
+  name,
+  label,
+  value,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <AuthField id={name} label={label}>
+      <div className="flex h-12 items-center gap-3 rounded-xl border border-[var(--input)] bg-[var(--reader-surface)] px-3 focus-within:ring-[3px] focus-within:ring-[var(--liquid-accent)]/20">
+        <input
+          id={name}
+          type="color"
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="size-7 shrink-0 cursor-pointer rounded-md border-0 bg-transparent p-0"
+        />
+        <span className="text-sm font-medium uppercase tabular-nums">{value}</span>
+      </div>
+    </AuthField>
+  );
+}
+
+function BrandPreview({
+  name,
+  logoUrl,
+  primary,
+  secondary,
+}: {
+  name: string;
+  logoUrl: string;
+  primary: string;
+  secondary: string;
+}) {
+  const ink = readableOn(secondary);
+  return (
+    <div
+      className="flex items-center gap-3 rounded-2xl border border-[var(--border)] p-4"
+      style={{ backgroundColor: secondary, color: ink }}
+      aria-label="Prévia da identidade visual"
+    >
+      {logoUrl ? (
+        <img src={logoUrl} alt="" className="size-11 rounded-xl object-contain" />
+      ) : (
+        <span
+          className="grid size-11 shrink-0 place-items-center rounded-xl font-bold"
+          style={{ backgroundColor: primary, color: readableOn(primary) }}
+        >
+          {(name.trim().charAt(0) || "D").toUpperCase()}
+        </span>
+      )}
+      <span className="min-w-0 flex-1 truncate font-bold">{name.trim() || "Sua plataforma"}</span>
+      <span
+        className="shrink-0 rounded-lg px-3.5 py-2 text-[13px] font-bold"
+        style={{ backgroundColor: primary, color: readableOn(primary) }}
+      >
+        Ler agora
+      </span>
+    </div>
+  );
+}
 
 export default function RegistrarEscritorPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const [form, setForm] = useState({
-        writerName: "",
-        slug: "",
-        email: "",
-        password: "",
-        name: "",
-        logoUrl: "",
-        colorPrimary: "#0dcaf0",
-        colorSecondary: "#f1f5f9",
-    });
+  const [form, setForm] = useState({
+    writerName: "",
+    slug: "",
+    email: "",
+    password: "",
+    name: "",
+    logoUrl: "",
+    colorPrimary: "#0dcaf0",
+    colorSecondary: "#f1f5f9",
+  });
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+  const handleWriterNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const writerName = e.target.value;
+    setForm((current) => ({
+      ...current,
+      writerName,
+      slug: slugEdited ? current.slug : trimSlug(toSlug(writerName)),
+    }));
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const slug = toSlug(e.target.value);
+    setSlugEdited(slug !== "");
+    setForm((current) => ({ ...current, slug }));
+  };
 
-        try {
-            const res = await fetch("/api/v1/auth/web/register-writer", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-            const data = await res.json();
+    try {
+      const res = await fetch("/api/v1/auth/web/register-writer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, slug: trimSlug(form.slug) }),
+      });
 
-            if (!res.ok) {
-                setError(data.message || "Erro ao registrar.");
-                setLoading(false);
-                return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Erro ao registrar.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/login?success=1");
+    } catch (err) {
+      console.error(err);
+      setError("Erro inesperado.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AuthShell
+      image="/writer.jpg"
+      wide
+      sceneEyebrow="Para escritores"
+      sceneTitle="Leve sua mensagem para o dia a dia de quem lê você."
+      sceneBody={
+        <ul className="grid gap-2.5">
+          {BENEFITS.map((benefit) => (
+            <li key={benefit} className="flex items-start gap-2.5">
+              <Check className="mt-1 size-4 shrink-0" />
+              {benefit}
+            </li>
+          ))}
+        </ul>
+      }
+      topAction={
+        <>
+          <span className="hidden sm:inline">Já tem conta? </span>
+          <Link href="/login" className={authLinkClass}>
+            Entrar
+          </Link>
+        </>
+      }
+    >
+      <AuthHeading title="Crie sua plataforma" description="Comece com o essencial. O resto você ajusta depois." />
+
+      <form onSubmit={handleSubmit} className="grid gap-7">
+        <FormSection title="Sua plataforma">
+          <AuthField id="writerName" label="Nome da plataforma">
+            <Input
+              id="writerName"
+              name="writerName"
+              placeholder="Ex.: Igreja Vida"
+              value={form.writerName}
+              onChange={handleWriterNameChange}
+              className={authInputClass}
+              minLength={2}
+              maxLength={120}
+              required
+            />
+          </AuthField>
+          <AuthField
+            id="slug"
+            label="Endereço"
+            hint={
+              <>
+                Seu site será{" "}
+                <b className="font-semibold break-all text-[var(--liquid-ink)]">
+                  {form.slug ? trimSlug(form.slug) : "seu-endereco"}.{BASE_DOMAIN}
+                </b>
+              </>
             }
+          >
+            <Input
+              id="slug"
+              name="slug"
+              placeholder="igreja-vida"
+              value={form.slug}
+              onChange={handleSlugChange}
+              onBlur={() => setForm((current) => ({ ...current, slug: trimSlug(current.slug) }))}
+              className={authInputClass}
+              autoCapitalize="none"
+              spellCheck={false}
+              required
+            />
+          </AuthField>
+        </FormSection>
 
-            router.push("/login?success=1");
-        } catch (err) {
-            console.error(err);
-            setError("Erro inesperado.");
-            setLoading(false);
-        }
-    };
+        <FormSection title="Sua conta">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <AuthField id="name" label="Seu nome">
+              <Input
+                id="name"
+                name="name"
+                placeholder="Nome completo"
+                value={form.name}
+                onChange={handleChange}
+                className={authInputClass}
+                autoComplete="name"
+                required
+              />
+            </AuthField>
+            <AuthField id="email" label="E-mail">
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="voce@email.com"
+                value={form.email}
+                onChange={handleChange}
+                className={authInputClass}
+                autoComplete="email"
+                required
+              />
+            </AuthField>
+          </div>
+          <PasswordField
+            id="password"
+            name="password"
+            label="Senha"
+            placeholder="Crie uma senha"
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+            minLength={6}
+            required
+            showStrength
+          />
+        </FormSection>
 
-    return (
-        <div className="min-h-screen flex">
-            {/* Lado esquerdo: Formulário */}
-            <div className="flex-1 flex items-center justify-center md:px-0 px-3 ">
-                <div className="w-full p-10">
-                    <div className="flex items-center justify-between mb-6">
-                        <Link className="text-propositoBlue hover:text-propositoBlue font-medium transition" href="/">
-                            ← Início
-                        </Link>
-                        <Link className="text-propositoBlue hover:text-propositoBlue font-medium transition" href="/login">
-                            Login
-                        </Link>
-                    </div>
-                    <div className="flex flex-col items-center mb-8">
-                        <h1 className="md:text-4xl text-2xl font-extrabold text-propositoBlue my-2 drop-shadow">Registrar Escritor</h1>
-                        <p className="text-gray-500 text-base">Crie sua plataforma e comece agora!</p>
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* ... (restante dos campos do formulário) ... */}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Nome da Plataforma</label>
-                            <input
-                                name="writerName"
-                                placeholder="Nome da Plataforma"
-                                onChange={handleChange}
-                                required
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
-                        </div>
-                        <div>
-                            <div className="relative flex items-center justify-between w-16">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Slug</label>
-                                <WhatIsSlug />
-                            </div>
-                            <input
-                                name="slug"
-                                placeholder="ex: igreja-vida"
-                                onChange={handleChange}
-                                required
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Email do Administrador</label>
-                            <input
-                                name="email"
-                                type="email"
-                                placeholder="Email do administrador"
-                                onChange={handleChange}
-                                required
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Senha</label>
-                            <input
-                                name="password"
-                                type="password"
-                                placeholder="Senha"
-                                onChange={handleChange}
-                                required
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Nome do Administrador</label>
-                            <input
-                                name="name"
-                                placeholder="Nome do administrador"
-                                onChange={handleChange}
-                                required
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                Logo <span className="text-gray-400 font-normal">(opcional)</span>
-                            </label>
-                            <S3Uploader
-                              folder="logos"
-                              onUploaded={({ publicUrl }) =>
-                                setForm((prev) => ({ ...prev, logoUrl: publicUrl }))
-                              }
-                            />
-                            {/* <input
-                                name="logoUrl"
-                                placeholder="URL do logo"
-                                onChange={handleChange}
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 bg-gray-50 transition"
-                            /> */}
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="flex-1">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Cor primária</label>
-                                <input
-                                    type="color"
-                                    name="colorPrimary"
-                                    value={form.colorPrimary}
-                                    onChange={handleChange}
-                                    className="w-full h-12 rounded-xl border border-gray-200 bg-gray-50"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Cor secundária</label>
-                                <input
-                                    type="color"
-                                    name="colorSecondary"
-                                    value={form.colorSecondary}
-                                    onChange={handleChange}
-                                    className="w-full h-12 rounded-xl border border-gray-200 bg-gray-50"
-                                />
-                            </div>
-                        </div>
-                        {error && (
-                            <div className="text-red-600 text-sm text-center font-medium bg-red-50 border border-red-200 rounded-lg py-2">
-                                {error}
-                            </div>
-                        )}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-propositoBlue to-blue-500 text-white py-3 rounded-xl font-bold shadow-lg hover:from-blue-500 hover:to-propositoBlue transition disabled:opacity-60"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                    </svg>
-                                    Registrando...
-                                </span>
-                            ) : (
-                                "Registrar Escritor"
-                            )}
-                        </button>
-                    </form>
-                </div>
-            </div>
-            {/* Lado direito: Gradiente */}
-            <div className="hidden overflow-hidden md:block flex-1 min-h-screen bg-gradient-to-br from-propositoBlue via-blue-400 to-blue-200">
-                <Image src={"/writer.jpg"} alt="Escritor" width={1000} height={1000} className="w-full h-full object-cover" />
-            </div>
+        <FormSection title="Identidade visual" description="Opcional. Você pode alterar depois no seu perfil.">
+          <BrandPreview
+            name={form.writerName}
+            logoUrl={form.logoUrl}
+            primary={form.colorPrimary}
+            secondary={form.colorSecondary}
+          />
+          <div className="grid gap-2">
+            <span className="text-[13px] font-semibold">Logo</span>
+            <S3Uploader
+              compact
+              folder="logos"
+              onUploaded={({ publicUrl }) => setForm((prev) => ({ ...prev, logoUrl: publicUrl }))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <ColorField name="colorPrimary" label="Cor primária" value={form.colorPrimary} onChange={handleChange} />
+            <ColorField name="colorSecondary" label="Cor de fundo" value={form.colorSecondary} onChange={handleChange} />
+          </div>
+        </FormSection>
+
+        <div className="grid gap-4">
+          {error && <AuthAlert tone="error">{error}</AuthAlert>}
+          <AuthSubmit loading={loading} loadingLabel="Criando plataforma…">
+            Criar minha plataforma
+          </AuthSubmit>
         </div>
-    );
+      </form>
+    </AuthShell>
+  );
 }

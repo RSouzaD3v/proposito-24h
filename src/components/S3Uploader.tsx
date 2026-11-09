@@ -5,11 +5,14 @@ import { useState } from "react";
 type Props = {
   folder?: string; // ex: `writers/${writerId}` ou `uploads`
   onUploaded?: (fileInfo: { key: string; publicUrl: string }) => void;
+  /** Mostra apenas um botão, para formulários que exibem a própria prévia. */
+  compact?: boolean;
 };
 
-export default function S3Uploader({ folder, onUploaded }: Props) {
+export default function S3Uploader({ folder, onUploaded, compact }: Props) {
   const [progress, setProgress] = useState<number>(0);
   const [uploading, setUploading] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,11 +41,32 @@ export default function S3Uploader({ folder, onUploaded }: Props) {
       await putWithProgress(data.url, file, file.type, (pct) => setProgress(pct));
 
       setUploading(false);
+      setUploaded(true);
       onUploaded?.({ key: data.key, publicUrl: data.publicUrl });
     } catch (err: any) {
       setUploading(false);
       setError(err.message || "Falha no upload");
     }
+  }
+
+  if (compact) {
+    return (
+      <div className="grid gap-2">
+        <label
+          className={`flex h-12 items-center justify-center rounded-xl border border-dashed border-[var(--input)] px-4 text-sm font-semibold transition-colors focus-within:ring-[3px] focus-within:ring-[var(--liquid-accent)]/20 ${
+            uploading ? "cursor-wait opacity-70" : "cursor-pointer hover:bg-[var(--muted)]"
+          }`}
+        >
+          <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="sr-only" />
+          {uploading ? `Enviando… ${progress}%` : uploaded ? "Trocar imagem" : "Escolher imagem"}
+        </label>
+        {error && (
+          <p role="alert" className="text-[13px] font-medium text-red-700 dark:text-red-300">
+            {error}
+          </p>
+        )}
+      </div>
+    );
   }
 
   return (

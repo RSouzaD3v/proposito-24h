@@ -1,88 +1,51 @@
 // app/reader/register/page.tsx
-import { apiGetOrNull } from "@/lib/api/server";
-import { headers } from "next/headers";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { GlassCard } from "@/components/ui/glass-card";
-import { WriterShell } from "@/components/ui/writer-shell";
+import Link from "next/link";
+import { SearchX } from "lucide-react";
+import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
+import { authLinkClass } from "@/components/auth/auth-fields";
+import { getWriterFromHost } from "@/lib/writer-host";
 import { ReaderRegister } from "./_components/formRegister";
 
 export default async function ReaderRegisterPage() {
-  const h = headers();
-  const host = (await h).get("host") || ""; // ex.: sub.example.com:3000
-
-  // Defina seu domínio base (sem porta). Recomendado via env.
-  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || "example.com";
-
-  const hostname = host.split(":")[0]; // remove porta
-  const isLocalhost = hostname.endsWith("localhost") || hostname.endsWith("lvh.me");
-
-  const subdomain = (() => {
-    if (isLocalhost) {
-      // ex.: escritor.localhost
-      const parts = hostname.split(".");
-      return parts.length > 1 ? parts[0] : "";
-    }
-    if (hostname === baseDomain) return ""; // acesso direto ao domínio root
-    return hostname.replace(`.${baseDomain}`, ""); // ex.: escritor.example.com → escritor
-  })();
-
-  const writer = subdomain
-    ? await apiGetOrNull<{ id: string; slug: string; name: string; logoUrl: string | null }>(
-        `/public/writers/by-subdomain/${encodeURIComponent(subdomain)}`,
-      )
-    : null;
+  const { subdomain, writer } = await getWriterFromHost();
 
   if (!writer) {
     return (
-      <WriterShell contained={false} className="grid place-items-center">
-        <WriterShell maxWidth="md">
-          <GlassCard strong className="text-center">
-            <div className="mx-auto mb-4 size-12 rounded-full bg-red-100" />
-            <h1 className="text-2xl font-bold text-red-600">Subdomínio inválido</h1>
-            <p className="mt-2 text-sm text-[var(--liquid-muted)]">
-              O subdomínio <b>{subdomain || "vazio"}</b> não está registrado para nenhum escritor.
-            </p>
-          </GlassCard>
-        </WriterShell>
-      </WriterShell>
+      <div className="reader-premium grid min-h-screen place-items-center bg-[var(--reader-bg)] px-5 text-center text-[var(--liquid-ink)]">
+        <div className="animate-glass-in max-w-md">
+          <div className="mx-auto mb-5 grid size-14 place-items-center rounded-2xl bg-[var(--muted)]">
+            <SearchX className="size-6 text-[var(--liquid-muted)]" />
+          </div>
+          <h1 className="text-3xl">Endereço não encontrado</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-[var(--liquid-muted)]">
+            O subdomínio <b>{subdomain || "vazio"}</b> não está registrado para nenhum escritor. Confira o link
+            recebido e tente novamente.
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <WriterShell contained={false}>
-      <WriterShell maxWidth="lg">
-        <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          {writer.logoUrl ? (
-            <img
-              src={writer.logoUrl}
-              alt="Logo do Escritor"
-              width={84}
-              height={84}
-              className="rounded-xl object-contain"
-            />
-          ) : (
-            <div className="grid size-20 place-items-center rounded-xl bg-slate-200 text-slate-500">LOGO</div>
-          )}
-          <div>
-            <h1 className="text-2xl font-bold leading-tight text-[var(--liquid-ink)]">Criar conta</h1>
-            <p className="text-sm text-[var(--liquid-muted)]">
-              Você está se registrando para <span className="font-medium">{writer.name}</span>
-            </p>
-          </div>
-          <Badge variant="secondary">Leitor</Badge>
-        </div>
-
-        <GlassCard strong>
-            <ReaderRegister writer={{ slug: writer.slug, name: writer.name }} />
-            <Separator className="my-6" />
-            <p className="text-center text-xs text-[var(--liquid-muted)]">
-              Ao continuar, você concorda com nossa 
-              <a className="underline hover:text-foreground" href="/privacy">Política de Privacidade</a> e 
-              <a className="underline hover:text-foreground" href="/terms">Termos de Uso</a>.
-            </p>
-        </GlassCard>
-      </WriterShell>
-    </WriterShell>
+    <AuthShell
+      image="/bible3d.webp"
+      sceneEyebrow={writer.name}
+      sceneTitle="Uma palavra para começar cada dia."
+      sceneBody="Devocionais, orações e leituras para acompanhar sua caminhada."
+      brandName={writer.name}
+      brandLogoUrl={writer.logoUrl}
+      accent={writer.colorPrimary}
+      topAction={
+        <>
+          <span className="hidden sm:inline">Já tem conta? </span>
+          <Link href="/login" className={authLinkClass}>
+            Entrar
+          </Link>
+        </>
+      }
+    >
+      <AuthHeading title="Crie sua conta" description={`Acesse os conteúdos de ${writer.name} em poucos segundos.`} />
+      <ReaderRegister writer={{ slug: writer.slug }} />
+    </AuthShell>
   );
 }
