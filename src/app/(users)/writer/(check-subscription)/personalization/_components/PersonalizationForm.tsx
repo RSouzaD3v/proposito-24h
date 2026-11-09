@@ -34,7 +34,7 @@ export default function PersonalizationForm({
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    fetch(`/api/personalization?writerId=${writerId}`)
+    fetch("/api/v1/writer/personalization")
       .then((res) => res.json())
       .then((res) => {
         if (Array.isArray(res)) {
@@ -58,7 +58,7 @@ export default function PersonalizationForm({
     if (!data) return;
 
     startTransition(async () => {
-      const res = await fetch("/api/personalization", {
+      const res = await fetch("/api/v1/writer/personalization", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

@@ -1,6 +1,6 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -36,53 +36,16 @@ export default async function ReaderGroupDailyDetailPage({
     );
   }
 
-  /* 1) Agrupamento + conteúdos (o bloqueio de acesso fica nas páginas de cada item) */
-  const grouping = await db.groupingDaily.findFirst({
-    where: {
-      id: groupId,
-      writerId: session.user.writerId,
-      active: true,
-    },
-    include: {
-      devotionals: { orderBy: { createdAt: "asc" } },
-      verses: { orderBy: { createdAt: "asc" } },
-      prayers: { orderBy: { createdAt: "asc" } },
-      quotes: { orderBy: { createdAt: "asc" } },
-    },
-  });
-
+  const grouping = await apiGetOrNull<any>(`/reader/groupings/${groupId}`);
   if (!grouping) notFound();
 
-  /* 3) Conteúdos já lidos (UserCompletation*) */
-  const [
-    completedDevotionals,
-    completedVerses,
-    completedPrayers,
-    completedQuotes,
-  ] = await Promise.all([
-    db.userCompletationDevotional.findMany({
-      where: { userId: session.user.id },
-      select: { devotionalId: true },
-    }),
-    db.userCompletationVerse.findMany({
-      where: { userId: session.user.id },
-      select: { verseId: true },
-    }),
-    db.userCompletationPrayer.findMany({
-      where: { userId: session.user.id },
-      select: { prayerId: true },
-    }),
-    db.userCompletationQuote.findMany({
-      where: { userId: session.user.id },
-      select: { quoteId: true },
-    }),
-  ]);
-
+  const completedIds = (items: { id: string; completed: boolean }[]) =>
+    new Set(items.filter((item) => item.completed).map((item) => item.id));
   const completed = {
-    devotionals: new Set(completedDevotionals.map(d => d.devotionalId)),
-    verses: new Set(completedVerses.map(v => v.verseId)),
-    prayers: new Set(completedPrayers.map(p => p.prayerId)),
-    quotes: new Set(completedQuotes.map(q => q.quoteId)),
+    devotionals: completedIds(grouping.devotionals),
+    verses: completedIds(grouping.verses),
+    prayers: completedIds(grouping.prayers),
+    quotes: completedIds(grouping.quotes),
   };
 
   return (
@@ -128,7 +91,7 @@ export default async function ReaderGroupDailyDetailPage({
           {grouping.devotionals.length > 0 && (
             <TabsContent value="devotionals">
               <List>
-                {grouping.devotionals.map(item => (
+                {grouping.devotionals.map((item: any) => (
                   <ReadRow
                     key={item.id}
                     title={item.title}
@@ -143,7 +106,7 @@ export default async function ReaderGroupDailyDetailPage({
           {grouping.verses.length > 0 && (
             <TabsContent value="verses">
               <List>
-                {grouping.verses.map(item => (
+                {grouping.verses.map((item: any) => (
                   <ReadRow
                     key={item.id}
                     title={item.reference}
@@ -158,7 +121,7 @@ export default async function ReaderGroupDailyDetailPage({
           {grouping.prayers.length > 0 && (
             <TabsContent value="prayers">
               <List>
-                {grouping.prayers.map(item => (
+                {grouping.prayers.map((item: any) => (
                   <ReadRow
                     key={item.id}
                     title={item.title}
@@ -173,7 +136,7 @@ export default async function ReaderGroupDailyDetailPage({
           {grouping.quotes.length > 0 && (
             <TabsContent value="quotes">
               <List>
-                {grouping.quotes.map(item => (
+                {grouping.quotes.map((item: any) => (
                   <ReadRow
                     key={item.id}
                     title={item.verse}

@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 // app/admin/analytics/page.tsx
-import { db } from "@/lib/db";
 import { requireAdmin } from "../_lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import RevenueAreaChart from "./_charts/RevenueAreaChart";
@@ -10,17 +10,6 @@ import { Suspense } from "react";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-function getDateRange(range?: string) {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  const r = range ?? "30d";
-  const map: Record<string, number> = { "7d": 6, "30d": 29, "90d": 89, "365d": 364 };
-  start.setDate(end.getDate() - (map[r] ?? 29));
-  start.setHours(0, 0, 0, 0);
-  return { start, end, r };
-}
-
 export default async function AdminAnalytics({
   searchParams,
 }: {
@@ -28,45 +17,13 @@ export default async function AdminAnalytics({
 }) {
   await requireAdmin();
   const sp = (await searchParams) ?? {};
-  const { start, end, r } = getDateRange(sp.range);
-
-  const revenueByDay: { day: Date; revenue_cents: bigint; sales: number }[] =
-    await db.$queryRaw`
-      SELECT date_trunc('day', "createdAt") AS day,
-             SUM(COALESCE("netAmount", "amount" - COALESCE("fees",0)))::bigint AS revenue_cents,
-             COUNT(*)::int AS sales
-        FROM "Purchase"
-       WHERE "status" = 'SUCCESS'
-         AND "createdAt" >= ${start} AND "createdAt" < ${end}
-       GROUP BY 1 ORDER BY 1`;
-
-  const topWriters: { writer_id: string; writer_name: string; revenue_cents: bigint; sales: number }[] =
-    await db.$queryRaw`
-      SELECT w."id" as writer_id, w."name" as writer_name,
-             SUM(COALESCE(p."netAmount", p."amount" - COALESCE(p."fees",0)))::bigint AS revenue_cents,
-             COUNT(*)::int AS sales
-        FROM "Purchase" p
-        JOIN "Writer" w ON p."writerId" = w."id"
-       WHERE p."status" = 'SUCCESS'
-         AND p."createdAt" >= ${start} AND p."createdAt" < ${end}
-       GROUP BY w."id", w."name"
-       ORDER BY revenue_cents DESC
-       LIMIT 10`;
-
-  const statusDist: { status: string; count: number }[] =
-    await db.$queryRaw`
-      SELECT "status"::text AS status, COUNT(*)::int AS count
-        FROM "ReaderSubscription"
-       GROUP BY 1`;
-
-  const writersByMonth: { month: Date; count: number }[] =
-    await db.$queryRaw`
-      SELECT date_trunc('month', "createdAt") AS month, COUNT(*)::int AS count
-        FROM "Writer"
-       WHERE "createdAt" >= ${new Date(end.getFullYear() - 1, end.getMonth(), 1)}
-       GROUP BY 1 ORDER BY 1`;
-
-  const periodNet = revenueByDay.reduce((sum, r) => sum + Number(r.revenue_cents), 0);
+  const r = sp.range ?? "30d";
+  const data = await apiGet<any>(`/admin/analytics?range=${encodeURIComponent(r)}`);
+  const revenueByDay: any[] = data.revenueByDay;
+  const topWriters: any[] = data.topWriters;
+  const statusDist: any[] = data.statusDist;
+  const writersByMonth: any[] = data.writersByMonth;
+  const periodNet = revenueByDay.reduce((sum: number, row) => sum + Number(row.revenue_cents), 0);
 
   return (
     <section className="space-y-6">

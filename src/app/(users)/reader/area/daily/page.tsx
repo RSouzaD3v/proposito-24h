@@ -1,11 +1,7 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-
 import DailyTabs from "./_components/DailyTabs";
 import { PageHeader } from "@/components/ui/page-header";
 import { GlassCard } from "@/components/ui/glass-card";
+import { apiGet } from "@/lib/api/server";
 
 interface PageProps {
   searchParams: Promise<{
@@ -16,38 +12,22 @@ interface PageProps {
 
 const PAGE_SIZE = 10;
 
+interface ContentPage {
+  items: any[];
+  total: number;
+}
+
 export default async function DailyPage({ searchParams }: PageProps) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/login");
-
-  const writerId = (session.user as any)?.writerId;
-  if (!writerId) redirect("/");
-
   const tab = (await searchParams).tab ?? "verses";
   const page = Number((await searchParams).page ?? "1");
-  const skip = (page - 1) * PAGE_SIZE;
-
-  const commonQuery = {
-    where: { writerId },
-    orderBy: { createdAt: "desc" as const },
-    take: PAGE_SIZE,
-    skip,
-  };
+  const list = (kind: string) => apiGet<ContentPage>(`/reader/content/${kind}?page=${page}`);
 
   const [verses, devotionals, quotes, prayers] = await Promise.all([
-    db.verse.findMany(commonQuery),
-    db.devotional.findMany(commonQuery),
-    db.quote.findMany(commonQuery),
-    db.prayer.findMany(commonQuery)
+    list("verse"),
+    list("devotional"),
+    list("quote"),
+    list("prayer"),
   ]);
-
-  const [versesCount, devotionalsCount, quotesCount, prayersCount] =
-    await Promise.all([
-      db.verse.count({ where: { writerId } }),
-      db.devotional.count({ where: { writerId } }),
-      db.quote.count({ where: { writerId } }),
-      db.prayer.count({ where: { writerId } })
-    ]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -63,16 +43,16 @@ export default async function DailyPage({ searchParams }: PageProps) {
           page={page}
           pageSize={PAGE_SIZE}
           data={{
-            verses,
-            devotionals,
-            quotes,
-            prayers
+            verses: verses.items,
+            devotionals: devotionals.items,
+            quotes: quotes.items,
+            prayers: prayers.items,
           }}
           total={{
-            verses: versesCount,
-            devotionals: devotionalsCount,
-            quotes: quotesCount,
-            prayers: prayersCount
+            verses: verses.total,
+            devotionals: devotionals.total,
+            quotes: quotes.total,
+            prayers: prayers.total,
           }}
         />
       </GlassCard>

@@ -10,7 +10,7 @@ export const CompleteVerse = ({ verseId }: { verseId: string }) => {
     const handleCompleteVerse = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/reader/area/verse/${verseId}`, {
+            const res = await fetch(`/api/v1/reader/content/verse/${verseId}/complete`, {
                 method: "POST"
             });
             

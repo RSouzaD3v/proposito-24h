@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { apiGetOrNull } from "@/lib/api/server";
 import { notFound } from "next/navigation";
 import { ModalCreateQuestion } from "./_components/ModalCreateQuestion";
 import { ModalEditQuestion } from "./_components/ModalEditQuestion";
@@ -15,17 +15,7 @@ export default async function AdminQuizDetailPage({
 }) {
   const { quizId } = await params;
 
-  const quiz = await db.quiz.findUnique({
-    where: { id: quizId },
-    include: {
-      questions: {
-        orderBy: { order: "asc" },
-        include: {
-          options: true,
-        },
-      },
-    },
-  });
+  const quiz = await apiGetOrNull<any>(`/admin/quizzes/${quizId}`);
 
   if (!quiz) notFound();
 
@@ -59,7 +49,7 @@ export default async function AdminQuizDetailPage({
           </p>
         )}
 
-        {quiz.questions.map((question) => (
+        {quiz.questions.map((question: any) => (
           <Card key={question.id}>
             <CardContent className="p-4 space-y-3">
               {/* HEADER DA PERGUNTA */}
@@ -74,7 +64,7 @@ export default async function AdminQuizDetailPage({
                     quizId={quiz.id}
                     questionId={question.id}
                     initialTitle={question.title}
-                    initialOptions={question.options.map((opt) => ({
+                    initialOptions={question.options.map((opt: any) => ({
                       id: opt.id,
                       text: opt.text,
                       isCorrect: opt.isCorrect,
@@ -104,7 +94,7 @@ export default async function AdminQuizDetailPage({
 
               {/* ALTERNATIVAS */}
               <ul className="space-y-1 pl-4">
-                {question.options.map((opt) => (
+                {question.options.map((opt: any) => (
                   <li
                     key={opt.id}
                     className={`text-sm ${

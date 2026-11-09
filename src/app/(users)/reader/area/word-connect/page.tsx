@@ -1,6 +1,6 @@
+import { apiGet } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import Link from "next/link";
@@ -18,15 +18,7 @@ export default async function GameAreaPage() {
 
   const userId = session.user.id;
 
-  const games = await db.gameTemplate.findMany({
-    where: { active: true },
-    orderBy: { createdAt: "asc" },
-    include: {
-      playerGames: {
-        where: { userId },
-      },
-    },
-  });
+  const games = await apiGet<any[]>("/reader/games");
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -48,7 +40,7 @@ export default async function GameAreaPage() {
       )}
 
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {games.map((game) => {
+        {games.map((game: any) => {
           const playerGame = game.playerGames?.[0];
 
           const statusLabel = playerGame
@@ -86,7 +78,7 @@ export default async function GameAreaPage() {
               </div>
 
               <Button asChild variant="glass-primary" className="w-full rounded-full">
-                <Link href={`/reader/area/game/${game.slug}/play`}>
+                <Link href={`/reader/area/word-connect/${game.slug}/play`}>
                   {playerGame ? "Continuar" : "Começar"}
                 </Link>
               </Button>

@@ -1,308 +1,64 @@
 "use server";
 
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
+import { apiSend } from "@/lib/api/server";
 import { revalidatePath } from "next/cache";
-import z from "zod";
 
-async function assertWriter() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.writerId) {
-    throw new Error("Não autorizado");
-  }
-  return session.user.writerId;
+type ContentKind = "devotional" | "quote" | "prayer" | "verse";
+
+interface GroupingForm {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  active: boolean;
 }
 
-const updateGroupingSchema = z.object({
-  groupId: z.string(),
-  title: z.string().min(2),
-  description: z.string().optional(),
-  imageUrl: z.string().optional(),
-  active: z.boolean()
-});
+export async function updateGroupingDailyAction(data: GroupingForm & { groupId: string }) {
+  const { groupId, ...form } = data;
+  const result = await apiSend("PUT", `/writer/groupings/${groupId}`, form);
+  if (!result.ok) return { success: false, message: result.message ?? "Não autorizado" };
 
-export async function updateGroupingDailyAction(
-  data: z.infer<typeof updateGroupingSchema>
-) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.writerId) {
-    return { success: false, message: "Não autorizado" };
-  }
-
-  const parsed = updateGroupingSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false, message: "Dados inválidos" };
-  }
-
-  const { groupId, title, description, imageUrl, active } = parsed.data;
-
-await db.groupingDaily.updateMany({
-  where: {
-    id: groupId,
-    writerId: session.user.writerId,
-  },
-  data: {
-    title,
-    description,
-    imageUrl,
-    active,
-  },
-});
-
-revalidatePath(
-  "/(users)/writer/(check-subscription)/group-daily",
-  "page"
-);
-
-revalidatePath(
-  "/(users)/writer/(check-subscription)/group-daily/[groupId]",
-  "page"
-);
-
-revalidatePath(
-  "/(users)/reader/area/group-daily/[groupId]",
-  "page"
-);
-
+  revalidatePath("/writer/group-daily");
+  revalidatePath(`/writer/group-daily/${groupId}`);
+  revalidatePath(`/reader/area/group-daily/${groupId}`);
   return { success: true };
 }
 
+export async function createGroupingDailyAction(data: GroupingForm) {
+  const result = await apiSend("POST", "/writer/groupings", data);
+  if (!result.ok) return { success: false, message: result.message ?? "Erro ao criar agrupamento" };
 
-/* =========================
- * SCHEMA
- * ========================= */
-const createGroupingDailySchema = z.object({
-  title: z.string().min(3, "Título muito curto"),
-  description: z.string().optional(),
-  imageUrl: z.string().url().optional(),
-  active: z.boolean()
-});
-
-/* =========================
- * ACTION
- * ========================= */
-export async function createGroupingDailyAction(
-  data: z.infer<typeof createGroupingDailySchema>
-) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user.writerId) {
-    return {
-      success: false,
-      message: "Não autorizado",
-    };
-  }
-
-  const parsed = createGroupingDailySchema.safeParse(data);
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "Dados inválidos",
-    };
-  }
-
-  try {
-    await db.groupingDaily.create({
-      data: {
-        title: parsed.data.title,
-        description: parsed.data.description,
-        imageUrl: parsed.data.imageUrl,
-        writerId: session.user.writerId,
-        active: parsed.data.active ?? true,
-      },
-    });
-
-    // 🔄 Revalida a listagem
-    revalidatePath("/writer/group-daily");
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("createGroupingDailyAction error:", error);
-
-    return {
-      success: false,
-      message: "Erro ao criar agrupamento",
-    };
-  }
+  revalidatePath("/writer/group-daily");
+  return { success: true };
 }
 
-/* ======================
- * DEVOTIONAL
- * ====================== */
-export async function addDevotionalToGroupAction(
-  groupId: string,
-  devotionalId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      devotionals: {
-        connect: { id: devotionalId },
-      },
-    },
-  });
-
+async function setContent(method: "PUT" | "DELETE", groupId: string, kind: ContentKind, contentId: string) {
+  const result = await apiSend(method, `/writer/groupings/${groupId}/${kind}/${contentId}`);
+  if (!result.ok) throw new Error(result.message ?? "Não autorizado");
   revalidatePath(`/writer/group-daily/${groupId}`);
   return { success: true };
 }
 
-/* ======================
- * QUOTE
- * ====================== */
-export async function addQuoteToGroupAction(
-  groupId: string,
-  quoteId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      quotes: {
-        connect: { id: quoteId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function addDevotionalToGroupAction(groupId: string, id: string) {
+  return setContent("PUT", groupId, "devotional", id);
 }
-
-/* ======================
- * PRAYER
- * ====================== */
-export async function addPrayerToGroupAction(
-  groupId: string,
-  prayerId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      prayers: {
-        connect: { id: prayerId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function addQuoteToGroupAction(groupId: string, id: string) {
+  return setContent("PUT", groupId, "quote", id);
 }
-
-/* ======================
- * VERSE
- * ====================== */
-export async function addVerseToGroupAction(
-  groupId: string,
-  verseId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      verses: {
-        connect: { id: verseId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function addPrayerToGroupAction(groupId: string, id: string) {
+  return setContent("PUT", groupId, "prayer", id);
 }
-
-/* ======================
- * REMOVER DEVOTIONAL
- * ====================== */
-export async function removeDevotionalFromGroupAction(
-  groupId: string,
-  devotionalId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      devotionals: {
-        disconnect: { id: devotionalId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function addVerseToGroupAction(groupId: string, id: string) {
+  return setContent("PUT", groupId, "verse", id);
 }
-
-/* ======================
- * REMOVER QUOTE
- * ====================== */
-export async function removeQuoteFromGroupAction(
-  groupId: string,
-  quoteId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      quotes: {
-        disconnect: { id: quoteId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function removeDevotionalFromGroupAction(groupId: string, id: string) {
+  return setContent("DELETE", groupId, "devotional", id);
 }
-
-/* ======================
- * REMOVER PRAYER
- * ====================== */
-export async function removePrayerFromGroupAction(
-  groupId: string,
-  prayerId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      prayers: {
-        disconnect: { id: prayerId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function removeQuoteFromGroupAction(groupId: string, id: string) {
+  return setContent("DELETE", groupId, "quote", id);
 }
-
-/* ======================
- * REMOVER VERSE
- * ====================== */
-export async function removeVerseFromGroupAction(
-  groupId: string,
-  verseId: string
-) {
-  const writerId = await assertWriter();
-
-  await db.groupingDaily.update({
-    where: { id: groupId, writerId },
-    data: {
-      verses: {
-        disconnect: { id: verseId },
-      },
-    },
-  });
-
-  revalidatePath(`/writer/group-daily/${groupId}`);
-  return { success: true };
+export async function removePrayerFromGroupAction(groupId: string, id: string) {
+  return setContent("DELETE", groupId, "prayer", id);
+}
+export async function removeVerseFromGroupAction(groupId: string, id: string) {
+  return setContent("DELETE", groupId, "verse", id);
 }

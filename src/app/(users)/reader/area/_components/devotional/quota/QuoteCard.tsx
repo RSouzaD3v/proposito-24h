@@ -1,17 +1,10 @@
+import type { HomeCard } from "@/lib/api/types";
 // app/reader/area/_components/devotional/quota/QuoteCard.tsx
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { FiActivity } from "react-icons/fi";
-
-interface DayRange {
-  gte: Date;
-  lt: Date;
-}
 
 interface QuoteCardProps {
   colors: {
@@ -24,31 +17,10 @@ interface QuoteCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayRange: DayRange;
+  item: HomeCard | null;
 }
 
-export const QuoteCard = async ({ colors, dayRange }: QuoteCardProps) => {
-  const session = await getServerSession(authOptions);
-  if (!session) return null;
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, writerId: true },
-  });
-
-  if (!user?.writerId) return null;
-
-  const quote = await db.quote.findFirst({
-    where: {
-      writerId: user.writerId,
-      createdAt: {
-        gte: dayRange.gte,
-        lt: dayRange.lt,
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
+export const QuoteCard = ({ colors, item: quote }: QuoteCardProps) => {
   if (!quote) {
     return (
       <Card className="bg-linear-to-r from-blue-50 to-blue-100">
@@ -59,10 +31,7 @@ export const QuoteCard = async ({ colors, dayRange }: QuoteCardProps) => {
     );
   }
 
-  const userCompletionQuote = await db.userCompletationQuote.findFirst({
-    where: { userId: user.id, quoteId: quote.id },
-    select: { id: true },
-  });
+  const userCompletionQuote = quote.completed;
 
   return (
     <Card

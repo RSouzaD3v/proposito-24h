@@ -58,13 +58,11 @@ export default function PushBootstrap({ writerId, userId }: { writerId?: string;
     }
 
     async function save(sub: PushSubscription) {
-      await fetch('/api/push/subscribe', {
+      await fetch('/api/v1/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subscription: sub.toJSON(),
-          userId: userId ?? null,
-          writerId: writerId ?? null,
           topics: ['new-book'],
         }),
       });

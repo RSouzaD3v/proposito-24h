@@ -10,7 +10,7 @@ export const CompleteDevotional = ({ devotionalId, devotionalContent }: { devoti
     const handleCompleteDevotional = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/reader/area/devotional/${devotionalId}`, {
+            const res = await fetch(`/api/v1/reader/content/devotional/${devotionalId}/complete`, {
                 method: "POST"
             });
             

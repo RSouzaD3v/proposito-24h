@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 // app/admin/payouts/page.tsx
-import { db } from "@/lib/db";
 import { requireAdmin } from "../_lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,11 +10,7 @@ const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" 
 export default async function AdminPayoutsPage() {
   await requireAdmin();
 
-  const payouts = await db.writerPayout.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { writer: { select: { name: true } } },
-    take: 100,
-  });
+  const payouts = await apiGet<any[]>("/admin/payouts");
 
   return (
     <section className="space-y-6">

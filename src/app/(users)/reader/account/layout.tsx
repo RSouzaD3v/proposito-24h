@@ -1,9 +1,10 @@
+import { apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { AuthReaderProvider } from "../area/_contexts/AuthContext";
 import { ThemeWriterProvider } from "../area/_contexts/ThemeWriterContext";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
 import { redirect } from "next/navigation";
@@ -24,13 +25,7 @@ export default async function ReaderAccountLayout({
     redirect("/sign-in?from=/reader/account");
   }
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      writer: { select: { id: true } },
-    },
-  });
+  const user = await apiGetOrNull<ReaderProfile>("/reader/profile");
 
   if (!user?.writer?.id) {
     return (

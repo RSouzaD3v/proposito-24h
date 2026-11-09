@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { WriterShell } from "@/components/ui/writer-shell";
@@ -23,11 +23,7 @@ export default async function WriterPublicationPage() {
         );
     }
 
-    const pubs = await db.publication.findMany({
-        where: {
-            writerId: session?.user?.writerId,
-        },
-    });
+    const pubs = await apiGet<any[]>("/writer/publications");
 
     return (
         <WriterShell maxWidth="4xl">
@@ -47,7 +43,7 @@ export default async function WriterPublicationPage() {
             />
 
             <div className="space-y-4">
-                {pubs.map((pub, index) => (
+                {pubs.map((pub: any, index: number) => (
                     <GlassCard
                         key={pub.id}
                         strong

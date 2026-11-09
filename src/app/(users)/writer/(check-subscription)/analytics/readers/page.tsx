@@ -1,5 +1,4 @@
-import { db } from "@/lib/db";
-import { requireWriter } from "../_lib/auth";
+import { apiGet } from "@/lib/api/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,96 +31,20 @@ function formatDateTime(date?: Date | null) {
 }
 
 
-function getRange(range?: string) {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  const map: Record<string, number> = { "7d": 6, "30d": 29, "90d": 89, "365d": 364 };
-  start.setDate(end.getDate() - (map[range ?? "30d"] ?? 29));
-  start.setHours(0, 0, 0, 0);
-  return { start, end, r: range ?? "30d" };
-}
-
 export default async function WriterReadersPage({
   searchParams,
 }: {
   searchParams?: Promise<{ q?: string; range?: string; filter?: "all" | "subs" | "nonsubs" }>;
 }) {
-  const { writer } = await requireWriter();
-
   const sp = (await searchParams) ?? {};
   const q = sp.q?.trim() || "";
   const filter = sp.filter ?? "all";
-  const { start, end, r } = getRange(sp.range);
-
-  // KPIs
-  const [totalReaders, newReaders, subsActive] = await Promise.all([
-    db.user.count({ where: { writerId: writer.id, role: "CLIENT" } }),
-    db.user.count({ where: { writerId: writer.id, role: "CLIENT", createdAt: { gte: start, lt: end } } }),
-    db.readerSubscription.count({
-      where: {
-        writerId: writer.id,
-        OR: [{ lifetime: true }, { status: { in: [...ACTIVE_STATUSES] as any } }],
-      },
-    }),
-  ]);
-
-  // Assinantes ativos/vitalícios
-  const subs = await db.readerSubscription.findMany({
-    where: {
-      writerId: writer.id,
-      OR: [{ lifetime: true }, { status: { in: [...ACTIVE_STATUSES] as any } }],
-    },
-    select: { readerId: true },
-  });
-  const subsSet = new Set(subs.map((s) => s.readerId));
-
-  // Filtro base
-  const where: any = { writerId: writer.id, role: "CLIENT" };
-  if (q) {
-    where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { email: { contains: q, mode: "insensitive" } },
-    ];
-  }
-
-  let readers = await db.user.findMany({
-    where,
-    select: { id: true, name: true, email: true, createdAt: true, lastAccess: true },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
-
-  if (filter === "subs") readers = readers.filter((r) => subsSet.has(r.id));
-  if (filter === "nonsubs") readers = readers.filter((r) => !subsSet.has(r.id));
-
-  // Gastos por leitor (somatório, para os exibidos)
-  const purchaseAgg =
-    readers.length === 0
-      ? []
-      : await db.purchase.groupBy({
-          by: ["userId"],
-          _sum: { amount: true, netAmount: true },
-          where: {
-            writerId: writer.id,
-            status: "SUCCESS",
-            userId: { in: readers.map((r) => r.id) },
-          },
-        });
-
-  const spentMap = new Map(
-    purchaseAgg.map((p) => [p.userId, Number(p._sum.netAmount ?? 0) || Math.max(Number(p._sum.amount ?? 0), 0)])
-  );
-
-  // Série de novos leitores por dia
-  const newReadersByDay: { day: Date; qty: number }[] = await db.$queryRaw`
-    SELECT date_trunc('day', "createdAt") AS day, COUNT(*)::int AS qty
-      FROM "User"
-     WHERE "writerId" = ${writer.id}
-       AND "role" = 'CLIENT'
-       AND "createdAt" >= ${start} AND "createdAt" < ${end}
-     GROUP BY 1 ORDER BY 1
-  `;
+  const r = sp.range ?? "30d";
+  const query = new URLSearchParams({ range: r, filter, ...(q ? { q } : {}) });
+  const data = await apiGet<any>(`/writer/analytics/readers?${query}`);
+  const { totalReaders, newReaders, subsActive, newReadersByDay, readers } = data;
+  const start = new Date(data.start);
+  const end = new Date(data.end);
 
   return (
     <section className="space-y-6">
@@ -152,7 +75,7 @@ export default async function WriterReadersPage({
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded" />}>
-              <NewReadersAreaChart data={newReadersByDay.map(r => ({ day: new Date(r.day), qty: r.qty }))} />
+              <NewReadersAreaChart data={newReadersByDay.map((r: any) => ({ day: new Date(r.day), qty: r.qty }))} />
             </Suspense>
           </CardContent>
         </Card>
@@ -207,9 +130,9 @@ export default async function WriterReadersPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {readers.map((u) => {
-                const isSub = subsSet.has(u.id);
-                const spent = spentMap.get(u.id) ?? 0;
+              {readers.map((u: any) => {
+                const isSub = u.isSubscriber;
+                const spent = u.spent;
                 return (
                   <TableRow key={u.id}>
                     <TableCell className="max-w-60 truncate">

@@ -37,7 +37,7 @@ export default function WriterAiButton({ onInsert }: WriterAiButtonProps) {
   const handleClick = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/ai/writerAi", {
+      const response = await fetch("/api/v1/ai/writer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: idea }),

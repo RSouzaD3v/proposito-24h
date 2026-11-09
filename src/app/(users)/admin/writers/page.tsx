@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 // app/admin/writers/page.tsx
-import { db } from "@/lib/db";
 import { requireAdmin } from "../_lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,47 +10,7 @@ const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" 
 export default async function AdminWritersPage() {
   await requireAdmin();
 
-  // Receita e vendas por escritor nos últimos 30 dias
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  start.setDate(end.getDate() - 29);
-  start.setHours(0, 0, 0, 0);
-
-  const rows: {
-    writer_id: string;
-    writer_name: string;
-    revenue_cents: bigint;
-    sales: number;
-  }[] = await db.$queryRaw`
-    SELECT w."id" as writer_id, w."name" as writer_name,
-           COALESCE(SUM(COALESCE(p."netAmount", p."amount" - COALESCE(p."fees",0)))::bigint, 0) AS revenue_cents,
-           COUNT(p.*)::int AS sales
-      FROM "Writer" w
-      LEFT JOIN "Purchase" p ON p."writerId" = w."id"
-           AND p."status" = 'SUCCESS'
-           AND p."createdAt" >= ${start} AND p."createdAt" < ${end}
-     GROUP BY w."id", w."name"
-     ORDER BY revenue_cents DESC, sales DESC
-     LIMIT 50`;
-
-  // leitores e assinantes por escritor (geral)
-  const readerCounts = await db.user.groupBy({
-    by: ["writerId"],
-    _count: { _all: true },
-    where: { role: "CLIENT", writerId: { not: null } },
-  });
-
-  const subCounts = await db.readerSubscription.groupBy({
-    by: ["writerId"],
-    _count: { _all: true },
-    where: {
-      OR: [{ lifetime: true }, { status: { in: ["ACTIVE", "TRIALING", "PAST_DUE", "PAUSED"] } }],
-    },
-  });
-
-  const readerMap = new Map(readerCounts.map((r) => [r.writerId!, r._count._all]));
-  const subMap = new Map(subCounts.map((s) => [s.writerId, s._count._all]));
+  const rows = await apiGet<any[]>("/admin/writers");
 
   return (
     <section className="space-y-6">
@@ -84,8 +44,8 @@ export default async function AdminWritersPage() {
                   </TableCell>
                   <TableCell className="text-right">{BRL.format(Number(r.revenue_cents) / 100)}</TableCell>
                   <TableCell className="text-right">{r.sales}</TableCell>
-                  <TableCell className="text-right">{subMap.get(r.writer_id) ?? 0}</TableCell>
-                  <TableCell className="text-right">{readerMap.get(r.writer_id) ?? 0}</TableCell>
+                  <TableCell className="text-right">{r.subscribers}</TableCell>
+                  <TableCell className="text-right">{r.readers}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

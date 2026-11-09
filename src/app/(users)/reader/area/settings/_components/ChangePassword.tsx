@@ -41,7 +41,7 @@ export const ChangePassword = () => {
 
     try {
       setSaving(true);
-      const res = await fetch(`/api/reader/change-password`, {
+      const res = await fetch(`/api/v1/auth/change-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd }),

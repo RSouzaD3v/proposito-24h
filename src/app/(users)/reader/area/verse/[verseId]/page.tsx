@@ -1,56 +1,23 @@
-import { db } from "@/lib/db";
+import { apiFetch, apiGet } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
+import { notFound } from "next/navigation";
 import { CompleteVerse } from "./_components/CompleteVerse";
-import { authOptions } from "@/lib/authOption";
-import { getServerSession } from "next-auth";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
-import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 import { BackButton } from "@/components/ui/back-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { resolveReaderBackHref } from "@/lib/readerBackHref";
 
 export default async function VerseDetails({ params, searchParams }: { params: Promise<{ verseId: string }>; searchParams: Promise<{ from?: string | string[] }> }) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-        return (<div>Você precisa estar logado para ver este versículo.</div>);
-    }
     const { verseId } = await params;
     const backHref = resolveReaderBackHref((await searchParams).from);
+    const result = await apiFetch<any>(`/reader/content/verse/${verseId}`);
 
-    const verse = await db.verse.findUnique({
-        where: { id: verseId },
-        include: {
-            writer: {
-                select: {
-                    id: true,
-                    name: true,
-                    slug: true
-                }
-            }
-        }
-    });
-
-  // Usuário (precisamos do writer atual p/ regra de acesso)
-  const userReader = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      writer: { select: { id: true, name: true, slug: true } },
-    },
-  });
-
-  // Se sua regra exige que o usuário seja "writer" para ver o plano, mantenha:
-  if (!userReader || !userReader.writerId) {
-    return (
-      <div>
-        <h2>Acesso Negado</h2>
-        <p>Você precisa ser um escritor para acessar este plano de leitura.</p>
-      </div>
-    );
-  }
-
-  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "verse");
-  if (!gate.allowed) {
-    return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
-  }
+    if (result.status === 403) {
+        const profile = await apiGet<ReaderProfile>("/reader/profile");
+        return <ScreenSubscription slug={profile.writer?.slug || ""} />;
+    }
+    if (!result.ok) notFound();
+    const verse = result.data;
 
     return (
         <div style={{ backgroundImage: verse?.imageUrl ? `url(${verse.imageUrl}), linear-gradient(to bottom right, #f9fafb, #e5e7eb)` : undefined, backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }} 

@@ -1,8 +1,8 @@
+import { apiSend } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import { Button } from "@/components/ui/button";
@@ -33,25 +33,11 @@ async function createGame(formData: FormData) {
 
   if (!title) return;
 
-  const slug = title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-
-  const game = await db.gameTemplate.create({
-    data: {
-      title,
-      slug,
-      description: description || null,
-      type: type as any,
-      active: true,
-    },
-  });
+  const result = await apiSend("POST", "/admin/games", { title, description, type });
+  if (!result.ok) return;
 
   revalidatePath("/admin/game");
-  redirect(`/admin/game/${game.id}`);
+  redirect(`/admin/game/${(result.data as { id: string }).id}`);
 }
 
 /* -------------------------

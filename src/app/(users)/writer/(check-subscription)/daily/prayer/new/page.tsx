@@ -27,7 +27,7 @@ export default function PrayerNewPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/writer/daily/prayer/new", {
+            const response = await fetch("/api/v1/writer/daily/prayer", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

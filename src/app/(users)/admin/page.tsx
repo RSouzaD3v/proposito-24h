@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 // app/admin/page.tsx
-import { db } from "@/lib/db";
 import { requireAdmin } from "./_lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,44 +7,12 @@ import Link from "next/link";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-function getDateRange() {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  start.setDate(end.getDate() - 29);
-  start.setHours(0, 0, 0, 0);
-  return { start, end };
-}
-
 export default async function AdminHome() {
   await requireAdmin();
-  const { start, end } = getDateRange();
-
-  const [
-    totalWriters,
-    totalReaders,
-    totalPublications,
-    salesAgg,
-    subsActive,
-  ] = await Promise.all([
-    db.writer.count(),
-    db.user.count({ where: { role: "CLIENT" } }),
-    db.publication.count(),
-    db.purchase.aggregate({
-      _sum: { amount: true, fees: true, netAmount: true },
-      _count: true,
-      where: { status: "SUCCESS", createdAt: { gte: start, lt: end } },
-    }),
-    db.readerSubscription.count({
-      where: {
-        OR: [{ lifetime: true }, { status: { in: ["ACTIVE", "TRIALING", "PAST_DUE", "PAUSED"] } }],
-      },
-    }),
-  ]);
-
-  const gross = Number(salesAgg._sum.amount ?? 0);
-  const fees = Number(salesAgg._sum.fees ?? 0);
-  const net = Number(salesAgg._sum.netAmount ?? 0) || Math.max(gross - fees, 0);
+  const overview = await apiGet<any>("/admin/overview");
+  const { totalWriters, totalReaders, totalPublications, subsActive, net } = overview;
+  const start = new Date(overview.start);
+  const end = new Date(overview.end);
 
   return (
     <section className="space-y-6">
@@ -64,7 +32,7 @@ export default async function AdminHome() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Kpi title="Receita (30d)" value={BRL.format(net / 100)} />
-        <Kpi title="Vendas (30d)" value={String(salesAgg._count)} />
+        <Kpi title="Vendas (30d)" value={String(overview.sales)} />
         <Kpi title="Assinantes ativos" value={String(subsActive)} />
         <Kpi title="Leitores totais" value={String(totalReaders)} />
       </div>

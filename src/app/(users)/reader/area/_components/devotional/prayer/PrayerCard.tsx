@@ -1,18 +1,11 @@
+import type { HomeCard } from "@/lib/api/types";
 // app/reader/area/_components/devotional/prayer/PrayerCard.tsx
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { HandHeart } from "lucide-react";
 import AudioButton from "../devotional/AudioButton";
-
-interface DayRange {
-  gte: Date;
-  lt: Date;
-}
 
 interface PrayerCardProps {
   colors: {
@@ -25,31 +18,10 @@ interface PrayerCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayRange: DayRange;
+  item: HomeCard | null;
 }
 
-export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
-  const session = await getServerSession(authOptions);
-  if (!session) return null;
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, writerId: true },
-  });
-
-  if (!user?.writerId) return null;
-
-  const prayer = await db.prayer.findFirst({
-    where: {
-      writerId: user.writerId,
-      createdAt: {
-        gte: dayRange.gte,
-        lt: dayRange.lt,
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
+export const PrayerCard = ({ colors, item: prayer }: PrayerCardProps) => {
   if (!prayer) {
     return (
       <Card className="bg-linear-to-r from-blue-50 to-blue-100">
@@ -60,11 +32,7 @@ export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
     );
   }
 
-  const userCompletationPrayer =
-    await db.userCompletationPrayer.findFirst({
-      where: { userId: user.id, prayerId: prayer.id },
-      select: { id: true },
-    });
+  const userCompletationPrayer = prayer.completed;
 
   return (
     <Card style={{ backgroundColor: colors.background }}>
@@ -102,7 +70,7 @@ export const PrayerCard = async ({ colors, dayRange }: PrayerCardProps) => {
         </Link>
 
         <AudioButton
-          src={prayer.audioUrl}
+          src={prayer.audioUrl ?? null}
           style={{
             background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
             color: colors.buttonText,

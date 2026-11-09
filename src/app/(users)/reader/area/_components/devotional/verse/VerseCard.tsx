@@ -1,17 +1,10 @@
+import type { HomeCard } from "@/lib/api/types";
 // app/reader/area/_components/devotional/verse/VerseCard.tsx
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { FiBook } from "react-icons/fi";
-
-interface DayRange {
-  gte: Date;
-  lt: Date;
-}
 
 interface VerseCardProps {
   colors: {
@@ -24,31 +17,10 @@ interface VerseCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayRange: DayRange;
+  item: HomeCard | null;
 }
 
-export const VerseCard = async ({ colors, dayRange }: VerseCardProps) => {
-  const session = await getServerSession(authOptions);
-  if (!session) return null;
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, writerId: true },
-  });
-
-  if (!user?.writerId) return null;
-
-  const verse = await db.verse.findFirst({
-    where: {
-      writerId: user.writerId,
-      createdAt: {
-        gte: dayRange.gte,
-        lt: dayRange.lt,
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
+export const VerseCard = ({ colors, item: verse }: VerseCardProps) => {
   if (!verse) {
     return (
       <Card className="bg-linear-to-r from-blue-50 to-blue-100">
@@ -59,10 +31,7 @@ export const VerseCard = async ({ colors, dayRange }: VerseCardProps) => {
     );
   }
 
-  const userCompletionVerse = await db.userCompletationVerse.findFirst({
-    where: { userId: user.id, verseId: verse.id },
-    select: { id: true },
-  });
+  const userCompletionVerse = verse.completed;
 
   return (
     <Card style={{ backgroundColor: colors.background }}>

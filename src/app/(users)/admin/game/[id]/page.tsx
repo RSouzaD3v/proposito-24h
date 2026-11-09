@@ -1,8 +1,8 @@
+import { apiGetOrNull, apiSend } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import Link from "next/link";
@@ -36,14 +36,7 @@ async function updateGame(formData: FormData) {
 
   if (!id || !title) return;
 
-  await db.gameTemplate.update({
-    where: { id },
-    data: {
-      title,
-      description: description || null,
-      active,
-    },
-  });
+  await apiSend("PUT", `/admin/games/${id}`, { title, description, active });
 
   revalidatePath(`/admin/game/${id}`);
 }
@@ -56,23 +49,10 @@ async function createLevel(formData: FormData) {
 
   const gameTemplateId = String(formData.get("gameTemplateId"));
 
-  const lastLevel = await db.gameLevel.findFirst({
-    where: { gameTemplateId },
-    orderBy: { order: "desc" },
-  });
+  const result = await apiSend("POST", `/admin/games/${gameTemplateId}/levels`);
+  if (!result.ok) return;
 
-  const nextOrder = lastLevel ? lastLevel.order + 1 : 1;
-
-  const level = await db.gameLevel.create({
-    data: {
-      gameTemplateId,
-      order: nextOrder,
-      letters: [],
-      layout: [],
-    },
-  });
-
-  redirect(`/admin/game/${gameTemplateId}/level/${level.id}`);
+  redirect(`/admin/game/${gameTemplateId}/level/${(result.data as { id: string }).id}`);
 }
 
 /* -------------------------
@@ -91,17 +71,7 @@ export default async function AdminGameEditPage({ params }: PageProps) {
   const role = (session.user as any)?.role;
   if (role !== "ADMIN") redirect("/");
 
-  const game = await db.gameTemplate.findUnique({
-    where: { id: (await params).id },
-    include: {
-      levels: {
-        orderBy: { order: "asc" },
-        include: {
-          _count: { select: { words: true } },
-        },
-      },
-    },
-  });
+  const game = await apiGetOrNull<any>(`/admin/games/${(await params).id}`);
 
   if (!game) notFound();
 
@@ -190,7 +160,7 @@ export default async function AdminGameEditPage({ params }: PageProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              game.levels.map((lvl) => (
+              game.levels.map((lvl: any) => (
                 <TableRow key={lvl.id}>
                   <TableCell>
                     Nível {lvl.order}

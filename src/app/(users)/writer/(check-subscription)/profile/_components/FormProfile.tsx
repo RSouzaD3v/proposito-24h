@@ -53,7 +53,7 @@ export const FormProfile = (data: DataTypes) => {
         setLoading(true);
 
         try {
-            const res = await fetch("/api/writer/profile", {
+            const res = await fetch("/api/v1/writer/profile", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
@@ -62,7 +62,7 @@ export const FormProfile = (data: DataTypes) => {
             const data = await res.json();
 
             if (!res.ok) {
-                setError(data.error || "Erro ao registrar.");
+                setError(data.message || "Erro ao registrar.");
                 setLoading(false);
                 return;
             }

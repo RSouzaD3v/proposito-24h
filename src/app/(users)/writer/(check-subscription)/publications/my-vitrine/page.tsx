@@ -1,21 +1,15 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/ui/back-button";
 import { FiLock } from "react-icons/fi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 
 export default async function CoursesPage() {
-  const session = await getServerSession(authOptions);
+  const publications = await apiGetOrNull<any[]>("/writer/publications");
 
-  const userLogged = await db.user.findUnique({
-    where: { id: session?.user.id },
-  });
-
-  if (!userLogged || !userLogged.writerId) {
+  if (!publications) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">Acesso Negado</h2>
@@ -30,29 +24,16 @@ export default async function CoursesPage() {
     );
   }
 
-  const books = await db.publication.findMany({
-    where: {
-      type: "EBOOK",
-      status: "PUBLISHED",
-      writerId: userLogged.writerId,
-    },
-    select: {
-      id: true,
-      title: true,
-      coverUrl: true,
-      visibility: true, // FREE | PAID
-      category: true,
-      slug: true,       // caso tenha rota por slug; se não, troque o Link abaixo
-    },
-    orderBy: { title: "asc" },
-  });
+  const books = publications
+    .filter((book) => book.type === "EBOOK" && book.status === "PUBLISHED")
+    .sort((a, b) => a.title.localeCompare(b.title));
 
-  const booksByCategory = books.reduce((acc, book) => {
+  const booksByCategory = books.reduce<Record<string, any[]>>((acc, book) => {
     const category = book.category || "Outros";
     if (!acc[category]) acc[category] = [];
     acc[category].push(book);
     return acc;
-  }, {} as Record<string, typeof books>);
+  }, {});
 
   const categories = Object.entries(booksByCategory);
 
@@ -78,7 +59,7 @@ export default async function CoursesPage() {
 
           <Carousel opts={{ align: "start" }} className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
-              {books.map((book) => (
+              {books.map((book: any) => (
                 <CarouselItem
                   key={book.id}
                   className="pl-2 md:pl-4 basis-40 sm:basis-44 md:basis-48 lg:basis-52"

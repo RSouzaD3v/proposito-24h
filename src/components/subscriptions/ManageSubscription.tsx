@@ -30,7 +30,7 @@ export default function ManageSubscription({
     try {
       const res = await fetch(url, { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Erro");
+      if (!res.ok) throw new Error(data?.message || "Erro");
       if (data.accessUntil) {
         setMessage(
           `Cancelamento agendado. Você mantém acesso até ${new Date(data.accessUntil).toLocaleDateString("pt-BR")}.`
@@ -57,7 +57,7 @@ export default function ManageSubscription({
         ? `Cancelar renovação? Você mantém acesso até ${periodEndFmt}.`
         : "Confirmar cancelamento da assinatura?";
     if (window.confirm(text)) {
-      void call(`/api/reader-subscriptions/${writerId}/cancel`);
+      void call("/api/v1/billing/subscription/cancel");
     }
   };
 
@@ -89,7 +89,7 @@ export default function ManageSubscription({
             variant="secondary"
             size="sm"
             disabled={busy}
-            onClick={() => call(`/api/reader-subscriptions/${writerId}/resume`)}
+            onClick={() => call("/api/v1/billing/subscription/resume")}
           >
             Manter assinatura
           </Button>

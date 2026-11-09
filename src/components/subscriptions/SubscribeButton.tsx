@@ -27,13 +27,13 @@ export default function SubscribeButton({
   const handleClick = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/writer/${writerId}/subscribe`, {
+      const res = await fetch("/api/v1/billing/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId, successUrl, cancelUrl, cpfCnpj }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Falha ao iniciar checkout");
+      if (!res.ok) throw new Error(data?.message || "Falha ao iniciar checkout");
       window.location.href = data.url;
     } catch (err: any) {
       alert(err.message || "Erro ao redirecionar para o checkout.");

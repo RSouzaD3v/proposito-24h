@@ -36,7 +36,7 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
   });
 
   const load = async () => {
-    const res = await fetch(`/api/writer/${writerId}/plans`, { cache: "no-store" });
+    const res = await fetch("/api/v1/writer/plans", { cache: "no-store" });
     const data = (await res.json()) as Plan[];
     setItems(data);
   };
@@ -48,13 +48,13 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
   const createPlan = async () => {
     try {
       setBusy(true);
-      const res = await fetch(`/api/writer/${writerId}/plans`, {
+      const res = await fetch("/api/v1/writer/plans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form), // ✅ inclui isReaderVisible
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Erro ao criar plano");
+      if (!res.ok) throw new Error(data?.message || "Erro ao criar plano");
       await load();
       alert("Plano criado!");
     } catch (e: any) {
@@ -65,7 +65,7 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
   };
 
   const toggle = async (id: string, isActive: boolean) => {
-    const res = await fetch(`/api/writer/${writerId}/plans/${id}`, {
+    const res = await fetch(`/api/v1/writer/plans/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive }),
@@ -75,7 +75,7 @@ export default function WriterPlansManager({ writerId }: { writerId: string }) {
   };
 
   const toggleVisible = async (id: string, isReaderVisible: boolean) => {
-    const res = await fetch(`/api/writer/${writerId}/plans/${id}`, {
+    const res = await fetch(`/api/v1/writer/plans/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isReaderVisible }), // ✅ usa o valor recebido (true/false)

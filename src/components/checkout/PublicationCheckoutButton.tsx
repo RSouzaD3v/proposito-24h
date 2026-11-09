@@ -31,7 +31,7 @@ export function PublicationCheckoutButton({ publicationId, className }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/user/billing", { cache: "no-store" });
+        const res = await fetch("/api/v1/billing/profile", { cache: "no-store" });
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as { cpfCnpj?: string | null };
         if (data.cpfCnpj && !cancelled) {
@@ -49,13 +49,13 @@ export function PublicationCheckoutButton({ publicationId, className }: Props) {
   async function handleBuy() {
     try {
       setLoading(true);
-      const res = await fetch(`/api/checkout/publication/${publicationId}`, {
+      const res = await fetch(`/api/v1/billing/publications/${publicationId}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cpfCnpj }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error || "Falha ao iniciar checkout");
+      if (!res.ok) throw new Error((data as { message?: string }).message || "Falha ao iniciar checkout");
       const url = (data as { url?: string }).url;
       if (url) window.location.href = url;
     } catch (e) {

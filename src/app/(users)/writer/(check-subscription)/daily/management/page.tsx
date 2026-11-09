@@ -1,59 +1,16 @@
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
+import { apiGet } from "@/lib/api/server";
 import { SectionsDaily } from "./_components/SectionsDaily";
 import { WriterShell } from "@/components/ui/writer-shell";
 import { PageHeader } from "@/components/ui/page-header";
 
 export default async function DailyManagementPage() {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-        return (
-            <WriterShell maxWidth="4xl">
-                <h1>Você não está autenticado</h1>
-            </WriterShell>
-        );
-    }
-
-    const userWriter = await db.user.findUnique({
-        where: {
-            id: session.user.id
-        }
-    });
-
-    if (!userWriter || !userWriter.writerId) {
-        return (
-            <WriterShell maxWidth="4xl">
-                <h1>Usuário não encontrado</h1>
-            </WriterShell>
-        );
-    }
-
-    const quotes = await db.quote.findMany({
-        where: {
-            writerId: userWriter.writerId
-        },
-        orderBy: { createdAt: 'desc' }
-    });
-    const verses = await db.verse.findMany({
-        where: {
-            writerId: userWriter.writerId
-        },
-        orderBy: { createdAt: 'desc' }
-    });
-    const devotionals = await db.devotional.findMany({
-        where: {
-            writerId: userWriter.writerId
-        },
-        orderBy: { createdAt: 'desc' }
-    });
-    const prayers = await db.prayer.findMany({
-        where: {
-            writerId: userWriter.writerId
-        },
-        orderBy: { createdAt: 'desc' }
-    })
+    const list = (kind: string) => apiGet<any[]>(`/writer/daily/${kind}`);
+    const [quotes, verses, devotionals, prayers] = await Promise.all([
+        list("quote"),
+        list("verse"),
+        list("devotional"),
+        list("prayer"),
+    ]);
 
     return (
         <WriterShell maxWidth="4xl">

@@ -53,7 +53,7 @@ export default function DailyTabs({
         <TabsTrigger value="verses">Versículos</TabsTrigger>
         <TabsTrigger value="devotionals">Devocionais</TabsTrigger>
         <TabsTrigger value="quotes">Citações</TabsTrigger>
-        <TabsTrigger value="quotes">Orações</TabsTrigger>
+        <TabsTrigger value="prayers">Orações</TabsTrigger>
       </TabsList>
 
       {/* 🔽 Conteúdo */}

@@ -23,17 +23,17 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
         const fetchVerse = async () => {
             setLoadingData(true);
             const { verseId } = await params;
-            const response = await fetch(`/api/writer/daily/verse/edit/${verseId}`);
+            const response = await fetch(`/api/v1/writer/daily/verse/${verseId}`);
             if (!response.ok) {
                 throw new Error("Failed to fetch verse");
             }
-            const data = await response.json();
+            const data = { verse: await response.json() };
             setForm({
                 content: data.verse.content,
                 reference: data.verse.reference,
                 imageUrl: data.verse.imageUrl || "",
                 referenceDay: data.verse.referenceDay || 1,
-                date: data.verse.date ? new Date(data.verse.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+                date: new Date(data.verse.createdAt).toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
             });
             setLoadingData(false);
         };
@@ -50,7 +50,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ verseId: s
 
         try {
             const { verseId } = await params;
-            const response = await fetch(`/api/writer/daily/verse/edit/${verseId}`, {
+            const response = await fetch(`/api/v1/writer/daily/verse/${verseId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

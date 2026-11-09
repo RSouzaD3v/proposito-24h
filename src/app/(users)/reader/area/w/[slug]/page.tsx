@@ -1,9 +1,9 @@
-import { db } from "@/lib/db";
+import { apiGet, apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 import SubscribeWidget from "@/components/subscriptions/SubscribeWidget";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { readerSubscriptionIsActive } from "@/lib/readerSubscription";
 import { Button } from "@/components/ui/button";
 
 export default async function WriterPublicPage({
@@ -27,17 +27,9 @@ export default async function WriterPublicPage({
     );
   }
 
-  const userReader = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { writerId: true },
-  });
-
   const { slug } = await params;
-
-  const writer = await db.writer.findUnique({
-    where: { slug, id: userReader?.writerId || undefined },
-    select: { id: true, name: true, logoUrl: true, slug: true },
-  });
+  const profile = await apiGetOrNull<ReaderProfile>("/reader/profile");
+  const writer = profile?.writer?.slug === slug ? profile.writer : null;
 
   if (!writer) {
     return (
@@ -52,22 +44,7 @@ export default async function WriterPublicPage({
     );
   }
 
-  const readerSubscription = await db.readerSubscription.findUnique({
-    where: {
-      reader_writer_unique: {
-        readerId: session.user.id,
-        writerId: writer.id,
-      },
-    },
-    select: {
-      status: true,
-      currentPeriodEnd: true,
-      lifetime: true,
-      cancelAtPeriodEnd: true,
-    },
-  });
-
-  const isActive = readerSubscriptionIsActive(readerSubscription);
+  const { isActive } = await apiGet<{ isActive: boolean }>("/billing/subscription");
 
   if (isActive) {
     return (

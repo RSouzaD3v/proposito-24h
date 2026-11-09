@@ -43,7 +43,7 @@ export default function AdminPersonalizationPage() {
   async function loadData() {
     try {
       setLoading(true)
-      const res = await fetch('/api/personalization', { cache: 'no-store' })
+      const res = await fetch('/api/v1/admin/personalizations', { cache: 'no-store' })
       const data = await res.json()
       if (Array.isArray(data)) setPersonalizations(data)
     } catch (err) {
@@ -65,7 +65,7 @@ export default function AdminPersonalizationPage() {
 
     setSaving(true)
     try {
-      const res = await fetch('/api/personalization', {
+      const res = await fetch('/api/v1/admin/personalizations', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -87,7 +87,7 @@ export default function AdminPersonalizationPage() {
         loadData()
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Falha ao salvar.')
+        toast.error(err.message || 'Falha ao salvar.')
       }
     } catch (err) {
       console.error(err)
@@ -102,7 +102,7 @@ export default function AdminPersonalizationPage() {
     if (!confirm('Excluir esta personalização?')) return
 
     try {
-      const res = await fetch(`/api/personalization?writerId=${writerId}`, {
+      const res = await fetch(`/api/v1/admin/personalizations/${writerId}`, {
         method: 'DELETE',
       })
       const result = await res.json()

@@ -1,6 +1,6 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import ReaderDashboard from "./_components/ReaderDashboard";
 
@@ -23,45 +23,9 @@ export default async function ReaderAnalyticsPage({
     redirect("/reader/area");
   }
 
-  // Busca leitor + relações principais
-  const reader = await db.user.findUnique({
-    where: { id: readerId },
-    include: {
-      readerSubscriptions: {
-        orderBy: { createdAt: "desc" },
-      },
-      purchases: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          publication: {
-            select: { id: true, title: true, type: true, slug: true },
-          },
-        },
-      },
-      _count: {
-        select: {
-          purchases: true,
-          readerSubscriptions: true,
-          userCompletationQuote: true,
-          userCompletationDevotional: true,
-          userCompletationVerse: true,
-          userCompletationPrayer: true,
-        },
-      },
-    },
-  });
-
-  if (!reader) notFound();
-
-  // Se WRITER_ADMIN, garantir que o leitor pertence ao mesmo writer
-  if (role === "WRITER_ADMIN") {
-    if (!sessionWriterId || reader.writerId !== sessionWriterId) notFound();
-  }
-
-  // Carregar dados do writer (cores, nome) para header/contexto
-  const writer = reader.writerId
-    ? await db.writer.findUnique({ where: { id: reader.writerId } })
-    : null;
+  const details = await apiGetOrNull<any>(`/writer/analytics/readers/${readerId}`);
+  if (!details) notFound();
+  const { reader, writer } = details;
 
   return (
     <ReaderDashboard

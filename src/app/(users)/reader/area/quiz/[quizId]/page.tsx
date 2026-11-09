@@ -1,6 +1,6 @@
+import { apiPostOrNull } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,58 +24,13 @@ export default async function ReaderQuizPlayPage({
     );
   }
 
-  /**
-   * 1) Buscar quiz ativo
-   */
-  const quiz = await db.quiz.findFirst({
-    where: {
-      id: quizId,
-      active: true,
-    },
-    include: {
-      questions: {
-        orderBy: { order: "asc" },
-        include: {
-          options: true,
-        },
-      },
-    },
-  });
-
-  if (!quiz) notFound();
-
-  /**
-   * 2) Buscar sessão existente (COMPLETA OU NÃO)
-   */
-  let sessionQuiz = await db.quizSession.findFirst({
-    where: {
-      quizId: quiz.id,
-      userId: session.user.id,
-    },
-    include: {
-      answers: true,
-    },
-  });
-
-  /**
-   * 3) Se não existir, cria
-   */
-  if (!sessionQuiz) {
-    sessionQuiz = await db.quizSession.create({
-      data: {
-        quizId: quiz.id,
-        userId: session.user.id,
-      },
-      include: {
-        answers: true,
-      },
-    });
-  }
+  const opened = await apiPostOrNull<any>(`/reader/quizzes/${quizId}/session`);
+  if (!opened) notFound();
 
   /**
    * 4) Se já finalizou, bloqueia replay
    */
-  if (sessionQuiz.completed) {
+  if (opened.completed) {
     return (
       <div className="max-w-xl mx-auto mt-20 text-center space-y-4">
 
@@ -88,7 +43,7 @@ export default async function ReaderQuizPlayPage({
         </p>
 
         <p className="text-lg font-semibold">
-          Pontuação final: {sessionQuiz.score}
+          Pontuação final: {opened.score}
         </p>
 
         <Link href="/reader/area/quiz">
@@ -103,18 +58,11 @@ export default async function ReaderQuizPlayPage({
    */
   return (
     <QuizPlayer
-      quiz={{
-        id: quiz.id,
-        title: quiz.title,
-        pointsPerHit: quiz.pointsPerHit,
-      }}
-      questions={quiz.questions}
+      quiz={opened.quiz}
+      questions={opened.questions}
       session={{
-        id: sessionQuiz.id,
-        score: sessionQuiz.score,
-        answeredIds: sessionQuiz.answers.map(
-          (a) => a.questionId
-        ),
+        score: opened.score,
+        answeredIds: opened.answeredQuestionIds,
       }}
     />
   );

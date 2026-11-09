@@ -1,7 +1,5 @@
+import { apiFetch } from "@/lib/api/server";
 // app/writer/analytics/page.tsx
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -25,30 +23,6 @@ import StatusDonutChart from "./_charts/StatusDonutChart";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-function getDateRange(range?: string) {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  switch (range) {
-    case "7d":
-      start.setDate(end.getDate() - 6); // inclusivo
-      break;
-    case "90d":
-      start.setDate(end.getDate() - 89);
-      break;
-    case "365d":
-      start.setDate(end.getDate() - 364);
-      break;
-    case "30d":
-    default:
-      start.setDate(end.getDate() - 29);
-  }
-  start.setHours(0, 0, 0, 0);
-  return { start, end };
-}
-
-const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "PAST_DUE", "PAUSED"] as const;
-
 export default async function WriterAnalyticsPage({
   searchParams,
 }: {
@@ -56,67 +30,21 @@ export default async function WriterAnalyticsPage({
 }) {
   const sp = (await searchParams) ?? {};
   const range = sp.range ?? "30d";
-  const { start, end } = getDateRange(range);
 
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/login");
-
-  const user = await db.user.findUnique({ where: { id: session.user.id } });
-  if (!user?.writerId) return notFound();
-
-  const writer = await db.writer.findUnique({ where: { id: user.writerId } });
-  if (!writer) return notFound();
-
-  // ------------- KPIs & Aggregations -------------
-  // Receita e vendas por dia no período
-  const revenueByDay: { day: Date; revenue_cents: bigint; sales: number }[] = await db.$queryRaw`SELECT DATE_TRUNC('day', "createdAt") AS day, SUM(COALESCE("netAmount", "amount" - COALESCE("fees",0)))::bigint AS revenue_cents, COUNT(*)::int AS sales FROM "Purchase" WHERE "writerId" = ${writer.id} AND "status" = 'SUCCESS' AND "createdAt" >= ${start} AND "createdAt" < ${end} GROUP BY 1 ORDER BY 1`;
-
-  // Top publicações (por receita) no período
-  const topProducts: { id: string; title: string; revenue_cents: bigint; sales: number }[] = await db.$queryRaw`SELECT p."id" as id, p."title" as title, SUM(COALESCE(pr."netAmount", pr."amount" - COALESCE(pr."fees",0)))::bigint AS revenue_cents, COUNT(*)::int AS sales FROM "Purchase" pr JOIN "Publication" p ON pr."publicationId" = p."id" WHERE pr."writerId" = ${writer.id} AND pr."status" = 'SUCCESS' AND pr."createdAt" >= ${start} AND pr."createdAt" < ${end} GROUP BY p."id", p."title" ORDER BY revenue_cents DESC LIMIT 8`;
-
-  // Novos assinantes por dia no período
-  const newSubsByDay: { day: Date; new_subs: number }[] = await db.$queryRaw`SELECT DATE_TRUNC('day', "createdAt") AS day, COUNT(*)::int AS new_subs FROM "ReaderSubscription" WHERE "writerId" = ${writer.id} AND ("lifetime" = true OR "status" IN ('ACTIVE','TRIALING','PAST_DUE','PAUSED')) AND "createdAt" >= ${start} AND "createdAt" < ${end} GROUP BY 1 ORDER BY 1`;
-
-  // Distribuição de status de assinatura (geral)
-  const statusDist: { status: string; count: number }[] = await db.$queryRaw`SELECT "status"::text AS status, COUNT(*)::int AS count FROM "ReaderSubscription" WHERE "writerId" = ${writer.id} GROUP BY 1`;
-
-  // KPIs absolutos
-  const [
+  const analytics = await apiFetch<any>(`/writer/analytics?range=${encodeURIComponent(range)}`);
+  if (!analytics.ok) return notFound();
+  const {
+    revenueByDay,
+    topProducts,
+    newSubsByDay,
+    statusDist,
     totalReaders,
-    booksCount,
     subsCount,
-    salesAgg,
-  ] = await Promise.all([
-    db.user.count({ where: { writerId: writer.id, role: "CLIENT" } }),
-    db.publication.count({ where: { writerId: writer.id, type: "EBOOK", status: "PUBLISHED" } }),
-    db.readerSubscription.count({
-      where: {
-        writerId: writer.id,
-        OR: [
-          { lifetime: true },
-          { status: { in: [...ACTIVE_STATUSES] as any } },
-        ],
-      },
-    }),
-    db.purchase.aggregate({
-      _sum: {
-        amount: true,
-        fees: true,
-        netAmount: true,
-      },
-      _count: true,
-      where: {
-        writerId: writer.id,
-        status: "SUCCESS",
-        createdAt: { gte: start, lt: end },
-      },
-    }),
-  ]);
-
-  const totalSalesInPeriod = salesAgg._count;
-  const grossCents = Number(salesAgg._sum.amount ?? 0);
-  const feesCents = Number(salesAgg._sum.fees ?? 0);
-  const netCents = Number(salesAgg._sum.netAmount ?? 0) || Math.max(grossCents - feesCents, 0);
+    totalSalesInPeriod,
+    netCents,
+  } = analytics.data;
+  const start = new Date(analytics.data.start);
+  const end = new Date(analytics.data.end);
 
   return (
     <section className="min-h-screen w-full px-4 md:px-8 py-8">
@@ -150,7 +78,7 @@ export default async function WriterAnalyticsPage({
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <RevenueAreaChart data={revenueByDay.map(r => ({ day: new Date(r.day), revenue: Number(r.revenue_cents)/100, sales: r.sales }))} />
+              <RevenueAreaChart data={revenueByDay.map((r: any) => ({ day: new Date(r.day), revenue: Number(r.revenue_cents)/100, sales: r.sales }))} />
             </Suspense>
           </CardContent>
           <CardFooter className="text-xs text-muted-foreground">Valores líquidos (quando disponível) ou bruto – taxas subtraídas quando possível.</CardFooter>
@@ -177,7 +105,7 @@ export default async function WriterAnalyticsPage({
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <SalesBarChart data={topProducts.map(p => ({ title: p.title, revenue: Number(p.revenue_cents)/100, sales: p.sales }))} />
+              <SalesBarChart data={topProducts.map((p: any) => ({ title: p.title, revenue: Number(p.revenue_cents)/100, sales: p.sales }))} />
             </Suspense>
           </CardContent>
         </Card>
@@ -190,7 +118,7 @@ export default async function WriterAnalyticsPage({
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}> 
-              <SubscribersLineChart data={newSubsByDay.map(d => ({ day: new Date(d.day), newSubs: d.new_subs }))} />
+              <SubscribersLineChart data={newSubsByDay.map((d: any) => ({ day: new Date(d.day), newSubs: d.new_subs }))} />
             </Suspense>
           </CardContent>
         </Card>

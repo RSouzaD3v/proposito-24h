@@ -63,13 +63,13 @@ export default function TeacherBibleAI({
     setErrorMsg("");
     setAnswer("");
     try {
-      const res = await fetch("/api/ai/teacher-bible-ai", {
+      const res = await fetch("/api/v1/ai/teacher", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
 
-      let data: { text?: string; error?: unknown } = {};
+      let data: { text?: string; message?: unknown } = {};
       try {
         data = await res.json();
       } catch {
@@ -79,7 +79,7 @@ export default function TeacherBibleAI({
       }
 
       if (!res.ok) {
-        throw new Error(toFriendlyError(data?.error ?? data));
+        throw new Error(toFriendlyError(data?.message ?? data));
       }
 
       setAnswer(data.text || "");

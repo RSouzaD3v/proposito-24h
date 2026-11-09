@@ -4,7 +4,6 @@ import { useMemo, useState, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { submitQuizAnswerAction } from "../actions";
 import Link from "next/link";
 
 interface QuizPlayerProps {
@@ -22,7 +21,6 @@ interface QuizPlayerProps {
     }[];
   }[];
   session: {
-    id: string;
     score: number;
     answeredIds: string[];
   };
@@ -62,12 +60,12 @@ export function QuizPlayer({
     setSelectedOption(optionId);
 
     startTransition(async () => {
-      const res = await submitQuizAnswerAction({
-        sessionId: session.id,
-        quizId: quiz.id,
-        questionId: currentQuestion.id,
-        optionId,
+      const response = await fetch(`/api/v1/reader/quizzes/${quiz.id}/answers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId: currentQuestion.id, optionId }),
       });
+      const res = (await response.json()) as { correct?: boolean };
 
       setFeedback(res.correct ? "correct" : "wrong");
 

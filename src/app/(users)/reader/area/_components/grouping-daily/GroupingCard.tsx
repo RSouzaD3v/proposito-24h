@@ -14,10 +14,8 @@ export function GroupingCard({ grouping }: { grouping: GroupingDaily }) {
 
   const onSelect = () => {
     startTransition(async () => {
-      await fetch("/api/grouping/start", {
+      await fetch(`/api/v1/reader/groupings/${grouping.id}/start`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groupingDailyId: grouping.id }),
       });
 
       // 🔥 força reload pra layout recalcular

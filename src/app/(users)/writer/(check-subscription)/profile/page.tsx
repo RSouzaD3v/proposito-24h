@@ -1,5 +1,5 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { FormProfile } from "./_components/FormProfile";
 import { WriterShell } from "@/components/ui/writer-shell";
@@ -16,23 +16,7 @@ export default async function ProfilePage() {
         );
     }
 
-    const userWriter = await db.user.findUnique({
-        where: {
-            id: session.user.id
-        },
-        select: {
-            writer: {
-                select: {
-                    colorPrimary: true,
-                    colorSecondary: true,
-                    id: true,
-                    logoUrl: true,
-                    titleApp: true,
-                    titleHeader: true,
-                }
-            }
-        }
-    });
+    const userWriter = { writer: await apiGetOrNull<any>("/writer/profile") };
 
     if (!userWriter?.writer) {
         return (

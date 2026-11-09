@@ -59,7 +59,7 @@ export const PainelControllerAccess = ({ writerId }: { writerId: string }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const resp = await fetch(`/api/writer/${writerId}/access`);
+        const resp = await fetch("/api/v1/writer/access");
         const result = coerceAccess(await resp.json());
         setData(prev => ({ ...prev, ...result }));
       } catch (err) {
@@ -77,7 +77,7 @@ export const PainelControllerAccess = ({ writerId }: { writerId: string }) => {
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
-      await fetch(`/api/writer/${writerId}/access`, {
+      await fetch("/api/v1/writer/access", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(next),

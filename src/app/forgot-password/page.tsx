@@ -3,11 +3,12 @@ import { useState } from 'react';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const res = await fetch("/api/forgot-password", {
+        const res = await fetch("/api/v1/auth/forgot-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -15,11 +16,11 @@ export default function ForgotPassword() {
             body: JSON.stringify({ email }),
         });
 
-        if (res.ok) {
-            console.log("Password reset email sent");
-        } else {
-            console.error("Error sending password reset email");
-        }
+        setMessage(
+            res.ok
+                ? "Se o e-mail estiver cadastrado, você receberá um link em instantes."
+                : "Não foi possível enviar agora. Tente novamente."
+        );
     };
 
     return (
@@ -44,6 +45,7 @@ export default function ForgotPassword() {
                         Enviar link de redefinição
                     </button>
                 </form>
+                {message && <p role="status" className="text-sm mt-4 text-gray-600">{message}</p>}
             </div>
         </div>
     );

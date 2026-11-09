@@ -34,7 +34,7 @@ export function AuthWriterProvider({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        const response = await fetch("/api/writer/me");
+        const response = await fetch("/api/v1/writer/me");
         if (!response.ok) throw new Error("Network response was not ok");
 
         const data = await response.json();

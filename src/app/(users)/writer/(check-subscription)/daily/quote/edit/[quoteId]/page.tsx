@@ -25,9 +25,9 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
     (async () => {
       setLoadingData(true);
       const { quoteId } = await params;
-      const res = await fetch(`/api/writer/daily/quote/edit/${quoteId}`);
+      const res = await fetch(`/api/v1/writer/daily/quote/${quoteId}`);
       if (!res.ok) throw new Error("Failed to fetch quote");
-      const data = await res.json();
+      const data = { quote: await res.json() };
 
       // IMPORTANTE: derive a data como "yyyy-MM-dd" na TZ correta
       const dateStr = new Date(data.quote.createdAt).toLocaleDateString("en-CA", { timeZone: TZ });
@@ -55,13 +55,13 @@ export default function QuoteEditPage({ params }: { params: Promise<{ quoteId: s
     setLoading(true);
     try {
       const { quoteId } = await params;
-      const res = await fetch(`/api/writer/daily/quote/edit/${quoteId}`, {
+      const res = await fetch(`/api/v1/writer/daily/quote/${quoteId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form), // form.date é "yyyy-MM-dd"
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to save quote");
+      if (!res.ok) throw new Error(data?.message || "Failed to save quote");
       setSuccess(true);
     } catch (err) {
       console.error(err);

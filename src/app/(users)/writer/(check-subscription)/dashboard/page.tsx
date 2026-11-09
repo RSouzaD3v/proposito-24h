@@ -1,6 +1,6 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Logout from "../_components/Logout";
 import { ClipboardLink } from "./_components/ClipboardLink";
@@ -34,10 +34,7 @@ export default async function WriterDashboardPage() {
     redirect("/login");
   }
 
-  const writerId = session.user.writerId!;
-  const writer = await db.writer.findUnique({
-    where: { id: writerId },
-  });
+  const writer = await apiGetOrNull<{ slug: string }>("/writer/profile");
 
   return (
     <WriterShell maxWidth="4xl">

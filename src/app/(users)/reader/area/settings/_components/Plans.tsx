@@ -1,5 +1,6 @@
+import { apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 
@@ -14,14 +15,7 @@ export async function Plans() {
         )
     }
 
-    const userReader = await db.user.findUnique({
-        where: { id: session.user.id },
-        include: {
-            writer: {
-                select: { id: true, slug: true }
-            }
-        }
-    });
+    const userReader = await apiGetOrNull<ReaderProfile>("/reader/profile");
 
     return (
         <Link href={`/reader/area/w/${userReader?.writer?.slug}`}className="text-blue-600 hover:underline">

@@ -28,7 +28,7 @@ export default function DevotionalNewPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/writer/daily/devotional/new", {
+            const response = await fetch("/api/v1/writer/daily/devotional", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

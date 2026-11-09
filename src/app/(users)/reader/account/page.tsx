@@ -1,11 +1,11 @@
+import { apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 import Link from "next/link";
 import { BookOpen, ChevronRight, CreditCard, Settings, UserRound } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { Role } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
 import { BackButton } from "@/components/ui/back-button";
@@ -29,20 +29,9 @@ export default async function ReaderAccountPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/sign-in?from=/reader/account");
 
-  const user = await db.user.findFirst({
-    where: { id: session.user.id, role: Role.CLIENT },
-    select: {
-      name: true,
-      email: true,
-      createdAt: true,
-      freePlan: true,
-      writer: {
-        select: { name: true, slug: true },
-      },
-    },
-  });
+  const user = await apiGetOrNull<ReaderProfile>("/reader/profile");
 
-  if (!user) redirect("/sign-in?from=/reader/account");
+  if (!user || user.role !== "CLIENT") redirect("/sign-in?from=/reader/account");
 
   const label = initials(user.name, user.email);
   const memberSince = new Date(user.createdAt).toLocaleDateString("pt-BR", {

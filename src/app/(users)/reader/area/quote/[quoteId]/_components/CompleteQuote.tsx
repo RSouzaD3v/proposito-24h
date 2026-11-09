@@ -10,7 +10,7 @@ export const CompleteQuote = ({ quoteId }: { quoteId: string }) => {
     const handleCompleteQuote = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/reader/area/quote/${quoteId}`, {
+            const res = await fetch(`/api/v1/reader/content/quote/${quoteId}/complete`, {
                 method: "POST"
             });
             

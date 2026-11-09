@@ -1,56 +1,23 @@
-import { db } from "@/lib/db";
+import { apiFetch, apiGet } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
+import { notFound } from "next/navigation";
 import { CompleteDevotional } from "./_components/CompleteDevotional";
-import { authOptions } from "@/lib/authOption";
-import { getServerSession } from "next-auth";
 import { ScreenSubscription } from "../../_components/ScreenSubscription";
-import { getReaderContentGate } from "@/lib/readerAccessForWriter";
 import { BackButton } from "@/components/ui/back-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { resolveReaderBackHref } from "@/lib/readerBackHref";
 
 export default async function VerseDetails({ params, searchParams }: { params: Promise<{ devotionalId: string }>; searchParams: Promise<{ from?: string | string[] }> }) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-        return (<div>Você precisa estar logado para ver este devocional.</div>);
-    }
     const { devotionalId } = await params;
     const backHref = resolveReaderBackHref((await searchParams).from);
+    const result = await apiFetch<any>(`/reader/content/devotional/${devotionalId}`);
 
-    const devotional = await db.devotional.findUnique({
-        where: { id: devotionalId },
-        include: {
-            writer: {
-                select: {
-                    id: true,
-                    name: true,
-                    slug: true
-                }
-            }
-        }
-    });
-
-  // Usuário (precisamos do writer atual p/ regra de acesso)
-  const userReader = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      writer: { select: { id: true, name: true, slug: true } },
-    },
-  });
-
-  // Se sua regra exige que o usuário seja "writer" para ver o plano, mantenha:
-  if (!userReader || !userReader.writerId) {
-    return (
-      <div>
-        <h2>Acesso Negado</h2>
-        <p>Você precisa ser um escritor para acessar este plano de leitura.</p>
-      </div>
-    );
-  }
-
-  const gate = await getReaderContentGate(userReader.writerId, session.user.id, "devotional");
-  if (!gate.allowed) {
-    return <ScreenSubscription slug={userReader.writer?.slug || ""} />;
-  }
+    if (result.status === 403) {
+        const profile = await apiGet<ReaderProfile>("/reader/profile");
+        return <ScreenSubscription slug={profile.writer?.slug || ""} />;
+    }
+    if (!result.ok) notFound();
+    const devotional = result.data;
 
     return (
         <div style={{ backgroundImage: devotional?.imageUrl ? `url(${devotional?.imageUrl}), 

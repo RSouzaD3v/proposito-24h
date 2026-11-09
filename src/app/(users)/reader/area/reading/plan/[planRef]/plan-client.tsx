@@ -131,8 +131,8 @@ export default function PlanClient({
     });
 
     startTransition(async () => {
-      const res = await fetch("/api/reader/area/reading-progress", {
-        method: "POST",
+      const res = await fetch("/api/v1/reader/reading-progress", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId, dayId, completed: next }),
       });

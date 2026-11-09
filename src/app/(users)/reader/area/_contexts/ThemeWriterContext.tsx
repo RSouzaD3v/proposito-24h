@@ -51,7 +51,7 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
             }
             else {
                 try {
-                    const response = await fetch("/api/theme");
+                    const response = await fetch("/api/v1/reader/theme");
                     if (!response.ok) {
                         throw new Error("Failed to fetch theme");
                     }

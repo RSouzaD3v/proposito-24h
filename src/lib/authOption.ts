@@ -1,12 +1,7 @@
-// src/lib/authOptions.ts
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { db } from "./db";
 import type { AuthOptions, SessionStrategy } from "next-auth";
 
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(db),
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
     CredentialsProvider({
@@ -15,36 +10,20 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Senha", type: "password" },
       },
+      // A senha é validada pela API; o Next só guarda a sessão no cookie.
       authorize: async (credentials) => {
         if (!credentials?.email || !credentials.password) return null;
-
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-          include: { writer: { select: { id: true, slug: true } } },
+        const response = await fetch(`${process.env.API_URL}/v1/auth/web/credentials`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-internal-key": process.env.INTERNAL_API_KEY ?? "",
+          },
+          body: JSON.stringify({ email: credentials.email, password: credentials.password }),
+          cache: "no-store",
         });
-        if (!user?.password) return null;
-
-        const ok = await bcrypt.compare(credentials.password, user.password);
-        if (!ok) return null;
-
-        // await db.user.update({
-        //   where: {
-        //     id: user.id
-        //   },
-        //   data: {
-        //     lastAccess: new Date()
-        //   }
-        // });
-
-        // Retorna os campos que vamos propagar pro token
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name ?? undefined,
-          role: user.role,               // ADMIN | WRITER_ADMIN | CLIENT
-          writerId: user.writerId ?? null,
-          writerSlug: user.writer?.slug ?? null,
-        } as any;
+        if (!response.ok) return null;
+        return (await response.json()) as any;
       },
     }),
   ],

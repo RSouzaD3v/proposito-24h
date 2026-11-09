@@ -12,7 +12,7 @@ export default function WriterSubscriptionPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/user/billing", { cache: "no-store" });
+        const res = await fetch("/api/v1/billing/profile", { cache: "no-store" });
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as { cpfCnpj?: string | null };
         if (data.cpfCnpj && !cancelled) setCpfCnpj(data.cpfCnpj);
@@ -28,7 +28,7 @@ export default function WriterSubscriptionPage() {
   async function handleSubscribe() {
     setLoading(true);
 
-    const res = await fetch("/api/asaas/writer-subscription", {
+    const res = await fetch("/api/v1/billing/writer-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cpfCnpj }),
@@ -40,7 +40,7 @@ export default function WriterSubscriptionPage() {
     if (data.url) {
       window.location.href = data.url;
     } else {
-      alert("Erro: " + (data.error || "resposta inválida"));
+      alert("Erro: " + (data.message || "resposta inválida"));
     }
   }
 

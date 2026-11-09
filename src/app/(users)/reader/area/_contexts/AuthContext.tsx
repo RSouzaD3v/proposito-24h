@@ -17,14 +17,17 @@ export function AuthReaderProvider({ children }: { children: React.ReactNode }) 
         const fetchUser = async () => {
             setLoading(true);
             try {
-                const response = await fetch("/api/reader/me");
+                const response = await fetch("/api/v1/reader/me");
                 
                 if (!response.ok) {
                     redirect("/login");
                 }
 
                 const data = await response.json();
-                setUser(data.user);
+                if (data.role !== "CLIENT") {
+                    redirect("/login");
+                }
+                setUser(data);
             } catch (error) {
                 console.error("Error fetching user:", error);
                 redirect("/login");

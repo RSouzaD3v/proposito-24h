@@ -26,11 +26,11 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
         const fetchDevotional = async () => {
             setLoadingData(true);
             const { devotionalId } = await params;
-            const response = await fetch(`/api/writer/daily/devotional/edit/${devotionalId}`);
+            const response = await fetch(`/api/v1/writer/daily/devotional/${devotionalId}`);
             if (!response.ok) {
                 throw new Error("Failed to fetch devotional");
             }
-            const data = await response.json();
+            const data = { devotional: await response.json() };
             setForm({
                 title: data.devotional.title,
                 content: data.devotional.content,
@@ -38,7 +38,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
                 imageUrl: data.devotional.imageUrl || "",
                 audioUrl: data.devotional.audioUrl || "",
                 referenceDay: data.devotional.referenceDay || 1,
-                date: data.devotional.date || new Date().toISOString().split("T")[0],
+                date: new Date(data.devotional.createdAt).toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
             });
             setLoadingData(false);
         };
@@ -55,7 +55,7 @@ export default function DevotionalEditPage({ params }: { params: Promise<{ devot
 
         try {
             const { devotionalId } = await params;
-            const response = await fetch(`/api/writer/daily/devotional/edit/${devotionalId}`, {
+            const response = await fetch(`/api/v1/writer/daily/devotional/${devotionalId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 // app/admin/writer-subscriptions/page.tsx
-import { db } from "@/lib/db";
 import { requireAdmin } from "../_lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,16 +12,6 @@ import WriterSubsMRRAreaChart from "./_charts/WriterSubsMRRAreaChart";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-function rangeDates(range?: string) {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  const map: Record<string, number> = { "7d": 6, "30d": 29, "90d": 89, "365d": 364 };
-  start.setDate(end.getDate() - (map[range ?? "30d"] ?? 29));
-  start.setHours(0, 0, 0, 0);
-  return { start, end };
-}
-
 export default async function AdminWriterSubscriptions({
   searchParams,
 }: {
@@ -33,65 +23,14 @@ export default async function AdminWriterSubscriptions({
   const q = sp.q?.trim() || "";
   const status = sp.status ?? "all";
   const range = sp.range ?? "30d";
-  const { start, end } = rangeDates(range);
-
+  const query = new URLSearchParams({ status, range, ...(q ? { q } : {}) });
+  const data = await apiGet<any>(`/admin/writer-subscriptions?${query}`);
+  const { activeCount, mrrNow, newInPeriod, canceledInPeriod } = data;
+  const mrrSeries: any[] = data.mrrSeries;
+  const subscriptions: any[] = data.subscriptions;
+  const start = new Date(data.start);
+  const end = new Date(data.end);
   const now = new Date();
-
-  // KPIs
-  const [activeCount, mrrNowAgg, newInPeriod, canceledInPeriod] = await Promise.all([
-    db.writerSubscription.count({
-      where: { OR: [{ endedAt: null }, { endedAt: { gt: now } }] },
-    }),
-   db.writerSubscription.aggregate({
-     _sum: { amount: true },
-     where: { OR: [{ endedAt: null }, { endedAt: { gt: now } }] },
-   }),
-   db.writerSubscription.count({ where: { startedAt: { gte: start, lt: end } } }),
-   db.writerSubscription.count({ where: { endedAt: { gte: start, lt: end } } }),
- ]);
-
-
- const mrrNow = Number(mrrNowAgg._sum.amount ?? 0) / 100;
-
-  // Série MRR por mês (últimos 12 meses) – ativa no mês = startedAt < mês+1 e (endedAt null ou >= mês)
-  const mrrSeries = await db.$queryRaw<Array<{ month: Date; mrr: number }>>`
-   WITH months AS (
-     SELECT generate_series(
-       date_trunc('month', now()) - interval '11 months',
-       date_trunc('month', now()),
-       interval '1 month'
-     ) AS month
-   )
-   SELECT m.month::date AS month,
-           COALESCE(SUM(ws."amount")::numeric, 0) AS mrr
-     FROM months m
-     LEFT JOIN "WriterSubscription" ws
-       ON ws."startedAt" < (m.month + interval '1 month')
-      AND (ws."endedAt" IS NULL OR ws."endedAt" >= m.month)
-    GROUP BY m.month
-    ORDER BY m.month;
- `;
-
-  // Filtro de listagem
-  const where: any = {};
-  if (status === "active") where.OR = [{ endedAt: null }, { endedAt: { gt: now } }];
-  if (status === "ended") where.endedAt = { lte: now };
-  if (q) {
-    where.OR = [
-      ...(where.OR ?? []),
-      { asaasSubscriptionId: { contains: q, mode: "insensitive" } },
-      { stripeId: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-      { writer: { name: { contains: q, mode: "insensitive" } } },
-    ];
-  }
-
-  const subscriptions = await db.writerSubscription.findMany({
-    where,
-    include: { writer: { select: { id: true, name: true, slug: true } } },
-    orderBy: { startedAt: "desc" },
-    take: 100,
-  });
 
   return (
     <section className="space-y-6">
@@ -190,7 +129,7 @@ export default async function AdminWriterSubscriptions({
             </TableHeader>
             <TableBody>
               {subscriptions.map((s) => {
-                const active = !s.endedAt || s.endedAt > now;
+                const active = !s.endedAt || new Date(s.endedAt) > now;
                 return (
                   <TableRow key={s.id}>
                     <TableCell>

@@ -30,7 +30,7 @@ export default function MySubscriptions({ writerId }: { writerId?: string }) {
     (async () => {
       try {
         setErr(null);
-        const res = await fetch("/api/reader-subscriptions/me", { cache: "no-store" });
+        const res = await fetch("/api/v1/billing/subscriptions", { cache: "no-store" });
         const ct = res.headers.get("content-type") || "";
         if (!res.ok || !ct.includes("application/json")) {
           const text = await res.text();

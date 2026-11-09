@@ -1,5 +1,5 @@
+import { apiGet } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
@@ -22,14 +22,7 @@ export default async function GroupDaily() {
     );
   }
 
-  const groupingDailies = await db.groupingDaily.findMany({
-    where: {
-      writerId: session.user.writerId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const groupingDailies = await apiGet<any[]>("/writer/groupings");
 
   return (
     <WriterShell maxWidth="4xl">
@@ -57,7 +50,7 @@ export default async function GroupDaily() {
 
       {groupingDailies.length > 0 && (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {groupingDailies.map((group) => (
+          {groupingDailies.map((group: any) => (
             <GlassCard key={group.id} strong padding="none" className="overflow-hidden">
               {group.imageUrl && (
                 <div className="h-40 w-full overflow-hidden">

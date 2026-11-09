@@ -78,7 +78,7 @@ export default function S3AudioUploader({
           : undefined;
 
       // 1) presign — TEM que usar o MESMO ContentType que iremos enviar no PUT
-      const presignRes = await fetch("/api/uploads/presign", {
+      const presignRes = await fetch("/api/v1/uploads/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -89,7 +89,7 @@ export default function S3AudioUploader({
       });
 
       const data = await presignRes.json();
-      if (!presignRes.ok) throw new Error(data.error || "Erro ao gerar URL");
+      if (!presignRes.ok) throw new Error(data.message || "Erro ao gerar URL");
 
       // 2) PUT no S3
       await putWithProgress(data.url, file, fixedType, (pct) =>

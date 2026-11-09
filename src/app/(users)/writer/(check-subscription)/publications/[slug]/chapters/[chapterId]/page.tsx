@@ -46,9 +46,9 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
             const { slug, chapterId } = await params;
             setSlug(slug);
             try {
-                const res = await fetch(`/api/writer/publications/${slug}/chapters/${chapterId}`);
+                const res = await fetch(`/api/v1/writer/publications/${slug}/chapters/${chapterId}`);
                 if (!res.ok) return;
-                const data = await res.json();
+                const data = { chapter: await res.json() };
                 setChapter(data.chapter);
                 setTitle(data.chapter.title);
                 setSubtitle(data.chapter.subtitle);
@@ -69,7 +69,7 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
         e.preventDefault();
         const { slug, chapterId } = await params;
         try {
-            const res = await fetch(`/api/writer/publications/${slug}/chapters/${chapterId}`, {
+            const res = await fetch(`/api/v1/writer/publications/${slug}/chapters/${chapterId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export default function ChapterPage({ params }: { params: Promise<{ slug: string
                 }),
             });
             if (!res.ok) return;
-            const data = await res.json();
+            const data = { chapter: await res.json() };
             setChapter(data.chapter);
             router.replace(`/writer/publications/${slug}/chapters`);
         } catch (e) {

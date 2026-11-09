@@ -1,6 +1,10 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Devotional, Prayer, Quote, Verse } from "@prisma/client";
 import Link from "next/link";
+
+type Devotional = any;
+type Prayer = any;
+type Quote = any;
+type Verse = any;
 
 interface SectionsDailyTypes {
   quotes: Quote[];

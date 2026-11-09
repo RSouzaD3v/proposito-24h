@@ -1,8 +1,8 @@
+import { apiGetOrNull, apiSend } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import Link from "next/link";
@@ -57,27 +57,7 @@ async function updateLevel(formData: FormData) {
     .map((l) => l.trim().toUpperCase())
     .filter(Boolean);
 
-  const level = await db.gameLevel.findUnique({
-    where: { id: levelId },
-  });
-
-  if (!level) return;
-
-  let layout = level.layout as any[];
-
-  // 🔒 garante layout válido
-  if (!Array.isArray(layout) || layout.length !== letters.length) {
-    layout = generateCircularLayout(letters.length);
-  }
-
-  await db.gameLevel.update({
-    where: { id: levelId },
-    data: {
-      order,
-      letters,
-      layout,
-    },
-  });
+  await apiSend("PUT", `/admin/levels/${levelId}`, { order, letters });
 
   revalidatePath("/admin/game");
 }
@@ -87,18 +67,7 @@ async function applyDefaultLayout(formData: FormData) {
 
   const levelId = String(formData.get("levelId"));
 
-  const level = await db.gameLevel.findUnique({
-    where: { id: levelId },
-  });
-
-  if (!level) return;
-
-  const layout = generateCircularLayout(level.letters.length);
-
-  await db.gameLevel.update({
-    where: { id: levelId },
-    data: { layout },
-  });
+  await apiSend("POST", `/admin/levels/${levelId}/default-layout`);
 
   revalidatePath("/admin/game");
 }
@@ -114,13 +83,7 @@ async function addWord(formData: FormData) {
 
   if (!word) return;
 
-  await db.gameWord.create({
-    data: {
-      levelId,
-      word,
-      bonus,
-    },
-  });
+  await apiSend("POST", `/admin/levels/${levelId}/words`, { word, bonus });
 
   revalidatePath("/admin/game");
 }
@@ -129,7 +92,7 @@ async function deleteWord(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id"));
-  await db.gameWord.delete({ where: { id } });
+  await apiSend("DELETE", `/admin/words/${id}`);
 
   revalidatePath("/admin/game");
 }
@@ -153,13 +116,7 @@ export default async function AdminGameLevelPage({ params }: PageProps) {
 
   const { id, levelId } = await params;
 
-  const level = await db.gameLevel.findUnique({
-    where: { id: levelId },
-    include: {
-      words: true,
-      gameTemplate: true,
-    },
-  });
+  const level = await apiGetOrNull<any>(`/admin/levels/${levelId}`);
 
   if (!level) notFound();
 
@@ -277,7 +234,7 @@ export default async function AdminGameLevelPage({ params }: PageProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              level.words.map((w) => (
+              level.words.map((w: any) => (
                 <TableRow key={w.id}>
                   <TableCell className="font-mono">{w.word}</TableCell>
                   <TableCell className="text-center">

@@ -1,8 +1,8 @@
+import { apiGet, apiSend } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/lib/db";
 import { authOptions } from "@/lib/authOption";
 
 import Link from "next/link";
@@ -28,10 +28,7 @@ async function toggleGameActive(formData: FormData) {
 
   const nextActive = active !== "true";
 
-  await db.gameTemplate.update({
-    where: { id },
-    data: { active: nextActive },
-  });
+  await apiSend("PUT", `/admin/games/${id}`, { active: nextActive });
 
   revalidatePath("/admin/game");
 }
@@ -45,23 +42,7 @@ export default async function AdminGamePage() {
   const role = (session.user as any)?.role;
   if (role !== "ADMIN") redirect("/");
 
-  const games = await db.gameTemplate.findMany({
-    orderBy: [{ active: "desc" }, { createdAt: "desc" }],
-    include: {
-      _count: {
-        select: {
-          levels: true,
-          playerGames: true,
-        },
-      },
-      levels: {
-        select: {
-          id: true,
-          _count: { select: { words: true } },
-        },
-      },
-    },
-  });
+  const games = await apiGet<any[]>("/admin/games");
 
   const totalGames = games.length;
   const activeGames = games.filter((g) => g.active).length;
@@ -119,7 +100,7 @@ export default async function AdminGamePage() {
             ) : (
               games.map((g) => {
                 const totalWords = g.levels.reduce(
-                  (acc, lvl) => acc + (lvl._count?.words || 0),
+                  (acc: number, lvl: any) => acc + (lvl._count?.words || 0),
                   0
                 );
 

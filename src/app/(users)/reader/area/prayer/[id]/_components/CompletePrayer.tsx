@@ -10,7 +10,7 @@ export const CompletePrayer = ({ prayerId }: { prayerId: string }) => {
     const handleCompletePrayer = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/reader/area/prayer/${prayerId}`, {
+            const res = await fetch(`/api/v1/reader/content/prayer/${prayerId}/complete`, {
                 method: "POST"
             });
             

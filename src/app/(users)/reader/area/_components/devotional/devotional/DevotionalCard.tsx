@@ -1,17 +1,10 @@
+import type { HomeCard } from "@/lib/api/types";
 // app/reader/area/_components/devotional/devotional/DevotionalCard.tsx
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaCheck, FaComments } from "react-icons/fa";
 import AudioButton from "./AudioButton";
-
-interface DayRange {
-  gte: Date;
-  lt: Date;
-}
 
 interface DevotionalCardProps {
   colors: {
@@ -24,34 +17,10 @@ interface DevotionalCardProps {
     independenteColor1: string;
     independenteColor2: string;
   };
-  dayRange: DayRange;
+  item: HomeCard | null;
 }
 
-export const DevotionalCard = async ({
-  colors,
-  dayRange,
-}: DevotionalCardProps) => {
-  const session = await getServerSession(authOptions);
-  if (!session) return null;
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, writerId: true },
-  });
-
-  if (!user?.writerId) return null;
-
-  const devotional = await db.devotional.findFirst({
-    where: {
-      writerId: user.writerId,
-      createdAt: {
-        gte: dayRange.gte,
-        lt: dayRange.lt,
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
+export const DevotionalCard = ({ colors, item: devotional }: DevotionalCardProps) => {
   if (!devotional) {
     return (
       <Card className="bg-linear-to-r from-blue-50 to-blue-100">
@@ -62,11 +31,7 @@ export const DevotionalCard = async ({
     );
   }
 
-  const userCompletationDevotional =
-    await db.userCompletationDevotional.findFirst({
-      where: { userId: user.id, devotionalId: devotional.id },
-      select: { id: true },
-    });
+  const userCompletationDevotional = devotional.completed;
 
   return (
     <Card style={{ backgroundColor: colors.background }}>
@@ -104,7 +69,7 @@ export const DevotionalCard = async ({
 
         {/* Botão Ouvir/Pausar – só aparece se existir audioUrl */}
         <AudioButton
-          src={devotional.audioUrl}
+          src={devotional.audioUrl ?? null}
           style={{
             background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
             color: colors.buttonText,

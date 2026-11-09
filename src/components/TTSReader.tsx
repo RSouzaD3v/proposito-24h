@@ -78,7 +78,7 @@ export default function TTSReader({
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    const res = await fetch("/api/tts/stream", {
+    const res = await fetch("/api/v1/tts/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       signal: abortRef.current.signal,

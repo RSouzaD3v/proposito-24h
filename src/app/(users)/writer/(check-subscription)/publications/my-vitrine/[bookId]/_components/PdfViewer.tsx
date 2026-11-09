@@ -18,11 +18,7 @@ export default function PdfViewer({
   const [triedAuto, setTriedAuto] = useState(false);
   const canShare = typeof navigator !== "undefined" && !!navigator.share;
 
-  // Usa a rota do seu domínio para não expor a URL direta (e melhorar UX)
-  const nativeUrl = useMemo(
-    () => `/api/pdf-redirect?u=${encodeURIComponent(url)}`,
-    [url]
-  );
+  const nativeUrl = url;
 
   // Redireciona automaticamente (abre o viewer nativo no mesmo tab)
   useEffect(() => {

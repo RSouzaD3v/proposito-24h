@@ -34,7 +34,7 @@ export default function RegistrarEscritorPage() {
         setLoading(true);
 
         try {
-            const res = await fetch("/api/auth/register-writer", {
+            const res = await fetch("/api/v1/auth/web/register-writer", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
@@ -43,7 +43,7 @@ export default function RegistrarEscritorPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                setError(data.error || "Erro ao registrar.");
+                setError(data.message || "Erro ao registrar.");
                 setLoading(false);
                 return;
             }

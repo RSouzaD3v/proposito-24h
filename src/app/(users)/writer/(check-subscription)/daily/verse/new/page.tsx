@@ -27,7 +27,7 @@ export default function VerseNewPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/writer/daily/verse/new", {
+            const response = await fetch("/api/v1/writer/daily/verse", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -4,7 +4,6 @@ import { useState, useTransition, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { completeLevel } from "../actions";
 import Link from "next/link";
 
 interface Word {
@@ -18,9 +17,8 @@ interface Point {
 }
 
 interface WordConnectPlayProps {
-  gameId: string;
+  slug: string;
   levelId: string;
-  playerGameId: string;
   letters: string[];
   layout: Point[];
   words: Word[];
@@ -78,11 +76,10 @@ export default function WordConnectPlay(props: WordConnectPlayProps) {
 
   function handleCompleteLevel() {
     startTransition(async () => {
-      await completeLevel({
-        playerGameId: props.playerGameId,
-        levelId: props.levelId,
-        foundWords,
-        score: foundWords.length * 10,
+      await fetch(`/api/v1/reader/games/${props.slug}/levels/${props.levelId}/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ foundWords, score: foundWords.length * 10 }),
       });
 
       window.location.reload();
@@ -112,7 +109,7 @@ export default function WordConnectPlay(props: WordConnectPlayProps) {
   ======================= */
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
-        <Link href={"/reader/area/game"} className="bg-black hover:bg-gray-800 text-white p-2 rounded-sm">
+        <Link href={"/reader/area/games"} className="bg-black hover:bg-gray-800 text-white p-2 rounded-sm">
             Voltar
         </Link>
       {/* HUD */}

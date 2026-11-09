@@ -8,7 +8,7 @@ export function GroupingCompletionGate() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/grouping/status")
+    fetch("/api/v1/reader/groupings/status")
       .then(res => res.json())
       .then(data => {
         if (data.canComplete) {
@@ -32,7 +32,7 @@ export function GroupingCompletionGate() {
 
         <button
           onClick={async () => {
-            await fetch("/api/grouping/complete", {
+            await fetch("/api/v1/reader/groupings/complete", {
               method: "POST",
             });
             window.location.reload();

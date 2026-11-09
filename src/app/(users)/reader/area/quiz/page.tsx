@@ -1,6 +1,6 @@
+import { apiGet } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,25 +17,7 @@ export default async function ReaderQuizPage() {
     );
   }
 
-  /**
-   * 🔹 Buscar quizzes ativos da aplicação
-   */
-  const quizzes = await db.quiz.findMany({
-    where: {
-      active: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      coverUrl: true,
-      timeLimit: true,
-      pointsPerHit: true,
-    },
-  });
+  const quizzes = await apiGet<any[]>("/reader/quizzes");
 
   if (quizzes.length === 0) {
     return (

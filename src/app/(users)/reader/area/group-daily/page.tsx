@@ -1,6 +1,6 @@
+import { apiGet } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -20,22 +20,7 @@ export default async function ReaderGroupDailyPage() {
   /**
    * 1) Buscar agrupamentos ativos do writer
    */
-  const groupings = await db.groupingDaily.findMany({
-    where: {
-      writerId: session.user.writerId,
-      active: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      imageUrl: true,
-      createdAt: true,
-    },
-  });
+  const groupings = await apiGet<any[]>("/reader/groupings");
 
   if (groupings.length === 0) {
     return (

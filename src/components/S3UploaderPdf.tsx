@@ -22,7 +22,7 @@ export default function S3UploaderPdf({ folder, onUploaded }: Props) {
 
     try {
       // 1) pede URL pré-assinada
-      const presignRes = await fetch("/api/uploads/ebook", {
+      const presignRes = await fetch("/api/v1/uploads/ebook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,7 +33,7 @@ export default function S3UploaderPdf({ folder, onUploaded }: Props) {
       });
 
       const data = await presignRes.json();
-      if (!presignRes.ok) throw new Error(data.error || "Erro ao gerar URL");
+      if (!presignRes.ok) throw new Error(data.message || "Erro ao gerar URL");
 
       // 2) faz PUT direto pro S3 com XHR (pra ter progresso)
       await putWithProgress(data.url, file, file.type, (pct) => setProgress(pct));

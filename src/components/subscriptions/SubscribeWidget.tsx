@@ -69,8 +69,8 @@ export default function SubscribeWidget({
     (async () => {
       try {
         setError(null);
-        const pRes = await fetch(`/api/writer/${writerId}/plans`, { cache: "no-store" });
-        const sRes = await fetch(`/api/reader-subscriptions/${writerId}/status`, { cache: "no-store" });
+        const pRes = await fetch("/api/v1/reader/subscription-plans", { cache: "no-store" });
+        const sRes = await fetch("/api/v1/billing/subscription", { cache: "no-store" });
 
         if (!pRes.ok) throw new Error(`Falha ao carregar planos (HTTP ${pRes.status})`);
         const p = await readJsonSafe(pRes);
@@ -90,7 +90,7 @@ export default function SubscribeWidget({
         setPlans(Array.isArray(p) ? p : []);
         setSelected(Array.isArray(p) && p[0]?.id ? p[0].id : null);
 
-        const bRes = await fetch("/api/user/billing", { cache: "no-store" });
+        const bRes = await fetch("/api/v1/billing/profile", { cache: "no-store" });
         if (bRes.ok && mounted) {
           const b = await bRes.json().catch(() => ({}));
           if (typeof b?.cpfCnpj === "string" && b.cpfCnpj) {

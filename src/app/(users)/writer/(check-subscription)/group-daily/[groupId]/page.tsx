@@ -1,5 +1,5 @@
+import { apiGetOrNull } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/ui/back-button";
@@ -25,78 +25,16 @@ export default async function GroupDailyDetailPage({ params }: PageProps) {
     );
   }
 
-  // 1) Grouping (com ids já conectados)
-  const grouping = await db.groupingDaily.findFirst({
-    where: {
-      id: groupId,
-      writerId: session.user.writerId,
-    },
-    include: {
-      devotionals: { select: { id: true } },
-      quotes: { select: { id: true } },
-      prayers: { select: { id: true } },
-      verses: { select: { id: true } },
-    },
-  });
-
-  if (!grouping) notFound();
-
-  // 2) Buscar todos os conteúdos do writer
-  const [devotionals, quotes, prayers, verses] = await Promise.all([
-    db.devotional.findMany({
-      where: { writerId: session.user.writerId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        verse: true,
-        imageUrl: true,
-        createdAt: true,
-      },
-    }),
-    db.quote.findMany({
-      where: { writerId: session.user.writerId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        nameAuthor: true,
-        content: true,
-        verse: true,
-        imageUrl: true,
-        createdAt: true,
-      },
-    }),
-    db.prayer.findMany({
-      where: { writerId: session.user.writerId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        imageUrl: true,
-        createdAt: true,
-      },
-    }),
-    db.verse.findMany({
-      where: { writerId: session.user.writerId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        content: true,
-        reference: true,
-        imageUrl: true,
-        createdAt: true,
-      },
-    }),
-  ]);
+  const manager = await apiGetOrNull<any>(`/writer/groupings/${groupId}`);
+  if (!manager) notFound();
+  const { grouping, devotionals, quotes, prayers, verses } = manager;
 
   // 3) Sets para UI saber o que já está adicionado
   const groupedIds = {
-    devotionals: new Set(grouping.devotionals.map((d) => d.id)),
-    quotes: new Set(grouping.quotes.map((q) => q.id)),
-    prayers: new Set(grouping.prayers.map((p) => p.id)),
-    verses: new Set(grouping.verses.map((v) => v.id)),
+    devotionals: new Set<string>(grouping.devotionals.map((d: { id: string }) => d.id)),
+    quotes: new Set<string>(grouping.quotes.map((q: { id: string }) => q.id)),
+    prayers: new Set<string>(grouping.prayers.map((p: { id: string }) => p.id)),
+    verses: new Set<string>(grouping.verses.map((v: { id: string }) => v.id)),
   };
 
   return (

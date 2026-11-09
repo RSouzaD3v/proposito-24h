@@ -1,8 +1,6 @@
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOption";
-import { hasActiveSubscription } from "@/lib/subscription";
 import SubscribeWidget from "@/components/subscriptions/SubscribeWidget";
+import { apiGet, apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 
 export default async function PremiumLayout({
   children,
@@ -12,28 +10,15 @@ export default async function PremiumLayout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const session = await getServerSession(authOptions);
-  const writer = await db.writer.findUnique({
-    where: { slug: slug },
-    select: { id: true, name: true },
-  });
+  const profile = await apiGetOrNull<ReaderProfile>("/reader/profile");
+  const writer = profile?.writer?.slug === slug ? profile.writer : null;
 
   if (!writer) {
     return <main className="max-w-3xl mx-auto p-6">Escritor não encontrado.</main>;
   }
 
-  if (!session) {
-    return (
-      <main className="max-w-3xl mx-auto p-6 space-y-4">
-        <h1 className="text-xl font-semibold">Conteúdo premium</h1>
-        <p>Faça login para continuar.</p>
-        <SubscribeWidget writerId={writer.id} />
-      </main>
-    );
-  }
-
-  const ok = await hasActiveSubscription(session.user.id, writer.id);
-  if (!ok) {
+  const { isActive } = await apiGet<{ isActive: boolean }>("/billing/subscription");
+  if (!isActive) {
     return (
       <main className="max-w-3xl mx-auto p-6 space-y-4">
         <h1 className="text-xl font-semibold">{writer.name} • Premium</h1>

@@ -68,7 +68,7 @@ export default function WriterPublicationCreatePage() {
     const hasPdf = Boolean(form.pdfUrl);
 
     try {
-      const res = await fetch("/api/writer/publications/create", {
+      const res = await fetch("/api/v1/writer/publications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

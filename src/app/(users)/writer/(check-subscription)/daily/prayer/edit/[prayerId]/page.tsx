@@ -25,11 +25,11 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
         const fetchPrayer = async () => {
             setLoadingData(true);
             const { prayerId } = await params;
-            const response = await fetch(`/api/writer/daily/prayer/edit/${prayerId}`);
+            const response = await fetch(`/api/v1/writer/daily/prayer/${prayerId}`);
             if (!response.ok) {
                 throw new Error("Failed to fetch prayer");
             }
-            const data = await response.json();
+            const data = { prayer: await response.json() };
             setForm({
                 content: data.prayer.content,
                 title: data.prayer.title,
@@ -53,7 +53,7 @@ export default function VerseEditPage({ params }: { params: Promise<{ prayerId: 
 
         try {
             const { prayerId } = await params;
-            const response = await fetch(`/api/writer/daily/prayer/edit/${prayerId}`, {
+            const response = await fetch(`/api/v1/writer/daily/prayer/${prayerId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

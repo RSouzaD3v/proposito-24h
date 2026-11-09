@@ -122,13 +122,13 @@ export default function ReaderDashboard({
     }
     try {
       setSaving(true);
-      const res = await fetch(`/api/writer/readers/${reader.id}/reset-password`, {
+      const res = await fetch(`/api/v1/writer/readers/${reader.id}/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newPassword: newPwd }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Falha ao atualizar senha");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message || "Falha ao atualizar senha");
       setSuccess("Senha atualizada com sucesso.");
       setNewPwd("");
       setNewPwd2("");

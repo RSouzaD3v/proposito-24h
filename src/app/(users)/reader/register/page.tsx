@@ -1,5 +1,5 @@
 // app/reader/register/page.tsx
-import { db } from "@/lib/db";
+import { apiGetOrNull } from "@/lib/api/server";
 import { headers } from "next/headers";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -27,18 +27,11 @@ export default async function ReaderRegisterPage() {
     return hostname.replace(`.${baseDomain}`, ""); // ex.: escritor.example.com → escritor
   })();
 
-  const writer = await db.writer.findFirst({
-    where: {
-      domains: {
-        some: { subdomain }
-      }
-    },
-    select: {
-      id: true,
-      name: true,
-      logoUrl: true,
-    }
-  });
+  const writer = subdomain
+    ? await apiGetOrNull<{ id: string; slug: string; name: string; logoUrl: string | null }>(
+        `/public/writers/by-subdomain/${encodeURIComponent(subdomain)}`,
+      )
+    : null;
 
   if (!writer) {
     return (
@@ -81,7 +74,7 @@ export default async function ReaderRegisterPage() {
         </div>
 
         <GlassCard strong>
-            <ReaderRegister writer={{ id: writer.id, name: writer.name }} />
+            <ReaderRegister writer={{ slug: writer.slug, name: writer.name }} />
             <Separator className="my-6" />
             <p className="text-center text-xs text-[var(--liquid-muted)]">
               Ao continuar, você concorda com nossa 

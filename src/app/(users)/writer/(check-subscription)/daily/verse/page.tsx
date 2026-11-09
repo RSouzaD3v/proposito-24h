@@ -1,6 +1,4 @@
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
+import { apiGet } from "@/lib/api/server";
 import Link from "next/link";
 import { WriterShell } from "@/components/ui/writer-shell";
 import { PageHeader } from "@/components/ui/page-header";
@@ -9,22 +7,7 @@ import { CreateButton } from "@/components/ui/create-button";
 import { Button } from "@/components/ui/button";
 
 export default async function VersePage() {
-    const session = await getServerSession(authOptions);
-    if (!session) return null;
-
-    const user = await db.user.findUnique({ where: { id: session.user.id } });
-    if (!user?.writerId) return null;
-
-    const today = new Date();
-    const start = new Date(today.setHours(0, 0, 0, 0));
-    const end = new Date(today.setHours(23, 59, 59, 999));
-
-    const verse = await db.verse.findFirst({
-        where: {
-            writerId: user.writerId,
-            createdAt: { gte: start, lt: end }
-        }
-    });
+    const { item: verse } = await apiGet<{ item: any }>("/writer/daily/verse/today");
 
     return (
         <WriterShell maxWidth="xl">

@@ -1,6 +1,6 @@
+import { apiGet } from "@/lib/api/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -18,25 +18,7 @@ export default async function AdminQuizPage() {
     notFound();
   }
 
-  // 🔹 Buscar quizzes da aplicação
-  const quizzes = await db.quiz.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      active: true,
-      createdAt: true,
-      _count: {
-        select: {
-          questions: true,
-          sessions: true,
-        },
-      },
-    },
-  });
+  const quizzes = await apiGet<any[]>("/admin/quizzes");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">

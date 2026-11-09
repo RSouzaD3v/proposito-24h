@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { db } from "@/lib/db";
+import { apiGetOrNull } from "@/lib/api/server";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,16 +29,13 @@ export default async function Home() {
 
   // Busca writer só quando é subdomínio do escritor
   const writer = isTenantSite
-    ? await db.writer.findFirst({
-        where: { domains: { some: { subdomain } } },
-        select: {
-          id: true,
-          name: true,
-          logoUrl: true,
-          colorPrimary: true,
-          colorSecondary: true,
-        },
-      })
+    ? await apiGetOrNull<{
+        id: string;
+        name: string;
+        logoUrl: string | null;
+        colorPrimary: string | null;
+        colorSecondary: string | null;
+      }>(`/public/writers/by-subdomain/${encodeURIComponent(subdomain)}`)
     : null;
 
   // 404 se subdomínio inválido

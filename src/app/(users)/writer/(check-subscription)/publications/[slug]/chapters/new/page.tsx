@@ -50,7 +50,7 @@ export default function WriterPublicationChapterNewPage({
     };
 
     try {
-      const response = await fetch(`/api/writer/publications/${slug}/chapters`, {
+      const response = await fetch(`/api/v1/writer/publications/${slug}/chapters`, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },

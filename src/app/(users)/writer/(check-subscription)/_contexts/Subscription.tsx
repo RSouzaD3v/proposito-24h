@@ -1,5 +1,6 @@
+import { apiFetch } from "@/lib/api/server";
+import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -12,23 +13,10 @@ export default async function SubscriptionWriter({ children }: { children: React
     return null;
   }
 
-  const userWriter = await db.user.findUnique({
-    where: { id: session.user.id },
-  });
-
-  if (!userWriter || !userWriter.writerId) {
-    return null;
-  }
-
-  const now = new Date();
-  const subscription = await db.writerSubscription.findFirst({
-    where: {
-      writerId: userWriter.writerId, // ✅ usa o writerId, não o id do usuário
-      endedAt: {
-        gte: now,
-      },
-    },
-  });
+  const status = await apiFetch<{ active: boolean }>("/writer/subscription-status");
+  // Leitor não entra na área do escritor.
+  if (status.status === 403) redirect("/reader/area");
+  const subscription = status.ok && status.data.active;
 
   if (!subscription) {
     return (

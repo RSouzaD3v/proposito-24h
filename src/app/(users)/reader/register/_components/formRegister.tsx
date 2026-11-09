@@ -16,7 +16,7 @@ import { ButtonSpinner } from "@/components/ui/loading-state";
 export function ReaderRegister({
   writer,
 }: {
-  writer?: { id?: string; name?: string | null };
+  writer?: { slug?: string; name?: string | null };
 }) {
   const router = useRouter();
   const [form, setForm] = React.useState({ name: "", email: "", password: "", agree: true });
@@ -44,10 +44,10 @@ export function ReaderRegister({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/reader/register", {
+      const res = await fetch("/api/v1/auth/web/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, writerId: writer?.id }),
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, writerSlug: writer?.slug }),
       });
 
       if (!res.ok) {

@@ -1,8 +1,7 @@
+import { apiGet } from "@/lib/api/server";
 import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { FaMedal, FaQuoteRight, FaBible } from "react-icons/fa";
-import { Achievements } from "@prisma/client";
 import { PageHeader } from "@/components/ui/page-header";
 import { GlassCard } from "@/components/ui/glass-card";
 
@@ -10,21 +9,10 @@ export default async function JourneyPage() {
   const session = await getServerSession(authOptions);
   if (!session) return null;
 
-  const userCompetetionsDevotional = await db.userCompletationDevotional.findMany({
-    where: { userId: session.user.id },
-  });
-
-  const completedVerses = await db.userCompletationVerse.count({
-    where: { userId: session.user.id },
-  });
-
-  const completedQuotes = await db.userCompletationQuote.count({
-    where: { userId: session.user.id },
-  });
-
-  const achievements: Achievements | null = await db.achievements.findFirst({
-    where: { userId: session.user.id },
-  });
+  const journey = await apiGet<{ devotionals: number; verses: number; quotes: number; achievements: string[] }>("/reader/journey");
+  const completedVerses = journey.verses;
+  const completedQuotes = journey.quotes;
+  const achievements = { completed: journey.achievements };
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
@@ -42,7 +30,7 @@ export default async function JourneyPage() {
         <div className="flex justify-around py-4 gap-4 text-center">
           <ProgressBox
             icon={<FaMedal className="text-[var(--liquid-accent)] text-3xl mb-1" />}
-            value={userCompetetionsDevotional.length}
+            value={journey.devotionals}
             label="Devocionais"
           />
           <ProgressBox

@@ -50,9 +50,9 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
         const fetchData = async () => {
             try {
                 const { bookId } = await params;
-                const res = await fetch(`/api/writer/publications/edit/${bookId}`);
+                const res = await fetch(`/api/v1/writer/publications/${bookId}`);
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Erro ao carregar publicação");
+                if (!res.ok) throw new Error(data.message || "Erro ao carregar publicação");
                 setForm({
                     type: data.type ?? "EBOOK",
                     status: data.status ?? "DRAFT",
@@ -95,7 +95,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
         const hasPdf = Boolean(form.pdfUrl);
 
         try {
-            const res = await fetch(`/api/writer/publications/edit/${bookId}`, {
+            const res = await fetch(`/api/v1/writer/publications/${bookId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -120,7 +120,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                 }),
             });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || "Erro ao atualizar publicação");
+            if (!res.ok) throw new Error(data.message || "Erro ao atualizar publicação");
             setSuccess(true);
 
             router.push("/writer/publications");

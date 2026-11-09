@@ -1,6 +1,6 @@
+import { apiGetOrNull } from "@/lib/api/server";
 // app/admin/writer/[writerId]/page.tsx
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
 import { requireAdmin } from "../../_lib/auth";
 import Link from "next/link";
 import {
@@ -17,16 +17,6 @@ import { Suspense } from "react";
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "PAST_DUE", "PAUSED"] as const;
 
-function getRange(range?: string) {
-  const now = new Date();
-  const end = new Date(now.setHours(23, 59, 59, 999));
-  const start = new Date();
-  const map: Record<string, number> = { "7d": 6, "30d": 29, "90d": 89, "365d": 364 };
-  start.setDate(end.getDate() - (map[range ?? "30d"] ?? 29));
-  start.setHours(0, 0, 0, 0);
-  return { start, end, r: range ?? "30d" };
-}
-
 export default async function AdminWriterDetail({
   params,
   searchParams,
@@ -37,85 +27,15 @@ export default async function AdminWriterDetail({
   await requireAdmin();
   const { writerId } = await params;
   const sp = (await searchParams) ?? {};
-  const { start, end, r } = getRange(sp.range);
-
-  const writer = await db.writer.findUnique({
-    where: { id: writerId },
-    include: {
-      domains: { select: { host: true, isPrimary: true } },
-    },
-  });
-  if (!writer) return notFound();
-
-  // ---- KPIs
-  const [readers, subs, publications, salesAgg] = await Promise.all([
-    db.user.count({ where: { role: "CLIENT", writerId } }),
-    db.readerSubscription.count({
-      where: {
-        writerId,
-        OR: [{ lifetime: true }, { status: { in: [...ACTIVE_STATUSES] as any } }],
-      },
-    }),
-    db.publication.count({ where: { writerId, status: "PUBLISHED" } }),
-    db.purchase.aggregate({
-      _count: true,
-      _sum: { amount: true, fees: true, netAmount: true },
-      where: { writerId, status: "SUCCESS", createdAt: { gte: start, lt: end } },
-    }),
-  ]);
-  const gross = Number(salesAgg._sum.amount ?? 0);
-  const fees = Number(salesAgg._sum.fees ?? 0);
-  const net = Number(salesAgg._sum.netAmount ?? 0) || Math.max(gross - fees, 0);
-
-  // ---- Charts
-  const revenueByDay: { day: Date; revenue_cents: bigint; sales: number }[] =
-    await db.$queryRaw`
-      SELECT date_trunc('day', "createdAt") AS day,
-             SUM(COALESCE("netAmount", "amount" - COALESCE("fees",0)))::bigint AS revenue_cents,
-             COUNT(*)::int AS sales
-        FROM "Purchase"
-       WHERE "writerId" = ${writerId}
-         AND "status" = 'SUCCESS'
-         AND "createdAt" >= ${start} AND "createdAt" < ${end}
-       GROUP BY 1 ORDER BY 1`;
-
-  const topProducts: { id: string; title: string; revenue_cents: bigint; sales: number }[] =
-    await db.$queryRaw`
-      SELECT p."id" as id, p."title" as title,
-             SUM(COALESCE(pr."netAmount", pr."amount" - COALESCE(pr."fees",0)))::bigint AS revenue_cents,
-             COUNT(*)::int AS sales
-        FROM "Purchase" pr
-        JOIN "Publication" p ON pr."publicationId" = p."id"
-       WHERE pr."writerId" = ${writerId}
-         AND pr."status" = 'SUCCESS'
-         AND pr."createdAt" >= ${start} AND pr."createdAt" < ${end}
-       GROUP BY p."id", p."title"
-       ORDER BY revenue_cents DESC
-       LIMIT 8`;
-
-  const subStatusDist: { status: string; count: number }[] =
-    await db.$queryRaw`
-      SELECT "status"::text AS status, COUNT(*)::int AS count
-        FROM "ReaderSubscription"
-       WHERE "writerId" = ${writerId}
-       GROUP BY 1`;
-
-  // ---- Lists
-  const latestPurchases = await db.purchase.findMany({
-    where: { writerId, status: "SUCCESS" },
-    include: {
-      user: { select: { name: true, email: true } },
-      publication: { select: { title: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 15,
-  });
-
-  const latestReaderSubs = await db.readerSubscription.findMany({
-    where: { writerId },
-    orderBy: { createdAt: "desc" },
-    take: 15,
-  });
+  const r = sp.range ?? "30d";
+  const data = await apiGetOrNull<any>(`/admin/writers/${writerId}?range=${encodeURIComponent(r)}`);
+  if (!data) return notFound();
+  const { writer, readers, subs, publications, net } = data;
+  const revenueByDay: any[] = data.revenueByDay;
+  const topProducts: any[] = data.topProducts;
+  const subStatusDist: any[] = data.subStatusDist;
+  const latestPurchases: any[] = data.latestPurchases;
+  const latestReaderSubs: any[] = data.latestReaderSubs;
 
   return (
     <section className="space-y-6">
@@ -136,7 +56,7 @@ export default async function AdminWriterDetail({
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Kpi title="Receita (período)" value={BRL.format(net / 100)} hint="líquido" />
-        <Kpi title="Vendas (período)" value={String(salesAgg._count)} />
+        <Kpi title="Vendas (período)" value={String(data.sales)} />
         <Kpi title="Assinantes" value={String(subs)} hint="ativos + vitalícios" />
         <Kpi title="Leitores totais" value={String(readers)} />
       </div>

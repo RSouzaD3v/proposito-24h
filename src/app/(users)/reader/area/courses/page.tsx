@@ -1,19 +1,14 @@
+import { apiGet, apiGetOrNull } from "@/lib/api/server";
+import type { LibraryBook, ReaderProfile } from "@/lib/api/types";
 import Link from "next/link";
 import { FiLock } from "react-icons/fi";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { authOptions } from "@/lib/authOption";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import { BackButton } from "@/components/ui/back-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 
 export default async function CoursesPage() {
-  const session = await getServerSession(authOptions);
-
-  const userLogged = await db.user.findUnique({
-    where: { id: session?.user.id },
-  });
+  const userLogged = await apiGetOrNull<ReaderProfile>("/reader/profile");
 
   if (!userLogged || !userLogged.writerId) {
     return (
@@ -33,22 +28,7 @@ export default async function CoursesPage() {
     );
   }
 
-  const books = await db.publication.findMany({
-    where: {
-      type: "EBOOK",
-      status: "PUBLISHED",
-      writerId: userLogged.writerId,
-    },
-    select: {
-      id: true,
-      title: true,
-      coverUrl: true,
-      visibility: true,
-      category: true,
-      slug: true,
-    },
-    orderBy: { title: "asc" },
-  });
+  const { books, myBooks } = await apiGet<{ books: LibraryBook[]; myBooks: LibraryBook[] }>("/reader/library");
 
   const booksByCategory = books.reduce((acc, book) => {
     const category = book.category || "Outros";
@@ -58,19 +38,6 @@ export default async function CoursesPage() {
   }, {} as Record<string, typeof books>);
 
   const categories = Object.entries(booksByCategory);
-
-  const myBooks = await db.publication.findMany({
-    where: {
-      writerId: userLogged.writerId,
-      type: "EBOOK",
-      status: "PUBLISHED",
-      purchases: {
-        some: {
-          userId: userLogged.id,
-        },
-      }
-    }
-  });
 
   return (
     <div className="relative flex flex-col gap-8 px-4 md:px-8 lg:px-16 pb-16 pt-8">

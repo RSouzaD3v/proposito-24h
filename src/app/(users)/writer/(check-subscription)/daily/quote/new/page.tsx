@@ -29,7 +29,7 @@ export default function QuoteNewPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/writer/daily/quote/new", {
+      const res = await fetch("/api/v1/writer/daily/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

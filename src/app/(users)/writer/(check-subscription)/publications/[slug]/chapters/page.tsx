@@ -34,9 +34,9 @@ export default function WriterPublicationChapterPage({ params }: { params: Promi
             const { slug } = await params;
             setSlug(slug);
             try {
-                const res = await fetch(`/api/writer/publications/${slug}/chapters`);
+                const res = await fetch(`/api/v1/writer/publications/${slug}/chapters`);
                 const data = await res.json();
-                setChapters(data.chapters);
+                setChapters(data);
             } catch (e) {
                 console.log(e);
             }
@@ -50,7 +50,7 @@ export default function WriterPublicationChapterPage({ params }: { params: Promi
         if (!confirmed) return;
 
         try {
-            const res = await fetch(`/api/writer/publications/${slug}/chapters/${chapterId}`, {
+            const res = await fetch(`/api/v1/writer/publications/${slug}/chapters/${chapterId}`, {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error("Erro ao apagar capítulo");

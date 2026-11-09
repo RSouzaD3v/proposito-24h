@@ -1,3 +1,5 @@
+import { apiFetch } from "@/lib/api/server";
+import type { ReaderHome } from "@/lib/api/types";
 import Link from "next/link";
 import { HeaderReader } from "./_components/HeaderReader";
 import { FiChevronRight } from "react-icons/fi";
@@ -7,8 +9,6 @@ import { DevotionalCard } from "./_components/devotional/devotional/DevotionalCa
 import { PrayerCard } from "./_components/devotional/prayer/PrayerCard";
 import { authOptions } from "@/lib/authOption";
 import { getServerSession } from "next-auth";
-import { db } from "@/lib/db";
-import clientPromise from "@/lib/mongodb";
 import { startOfDay, addDays, subDays, format, parse } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
@@ -41,18 +41,6 @@ function isYesterdayOrTodaySp(dayParam: string) {
   );
 }
 
-/**
- * Calcula o range do dia (gte / lt) timezone-safe
- */
-function brasiliaDayRange(day: Date) {
-  const start = startOfDay(day);
-  const next = startOfDay(addDays(start, 1));
-  return {
-    gte: fromZonedTime(start, TZ),
-    lt: fromZonedTime(next, TZ),
-  };
-}
-
 export default async function AreaReader({
   searchParams,
 }: {
@@ -73,25 +61,11 @@ export default async function AreaReader({
   }
 
   const activeDay = requestedDay ? parseDayParamInSp(requestedDay) : nowSp;
-  const dayRange = brasiliaDayRange(activeDay);
 
-  // 🔹 Pega writerId do usuário logado (PostgreSQL)
-  const userReader = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      writer: {
-        select: {
-          id: true,
-          logoUrl: true,
-          titleApp: true,
-          titleHeader: true,
-        },
-      },
-    },
-  });
-
-  const writerId = userReader?.writer?.id;
-  if (!writerId) {
+  const home = await apiFetch<ReaderHome>(
+    `/reader/home${requestedDay ? `?day=${encodeURIComponent(requestedDay)}` : ""}`,
+  );
+  if (!home.ok || !home.data.writer) {
     return (
       <section className="p-8">
         <h1 className="text-xl font-bold mb-2">Sem escritor vinculado</h1>
@@ -101,25 +75,8 @@ export default async function AreaReader({
       </section>
     );
   }
-
-  // 🔹 Busca personalização no MongoDB
-  const client = await clientPromise;
-  const mongoDb = client.db(process.env.MONGODB_DB || "railway");
-  const personalization = await mongoDb
-    .collection("personalizations")
-    .findOne({ writerId });
-
-  // 🔹 Define cores com fallback padrão
-  const colors = {
-    primary: personalization?.primaryColor || "#202020",
-    secondary: personalization?.secondaryColor || "#404040",
-    background: personalization?.backgroundColor || "#ffffff",
-    buttonBg: personalization?.bgButtonColor || "#22c55e",
-    buttonText: personalization?.buttonTextColor || "#ffffff",
-    text: personalization?.textColor || "#000000",
-    independenteColor1: personalization?.independenteColor1 || "#f97316",
-    independenteColor2: personalization?.independenteColor2 || "#f97316",
-  };
+  const { colors, writer } = home.data;
+  const userReader = { writer };
 
   const items = [
     // { id: 5, name: "Cronologia Diários", type: "Daily", link: "/reader/area/daily" },
@@ -163,16 +120,16 @@ export default async function AreaReader({
       </h3>
       <div className="grid w-full min-w-0 grid-cols-1 gap-4 py-1 sm:grid-cols-2 xl:grid-cols-4">
         <div className="min-w-0">
-          <QuoteCard colors={colors} dayRange={dayRange} />
+          <QuoteCard colors={colors} item={home.data.quote} />
         </div>
         <div className="min-w-0">
-          <VerseCard colors={colors} dayRange={dayRange} />
+          <VerseCard colors={colors} item={home.data.verse} />
         </div>
         <div className="min-w-0">
-          <DevotionalCard colors={colors} dayRange={dayRange} />
+          <DevotionalCard colors={colors} item={home.data.devotional} />
         </div>
         <div className="min-w-0">
-          <PrayerCard colors={colors} dayRange={dayRange} />
+          <PrayerCard colors={colors} item={home.data.prayer} />
         </div>
       </div>
 

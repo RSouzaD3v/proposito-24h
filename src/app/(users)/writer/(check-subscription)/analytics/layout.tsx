@@ -1,11 +1,13 @@
-import { requireWriter } from "./_lib/auth";
+import { redirect } from "next/navigation";
+import { apiFetch } from "@/lib/api/server";
 import Sidebar from "./_components/Sidebar";
 import { Separator } from "@/components/ui/separator";
 
 export const metadata = { title: "Analytics — Escritor" };
 
 export default async function AnalyticsLayout({ children }: { children: React.ReactNode }) {
-  await requireWriter();
+  const access = await apiFetch<unknown>("/writer/profile");
+  if (!access.ok) redirect(access.status === 401 ? "/login" : "/");
 
   return (
     <div className="min-h-screen w-full md:grid md:grid-cols-[260px_1fr]">

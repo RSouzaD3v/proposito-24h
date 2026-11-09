@@ -14,7 +14,7 @@ export default function ImportPage() {
   const [loading, setLoading] = useState(false);
   const [kind, setKind] = useState<Kind>("devotional");
 
-  const endpoint = useMemo(() => `/api/massive/${kind}s/import`, [kind]);
+  const endpoint = useMemo(() => `/api/v1/writer/imports/${kind}`, [kind]);
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
@@ -44,7 +44,7 @@ export default function ImportPage() {
       }
 
       if (!r.ok) {
-        setError(j?.error || `Falha no upload (${r.status})`);
+        setError(j?.message || `Falha no upload (${r.status})`);
         setResp(j);
       } else {
         setResp(j);
