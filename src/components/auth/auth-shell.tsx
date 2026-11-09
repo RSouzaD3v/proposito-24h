@@ -16,6 +16,8 @@ type AuthShellProps = {
   accent?: string | null;
   topAction?: ReactNode;
   wide?: boolean;
+  /** Mostra a imagem só em telas grandes, sem a faixa no topo do celular. */
+  hideSceneOnMobile?: boolean;
   children: ReactNode;
 };
 
@@ -30,6 +32,7 @@ export function AuthShell({
   accent,
   topAction,
   wide,
+  hideSceneOnMobile,
   children,
 }: AuthShellProps) {
   const accentStyle = accent
@@ -41,7 +44,12 @@ export function AuthShell({
       className="reader-premium flex min-h-screen flex-col bg-[var(--reader-bg)] text-[var(--liquid-ink)] lg:flex-row"
       style={accentStyle}
     >
-      <aside className="h-28 shrink-0 sm:h-40 lg:sticky lg:top-0 lg:order-2 lg:h-screen lg:w-[46%]">
+      <aside
+        className={cn(
+          "shrink-0 lg:sticky lg:top-0 lg:order-2 lg:h-screen lg:w-[46%]",
+          hideSceneOnMobile ? "hidden lg:block" : "h-28 sm:h-40",
+        )}
+      >
         <div className="reader-scene h-full">
           <Image src={image} alt="" fill priority sizes="(min-width: 1024px) 46vw, 100vw" />
           <div className="hidden h-full flex-col justify-end p-12 lg:flex xl:p-16">

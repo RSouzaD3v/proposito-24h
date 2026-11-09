@@ -14,6 +14,7 @@ export default async function LoginPage() {
   return (
     <AuthShell
       image="/bible3d.webp"
+      hideSceneOnMobile
       sceneEyebrow="Salmos 119:105"
       sceneTitle="A tua palavra é lâmpada que ilumina os meus passos."
       {...(writer && { brandName: writer.name, brandLogoUrl: writer.logoUrl, accent: writer.colorPrimary })}

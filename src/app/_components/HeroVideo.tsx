@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 
 type NetworkInformation = { saveData?: boolean };
 
-/** Baixa o vídeo só em telas grandes, sem economia de dados e sem preferência por menos movimento. */
+/** Respeita quem pediu economia de dados ou menos movimento; os demais veem o vídeo em qualquer tela. */
 export function HeroVideo() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
     const allowed =
-      window.matchMedia("(min-width: 768px)").matches &&
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
       !connection?.saveData;
     setEnabled(allowed);
