@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const HOME = "/reader/area";
 
 export function CompleteStep({
   kind,
@@ -20,9 +23,12 @@ export function CompleteStep({
 
   if (completed) {
     return (
-      <p className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500/10 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-        <Check className="size-4" strokeWidth={3} /> Etapa concluída
-      </p>
+      <Link
+        href={HOME}
+        className="flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-500/10 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
+      >
+        <Check className="size-4" strokeWidth={3} /> Etapa concluída · Voltar ao início
+      </Link>
     );
   }
 
@@ -32,7 +38,7 @@ export function CompleteStep({
     try {
       const response = await fetch(`/api/v1/reader/content/${kind}/${id}/complete`, { method: "POST" });
       if (!response.ok) throw new Error();
-      router.push("/reader/area/");
+      router.push(HOME);
     } catch {
       setError("Não foi possível concluir. Tente novamente.");
       setLoading(false);
