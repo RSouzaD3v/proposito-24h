@@ -1,6 +1,5 @@
 'use client';
 import { useState, createContext, useEffect, useContext } from "react";
-import { useRouter } from "next/navigation";
 
 /** Escolhe texto claro ou escuro conforme a cor do escritor. */
 function readableOn(color: string) {
@@ -40,7 +39,6 @@ export const ThemeWriterContext = createContext<ThemeWriterContextProps>({
 });
 
 export const ThemeWriterProvider = ({ children }: { children: React.ReactNode }) => {
-    const router = useRouter();
     const [theme, setTheme] = useState({
         logoUrl:        "",
         colorPrimary:   "",
@@ -83,9 +81,11 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
     }, []);
 
     useEffect(() => {
-        document.body.classList.toggle("dark", mode === "dark");
-        return () => document.body.classList.remove("dark");
+        document.documentElement.classList.toggle("dark", mode === "dark");
     }, [mode]);
+
+    // O tema escuro vale só na área do leitor.
+    useEffect(() => () => document.documentElement.classList.remove("dark"), []);
 
     useEffect(() => {
         const root = document.documentElement.style;
@@ -100,30 +100,22 @@ export const ThemeWriterProvider = ({ children }: { children: React.ReactNode })
     }, [theme?.colorPrimary]);
 
     const changeMode = () => {
-        setMode(prev => { 
-            if (prev === 'dark') {
-                localStorage.setItem('themeMode', 'light')
-                return 'light'
-            } else {
-                localStorage.setItem('themeMode', 'dark')
-                return 'dark'
-            }
-         });
+        const next = mode === "dark" ? "light" : "dark";
+        localStorage.setItem("themeMode", next);
 
-         if (window) {
-             window.location.reload();
-         } else {
-             router.refresh();
-         }
+        const apply = () => {
+            document.documentElement.classList.toggle("dark", next === "dark");
+            setMode(next);
+        };
+
+        // Navegadores sem View Transitions trocam o tema sem a animação.
+        if (document.startViewTransition) document.startViewTransition(apply);
+        else apply();
     }
 
     return (
         <ThemeWriterContext.Provider value={{ theme, setTheme, mode, setMode, changeMode }}>
-            <div
-              className={`${mode === "dark" ? "text-white dark" : "text-[var(--liquid-ink)]"} transition-colors duration-300`}
-            >
-                {children}
-            </div>
+            {children}
         </ThemeWriterContext.Provider>
     );
 };

@@ -44,6 +44,12 @@ export default async function ReaderLayout({
 
   return (
     <AuthReaderProvider>
+      {/* Aplica o tema antes da primeira pintura, para não piscar claro no modo escuro. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{if(localStorage.getItem("themeMode")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
+        }}
+      />
       <ThemeWriterProvider>
         <WriterShell contained={false} background="plain" className="reader-premium bg-[var(--reader-bg)] pb-28 dark:bg-[var(--reader-bg)]">
           <PushBootstrap writerId={user.writer.id} userId={user.id} />
