@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { readableOn } from "@/lib/readable-on";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +56,7 @@ export function AuthShell({
         <header className="flex items-center justify-between gap-4">
           <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-lg">
             {brandLogoUrl ? (
-              <img src={brandLogoUrl} alt="" className="size-9 rounded-[10px] object-contain" />
+              <OptimizedImage src={brandLogoUrl} alt="" width={36} height={36} className="size-9 rounded-[10px] object-contain" />
             ) : (
               <span className="grid size-9 place-items-center rounded-[10px] bg-[var(--muted)] text-sm font-bold">
                 {brandName.charAt(0).toUpperCase()}

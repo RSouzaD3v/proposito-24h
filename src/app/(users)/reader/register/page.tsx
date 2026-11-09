@@ -1,13 +1,20 @@
 // app/reader/register/page.tsx
 import Link from "next/link";
-import { SearchX } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Lock, SearchX } from "lucide-react";
 import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
 import { authLinkClass } from "@/components/auth/auth-fields";
 import { getWriterFromHost } from "@/lib/writer-host";
 import { ReaderRegister } from "./_components/formRegister";
 
-export default async function ReaderRegisterPage() {
-  const { subdomain, writer } = await getWriterFromHost();
+export default async function ReaderRegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ escritor?: string }>;
+}) {
+  const { escritor } = await searchParams;
+  const { subdomain, writer } = await getWriterFromHost(escritor);
+  if (!subdomain) redirect("/escritores");
 
   if (!writer) {
     return (
@@ -18,8 +25,11 @@ export default async function ReaderRegisterPage() {
           </div>
           <h1 className="text-3xl">Endereço não encontrado</h1>
           <p className="mt-3 text-[15px] leading-relaxed text-[var(--liquid-muted)]">
-            O subdomínio <b>{subdomain || "vazio"}</b> não está registrado para nenhum escritor. Confira o link
-            recebido e tente novamente.
+            O endereço <b>{subdomain}</b> não está registrado para nenhum escritor. Confira o link recebido ou{" "}
+            <Link href="/escritores" className={authLinkClass}>
+              veja os escritores disponíveis
+            </Link>
+            .
           </p>
         </div>
       </div>
@@ -45,6 +55,18 @@ export default async function ReaderRegisterPage() {
       }
     >
       <AuthHeading title="Crie sua conta" description={`Acesse os conteúdos de ${writer.name} em poucos segundos.`} />
+      <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--reader-surface)] px-3.5 py-3 text-[13px] leading-snug text-[var(--liquid-muted)]">
+        <Lock className="mt-0.5 size-4 shrink-0 text-[var(--reader-gold)]" aria-hidden />
+        <p>
+          Sua conta ficará vinculada a <b className="font-semibold text-[var(--liquid-ink)]">{writer.name.trim()}</b>. Por
+          enquanto, essa escolha é vitalícia: não será possível trocar de escritor depois.{" "}
+          {escritor && (
+            <Link href="/escritores#escritores" className={authLinkClass}>
+              Escolher outro
+            </Link>
+          )}
+        </p>
+      </div>
       <ReaderRegister writer={{ slug: writer.slug }} />
     </AuthShell>
   );

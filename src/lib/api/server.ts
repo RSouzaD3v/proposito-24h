@@ -59,6 +59,17 @@ export async function apiGet<T>(path: string): Promise<T> {
 const isMissing = (status: number) => status === 401 || status === 404;
 
 /** Devolve null quando a sessão não vale mais ou o recurso não existe. */
+/** Leitura de dados públicos, sem sessão, reaproveitada pelo tempo indicado. */
+export async function apiPublicGet<T>(path: string, revalidateSeconds: number): Promise<T | null> {
+  const response = await fetch(`${process.env.API_URL}/v1${path}`, {
+    headers: { "x-proxy-key": process.env.INTERNAL_API_KEY ?? "" },
+    next: { revalidate: revalidateSeconds },
+  });
+  if (response.ok) return (await response.json()) as T;
+  if (isMissing(response.status)) return null;
+  throw new ApiError(response.status);
+}
+
 export async function apiGetOrNull<T>(path: string): Promise<T | null> {
   const result = await request<T>("GET", path);
   if (result.ok) return result.data;

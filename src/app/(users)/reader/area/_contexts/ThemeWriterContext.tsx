@@ -1,7 +1,6 @@
 'use client';
 import { useState, createContext, useEffect, useContext } from "react";
 
-/** Escolhe texto claro ou escuro conforme a cor do escritor. */
 import { readableOn } from "@/lib/readable-on";
 
 interface ThemeWriterContextProps {

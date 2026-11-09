@@ -15,6 +15,7 @@ import {
   authLinkClass,
 } from "@/components/auth/auth-fields";
 import { Input } from "@/components/ui/input";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { readableOn } from "@/lib/readable-on";
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || "devotionalapp.com.br";
@@ -98,7 +99,7 @@ function BrandPreview({
       aria-label="Prévia da identidade visual"
     >
       {logoUrl ? (
-        <img src={logoUrl} alt="" className="size-11 rounded-xl object-contain" />
+        <OptimizedImage src={logoUrl} alt="" width={44} height={44} className="size-11 rounded-xl object-contain" />
       ) : (
         <span
           className="grid size-11 shrink-0 place-items-center rounded-xl font-bold"

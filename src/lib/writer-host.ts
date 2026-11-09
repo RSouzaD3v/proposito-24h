@@ -20,10 +20,13 @@ function subdomainOf(hostname: string) {
   return hostname.replace(`.${baseDomain}`, "");
 }
 
-/** Identifica o escritor dono do subdomínio acessado; `writer` é null no domínio raiz ou se não existir. */
-export async function getWriterFromHost() {
+/**
+ * Identifica o escritor dono do subdomínio acessado; `writer` é null no domínio raiz ou se não existir.
+ * `chosenSlug` vale só no domínio raiz: é o escritor escolhido na página de escritores.
+ */
+export async function getWriterFromHost(chosenSlug?: string) {
   const host = (await headers()).get("host") ?? "";
-  const subdomain = subdomainOf(host.split(":")[0]);
+  const subdomain = subdomainOf(host.split(":")[0]) || (chosenSlug ?? "");
   const writer = subdomain
     ? await apiGetOrNull<HostWriter>(`/public/writers/by-subdomain/${encodeURIComponent(subdomain)}`)
     : null;

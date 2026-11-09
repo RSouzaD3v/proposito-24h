@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope, Merriweather } from "next/font/google";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // const geistSans = Geist({
@@ -20,6 +21,7 @@ const readerSerif = Fraunces({ subsets: ["latin"], variable: "--font-reader-seri
 const readerSans = Manrope({ subsets: ["latin"], variable: "--font-reader-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: "DevotionalApp",
   description: "Uma plataforma para escritores publicarem devocionais. E leitores encontrarem devocionais inspiradores.",
 };
@@ -30,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${readerSerif.variable} ${readerSans.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${readerSerif.variable} ${readerSans.variable}`} suppressHydrationWarning>
       <body
         className={`${font.className} antialiased`}
       >
