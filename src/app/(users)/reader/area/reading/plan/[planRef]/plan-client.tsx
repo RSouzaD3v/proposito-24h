@@ -1,105 +1,60 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
-import { BackButton } from "@/components/ui/back-button";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, BookOpenText, Check, PartyPopper } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { biblePath, parsePassage, readLastRead, type BibleBookInfo, type BibleVersionCode } from "@/components/bible/bible-books";
 
 type Day = { id: string; dayNumber: number; passages: string };
+type Filter = "pending" | "done" | "all";
 
-// Base da rota de leitura por livro
-const BIBLE_BASE = "/reader/area/bible-nvi"; // mude para "/reader/area/bible" se for o seu caso
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: "pending", label: "Pendentes" },
+  { id: "done", label: "Concluídos" },
+  { id: "all", label: "Todos" },
+];
 
-// Remove acentos
-function stripDiacritics(s: string) {
-  return s.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+function ChapterLinks({ passage, books, version, size = "sm" }: { passage: string; books: BibleBookInfo[]; version: BibleVersionCode; size?: "sm" | "lg" }) {
+  const parsed = parsePassage(passage, books);
+  if (!parsed) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {parsed.chapters.map((chapter) => (
+        <Link
+          key={chapter}
+          href={biblePath(version, parsed.book.abbrev, chapter)}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border border-[var(--border)] font-semibold text-[var(--liquid-ink)] transition hover:border-[var(--reader-gold)] hover:bg-[var(--muted)]/50",
+            size === "lg" ? "bg-[var(--reader-surface)] px-3.5 py-2 text-sm" : "px-2.5 py-1 text-xs",
+          )}
+        >
+          {size === "lg" && <BookOpenText className="size-3.5 text-[var(--reader-gold)]" aria-hidden />}
+          {parsed.book.name} {chapter}
+        </Link>
+      ))}
+    </div>
+  );
 }
 
-// Map de padrões (sem acento, minúsculo) -> slug
-const BOOK_PATTERNS: Record<string, string[]> = {
-  gn: ["genesis", "gn", "gen"],
-  ex: ["exodo", "ex"],
-  lv: ["levitico", "lv"],
-  nm: ["numeros", "nm", "num"],
-  dt: ["deuteronomio", "dt", "deut"],
-  js: ["josue", "js"],
-  jz: ["juizes", "jz"],
-  rt: ["rute", "rt"],
-  "1sm": ["1 samuel", "i samuel", "1sm", "1 sam"],
-  "2sm": ["2 samuel", "ii samuel", "2sm", "2 sam"],
-  "1rs": ["1 reis", "i reis", "1rs"],
-  "2rs": ["2 reis", "ii reis", "2rs"],
-  "1cr": ["1 cronicas", "i cronicas", "1cr", "1 cr"],
-  "2cr": ["2 cronicas", "ii cronicas", "2cr", "2 cr"],
-  ed: ["esdras", "ed"],
-  ne: ["neemias", "ne"],
-  et: ["ester", "et"],
-  job: ["job"], // evitar "jo" para não conflitar com João
-  sl: ["salmos", "salmo", "sl", "ps"],
-  pv: ["proverbios", "pv"],
-  ec: ["eclesiastes", "ec"],
-  ct: ["cantares", "cantico dos canticos", "canticos", "ct"],
-  is: ["isaias", "is"],
-  jr: ["jeremias", "jr"],
-  lm: ["lamentacoes", "lm"],
-  ez: ["ezequiel", "ez"],
-  dn: ["daniel", "dn"],
-  os: ["oseias", "os"],
-  jl: ["joel", "jl"],
-  am: ["amos", "am"],
-  ob: ["obadias", "ob"],
-  jn: ["jonas", "jn"],
-  mq: ["miqueias", "miqueias", "mq", "miq"],
-  na: ["naum", "na"],
-  hc: ["habacuque", "hc", "hab"],
-  sf: ["sofonias", "sf"],
-  ag: ["ageu", "ag"],
-  zc: ["zacarias", "zc", "zac"],
-  ml: ["malaquias", "ml"],
-
-  mt: ["mateus", "mt"],
-  mc: ["marcos", "mc"],
-  lc: ["lucas", "lc"],
-  jo: ["joao", "evangelho de joao", "jo"], // João
-  at: ["atos", "atos dos apostolos", "at"],
-  rm: ["romanos", "rm", "rom"],
-  "1co": ["1 corintios", "i corintios", "1co", "1 cor"],
-  "2co": ["2 corintios", "ii corintios", "2co", "2 cor"],
-  gl: ["galatas", "gl", "gal"],
-  ef: ["efesios", "ef"],
-  fp: ["filipenses", "fp", "fl"],
-  cl: ["colossenses", "cl", "col"],
-  "1ts": ["1 tessalonicenses", "1ts", "1 tes"],
-  "2ts": ["2 tessalonicenses", "2ts", "2 tes"],
-  "1tm": ["1 timoteo", "1tm"],
-  "2tm": ["2 timoteo", "2tm"],
-  tt: ["tito", "tt"],
-  fm: ["filemom", "fm", "flm"],
-  hb: ["hebreus", "hb"],
-  tg: ["tiago", "tg"],
-  "1pe": ["1 pedro", "1pe"],
-  "2pe": ["2 pedro", "2pe"],
-  "1jo": ["1 joao", "1jo"],
-  "2jo": ["2 joao", "2jo"],
-  "3jo": ["3 joao", "3jo"],
-  jd: ["judas", "jd"],
-  ap: ["apocalipse", "ap", "apc"],
-};
-
-// Captura o primeiro livro citado em uma string de passagens e retorna o slug
-function resolveBookSlug(passages: string): string | null {
-  const raw = passages.toLowerCase();
-  // caso especial para "Jó" (com acento), antes de remover acentos
-  if (raw.includes("jó")) return "job";
-
-  const text = stripDiacritics(raw); // sem acentos
-  // Se houver múltiplos livros (separados por vírgula, ponto e vírgula, " / ", etc.), tanto faz: achamos o primeiro que aparecer
-  for (const [slug, patterns] of Object.entries(BOOK_PATTERNS)) {
-    for (const p of patterns) {
-      if (text.includes(p)) return slug;
-    }
-  }
-  return null;
+function CheckButton({ checked, label, onToggle }: { checked: boolean; label: string; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={onToggle}
+      className={cn(
+        "grid size-11 shrink-0 place-items-center rounded-full border-2 transition active:scale-95",
+        checked
+          ? "border-[var(--liquid-accent)] bg-[var(--liquid-accent)] text-[var(--liquid-on-accent)]"
+          : "border-[var(--input)] text-transparent hover:border-[var(--liquid-accent)] hover:text-[var(--liquid-accent)]/40",
+      )}
+    >
+      <Check className="size-5" strokeWidth={3} aria-hidden />
+    </button>
+  );
 }
 
 export default function PlanClient({
@@ -107,113 +62,253 @@ export default function PlanClient({
   planName,
   days,
   completedInitial,
+  books,
 }: {
   planId: string;
   planName: string;
   days: Day[];
-  completedInitial: string[]; // dayIds
+  completedInitial: string[];
+  books: BibleBookInfo[];
 }) {
-  const [isPending, startTransition] = useTransition();
-  const [completed, setCompleted] = useState<Set<string>>(
-    new Set(completedInitial)
-  );
+  const [completed, setCompleted] = useState<Set<string>>(() => new Set(completedInitial));
+  const [filter, setFilter] = useState<Filter>("pending");
+  const [toast, setToast] = useState<{ text: string; undo?: () => void } | null>(null);
+  const [version, setVersion] = useState<BibleVersionCode>("NVI");
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Os links de capítulo seguem a versão que o leitor usou por último.
+  useEffect(() => {
+    const last = readLastRead();
+    if (last?.version) setVersion(last.version);
+  }, []);
 
   const total = days.length;
   const done = completed.size;
-  const pct = useMemo(() => Math.round((done / total) * 100), [done, total]);
+  const percent = total ? Math.round((done / total) * 100) : 0;
+  const nextDay = useMemo(() => days.find((day) => !completed.has(day.id)) ?? null, [days, completed]);
+  const visible = days.filter((day) =>
+    filter === "all" ? true : filter === "done" ? completed.has(day.id) : !completed.has(day.id),
+  );
 
-  async function toggle(dayId: string, next: boolean) {
-    setCompleted((prev) => {
-      const copy = new Set(prev);
-      if (next) copy.add(dayId);
-      else copy.delete(dayId);
-      return copy;
-    });
+  const showToast = (text: string, undo?: () => void) => {
+    clearTimeout(toastTimer.current);
+    setToast({ text, undo });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  };
 
-    startTransition(async () => {
-      const res = await fetch("/api/v1/reader/reading-progress", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, dayId, completed: next }),
+  const save = useCallback(
+    async (day: Day, value: boolean) => {
+      setCompleted((current) => {
+        const copy = new Set(current);
+        if (value) copy.add(day.id);
+        else copy.delete(day.id);
+        return copy;
       });
-
-      if (!res.ok) {
-        setCompleted((prev) => {
-          const copy = new Set(prev);
-          if (next) copy.delete(dayId);
-          else copy.add(dayId);
+      try {
+        const res = await fetch("/api/v1/reader/reading-progress", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planId, dayId: day.id, completed: value }),
+        });
+        if (!res.ok) throw new Error();
+        return true;
+      } catch {
+        setCompleted((current) => {
+          const copy = new Set(current);
+          if (value) copy.delete(day.id);
+          else copy.add(day.id);
           return copy;
         });
+        showToast("Não foi possível salvar. Tente de novo.");
+        return false;
       }
-    });
-  }
+    },
+    [planId],
+  );
+
+  const toggle = async (day: Day) => {
+    const value = !completed.has(day.id);
+    if ((await save(day, value)) && value) {
+      showToast(`Dia ${day.dayNumber} concluído`, () => {
+        setToast(null);
+        void save(day, false);
+      });
+    }
+  };
+
+  const jumpTo = (day: Day) => {
+    setFilter("all");
+    requestAnimationFrame(() => document.getElementById(`dia-${day.dayNumber}`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  };
 
   return (
-    <section className="mx-auto max-w-3xl px-5 pb-4 pt-20 md:pt-10">
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <BackButton href="/reader/area" label="Área do leitor" />
-        <Button asChild variant="glass-primary" size="sm" className="rounded-full">
-          <Link href="/reader/area/bible-nvi">Vamos ler a Bíblia 📖</Link>
-        </Button>
+    <div className="mx-auto max-w-2xl px-4 pt-4 pb-10">
+      <div className="mb-6 flex items-center pr-[5.25rem] lg:pr-0">
+        <Link
+          href="/reader/area"
+          aria-label="Voltar para o início"
+          className="grid size-9 place-items-center rounded-full bg-[var(--reader-surface)] text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+        </Link>
       </div>
 
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold">{planName}</h1>
-        <div className="mt-2">
-          <div className="h-3 w-full bg-gray-200 rounded">
-            <div
-              className="h-3 rounded bg-green-500 transition-all"
-              style={{ width: `${pct}%` }}
-              aria-label="Progresso"
-            />
-          </div>
-          <p className="text-sm text-gray-600 mt-1">
-            {done}/{total} dias • {pct}% {isPending ? " (sincronizando…)" : ""}
+      <p className="reader-eyebrow">Plano de leitura</p>
+      <h1 className="mt-1 text-[2rem] leading-tight text-[var(--liquid-ink)]">{planName}</h1>
+
+      {/* Progresso geral */}
+      <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)] p-5">
+        <div className="flex items-end justify-between gap-4">
+          <p className="text-sm text-[var(--liquid-muted)]">
+            <span className="reader-serif text-3xl text-[var(--liquid-ink)]">{done}</span> de {total} dias
           </p>
+          <p className="text-sm font-bold text-[var(--liquid-ink)]">{percent}%</p>
         </div>
-      </header>
+        <div
+          className="mt-3 h-2.5 overflow-hidden rounded-full bg-[var(--muted)]"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Progresso do plano"
+        >
+          <div className="h-full rounded-full bg-[var(--liquid-accent)] transition-all duration-500" style={{ width: `${percent}%` }} />
+        </div>
+        <p className="mt-2 text-[13px] text-[var(--liquid-muted)]">
+          {total - done === 0 ? "Plano concluído!" : `Faltam ${total - done} ${total - done === 1 ? "dia" : "dias"}`}
+        </p>
+      </div>
 
-      <ul className="space-y-2">
-        {days.map((d) => {
-          const checked = completed.has(d.id);
-          const slug = resolveBookSlug(d.passages);
-          const href = slug ? `${BIBLE_BASE}/${slug}` : `${BIBLE_BASE}`;
-          const disabled = !slug;
+      {/* Próxima leitura em destaque */}
+      {nextDay ? (
+        <section className="mt-4 rounded-3xl bg-[var(--liquid-accent)] p-5 text-[var(--liquid-on-accent)]" aria-label="Próxima leitura">
+          <p className="text-xs font-bold tracking-wide uppercase opacity-80">Próxima leitura · Dia {nextDay.dayNumber}</p>
+          <p className="reader-serif mt-1 text-2xl">{nextDay.passages}</p>
+          <div className="mt-4 [&_a]:border-transparent [&_a]:text-[var(--liquid-ink)]">
+            <ChapterLinks passage={nextDay.passages} books={books} version={version} size="lg" />
+          </div>
+          <button
+            type="button"
+            onClick={() => toggle(nextDay)}
+            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--reader-surface)] text-[15px] font-bold text-[var(--liquid-ink)] transition hover:brightness-95 active:scale-[0.99]"
+          >
+            <Check className="size-5" aria-hidden /> Marcar como lido
+          </button>
+        </section>
+      ) : (
+        <section className="mt-4 flex flex-col items-center rounded-3xl bg-[var(--liquid-accent)] p-6 text-center text-[var(--liquid-on-accent)]">
+          <PartyPopper className="size-8" aria-hidden />
+          <p className="reader-serif mt-3 text-2xl">Você leu a Bíblia toda!</p>
+          <p className="mt-1 text-sm opacity-85">Todos os {total} dias concluídos.</p>
+        </section>
+      )}
 
-          return (
-            <li
-              key={d.id}
-              className="flex items-start justify-between rounded-lg border p-3"
-            >
-              <div>
-                <p className="font-medium">Dia {d.dayNumber}</p>
-                <p className="text-sm text-gray-700">{d.passages}</p>
+      {/* Mapa do ano: cada quadrado é um dia */}
+      <section className="mt-8" aria-label="Mapa do plano">
+        <h2 className="reader-eyebrow mb-3 px-1">Seu ano de leitura</h2>
+        <div
+          className="grid gap-[3px] rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)] p-3"
+          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(12px, 1fr))" }}
+        >
+          {days.map((day) => {
+            const isDone = completed.has(day.id);
+            const isNext = day.id === nextDay?.id;
+            return (
+              <button
+                key={day.id}
+                type="button"
+                onClick={() => jumpTo(day)}
+                title={`Dia ${day.dayNumber}: ${day.passages}${isDone ? " (lido)" : ""}`}
+                aria-label={`Dia ${day.dayNumber}, ${isDone ? "lido" : "pendente"}`}
+                className={cn(
+                  "aspect-square rounded-[3px] transition hover:scale-125",
+                  isDone ? "bg-[var(--liquid-accent)]" : "bg-[var(--muted)]",
+                  isNext && "ring-2 ring-[var(--reader-gold)] ring-offset-1 ring-offset-[var(--reader-surface)]",
+                )}
+              />
+            );
+          })}
+        </div>
+      </section>
 
-                <Link
-                  href={href}
-                  className={`my-1 inline-block rounded-full bg-[var(--liquid-accent)] px-3 py-1.5 text-sm font-semibold text-[var(--liquid-on-accent)] ${
-                    disabled ? "pointer-events-none opacity-50" : "hover:opacity-90"
-                  }`}
+      {/* Lista de dias com filtro */}
+      <section className="mt-8" aria-label="Dias do plano">
+        <div role="tablist" className="mb-3 grid grid-cols-3 rounded-2xl bg-[var(--muted)] p-1">
+          {FILTERS.map((item) => {
+            const active = filter === item.id;
+            const count = item.id === "all" ? total : item.id === "done" ? done : total - done;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setFilter(item.id)}
+                className={cn(
+                  "rounded-xl px-2 py-2 text-sm font-semibold transition",
+                  active ? "bg-[var(--reader-surface)] text-[var(--liquid-ink)] shadow-sm" : "text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]",
+                )}
+              >
+                {item.label} <span className="font-normal opacity-70">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {visible.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-[var(--input)] p-8 text-center text-sm text-[var(--liquid-muted)]">
+            {filter === "done" ? "Nenhum dia concluído ainda. Comece pela próxima leitura!" : "Nenhum dia pendente."}
+          </p>
+        ) : (
+          <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)]">
+            {visible.map((day) => {
+              const isDone = completed.has(day.id);
+              return (
+                <li
+                  key={day.id}
+                  id={`dia-${day.dayNumber}`}
+                  className={cn("flex scroll-mt-24 items-start gap-3 px-4 py-3.5", day.id === nextDay?.id && "bg-[var(--reader-gold)]/8")}
                 >
-                  Ir para o capítulo
-                </Link>
-              </div>
+                  <CheckButton
+                    checked={isDone}
+                    label={`${isDone ? "Desmarcar" : "Marcar"} dia ${day.dayNumber} como lido`}
+                    onToggle={() => toggle(day)}
+                  />
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <p className="text-xs font-bold text-[var(--reader-gold)]">
+                      Dia {day.dayNumber}
+                      {day.id === nextDay?.id && " · próxima leitura"}
+                    </p>
+                    <p className={cn("font-semibold text-[var(--liquid-ink)]", isDone && "text-[var(--liquid-muted)] line-through decoration-1")}>
+                      {day.passages}
+                    </p>
+                    {!isDone && (
+                      <div className="mt-2">
+                        <ChapterLinks passage={day.passages} books={books} version={version} />
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="h-5 w-5"
-                  checked={checked}
-                  onChange={(e) => toggle(d.id, e.currentTarget.checked)}
-                />
-                <span className="text-sm">
-                  {checked ? "Concluído" : "Marcar"}
-                </span>
-              </label>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+      {toast && (
+        <div role="status" className="fixed inset-x-0 bottom-40 z-50 flex justify-center px-4 md:bottom-24">
+          <div className="flex items-center gap-3 rounded-full bg-[var(--liquid-ink)] py-2 pr-2 pl-4 text-sm font-semibold text-[var(--reader-surface)] shadow-lg">
+            {toast.text}
+            {toast.undo ? (
+              <button type="button" onClick={toast.undo} className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
+                Desfazer
+              </button>
+            ) : (
+              <span className="w-1" />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

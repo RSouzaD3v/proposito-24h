@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard } from "lucide-react";
-
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
-import SubscribeWidget from "./SubscribeWidget";
 
 type Item = {
   id: string;
@@ -15,117 +14,103 @@ type Item = {
   isTrial?: boolean;
   statusLabel?: string;
   nextPaymentLabel?: string | null;
-  daysUntilRenewal?: number | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   writer: { id: string; name: string; slug: string | null; logoUrl: string | null };
 };
 
-export default function MySubscriptions({ writerId }: { writerId?: string }) {
+export default function MySubscriptions({ writerSlug, writerName }: { writerSlug?: string; writerName?: string }) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        setErr(null);
-        const res = await fetch("/api/v1/billing/subscriptions", { cache: "no-store" });
-        const ct = res.headers.get("content-type") || "";
-        if (!res.ok || !ct.includes("application/json")) {
-          const text = await res.text();
-          throw new Error(text.slice(0, 140));
-        }
-        const data = await res.json();
-        setItems(Array.isArray(data) ? data : []);
-      } catch (e: unknown) {
-        setErr(e instanceof Error ? e.message : "Falha ao carregar assinaturas.");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetch("/api/v1/billing/subscriptions", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.json();
+      })
+      .then((data) => setItems(Array.isArray(data) ? data : []))
+      .catch(() => setFailed(true))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
-    return <p className="text-muted-foreground text-sm">Carregando assinaturas…</p>;
+    return (
+      <div className="grid gap-3" role="status" aria-label="Carregando assinaturas">
+        <Skeleton className="h-32 rounded-2xl" />
+      </div>
+    );
   }
 
-  if (err) {
-    return <p className="text-sm text-destructive">Erro: {err}</p>;
+  if (failed) {
+    return (
+      <p className="rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)] p-5 text-center text-sm text-[var(--liquid-muted)]">
+        Não foi possível carregar suas assinaturas agora. Tente novamente em instantes.
+      </p>
+    );
   }
 
-  const active = items.filter((s) => s.isActive);
-  const inactive = items.filter((s) => !s.isActive);
+  const active = items.filter((item) => item.isActive);
+  const history = items.filter((item) => !item.isActive);
 
   return (
-    <div className="space-y-8">
-      {writerId && !active.length ? (
-        <section className="rounded-xl border bg-card p-6 shadow-sm">
-          <h2 className="mb-2 text-lg font-semibold">Comece com 7 dias grátis</h2>
-          <p className="text-muted-foreground mb-4 text-sm">
-            Teste o conteúdo exclusivo do escritor. Após o período de teste, a assinatura é renovada
-            automaticamente conforme o plano escolhido.
-          </p>
-          <SubscribeWidget writerId={writerId} />
-        </section>
-      ) : null}
-
+    <div className="grid gap-8">
       {active.length > 0 ? (
-        <section className="space-y-4">
-          <h2 className="flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            <CreditCard className="size-4" />
-            Assinaturas ativas
-          </h2>
-          {active.map((s) => (
+        <section className="grid gap-3">
+          {active.map((item) => (
             <SubscriptionStatusCard
-              key={s.id}
-              writerId={s.writerId}
-              writerName={s.writer.name}
-              writerSlug={s.writer.slug}
-              writerLogoUrl={s.writer.logoUrl}
-              status={s.status}
-              isActive={s.isActive}
-              isTrial={s.isTrial}
-              lifetime={s.lifetime}
-              statusLabel={s.statusLabel}
-              nextPaymentLabel={s.nextPaymentLabel}
-              cancelAtPeriodEnd={s.cancelAtPeriodEnd}
-              currentPeriodEnd={s.currentPeriodEnd}
+              key={item.id}
+              writerId={item.writerId}
+              writerName={item.writer.name}
+              writerSlug={item.writer.slug}
+              writerLogoUrl={item.writer.logoUrl}
+              status={item.status}
+              isActive
+              isTrial={item.isTrial}
+              lifetime={item.lifetime}
+              statusLabel={item.statusLabel}
+              nextPaymentLabel={item.nextPaymentLabel}
+              cancelAtPeriodEnd={item.cancelAtPeriodEnd}
+              currentPeriodEnd={item.currentPeriodEnd}
             />
           ))}
         </section>
-      ) : null}
-
-      {!active.length && !writerId ? (
-        <div className="rounded-xl border border-dashed p-8 text-center">
-          <p className="text-muted-foreground mb-2">Você ainda não possui assinaturas ativas.</p>
-          <p className="text-sm text-muted-foreground">
-            Acesse a vitrine do escritor para assinar e liberar conteúdos exclusivos.
+      ) : (
+        <div className="rounded-2xl border border-dashed border-[var(--input)] p-8 text-center">
+          <p className="font-semibold text-[var(--liquid-ink)]">Você ainda não tem uma assinatura ativa</p>
+          <p className="mt-1 text-sm text-[var(--liquid-muted)]">
+            Assine para liberar os conteúdos exclusivos{writerName ? ` de ${writerName.trim()}` : ""}.
           </p>
+          {writerSlug && (
+            <Link
+              href={`/reader/area/w/${writerSlug}`}
+              className="mt-5 inline-flex h-11 items-center rounded-xl bg-[var(--liquid-accent)] px-5 text-sm font-bold text-[var(--liquid-on-accent)] transition hover:brightness-95"
+            >
+              Ver planos
+            </Link>
+          )}
         </div>
-      ) : null}
+      )}
 
-      {inactive.length > 0 ? (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Histórico
-          </h2>
-          {inactive.map((s) => (
+      {history.length > 0 && (
+        <section className="grid gap-3">
+          <h2 className="reader-eyebrow">Histórico</h2>
+          {history.map((item) => (
             <SubscriptionStatusCard
-              key={s.id}
-              writerId={s.writerId}
-              writerName={s.writer.name}
-              writerSlug={s.writer.slug}
-              writerLogoUrl={s.writer.logoUrl}
-              status={s.status}
+              key={item.id}
+              writerId={item.writerId}
+              writerName={item.writer.name}
+              writerSlug={active.length ? null : item.writer.slug}
+              writerLogoUrl={item.writer.logoUrl}
+              status={item.status}
               isActive={false}
-              statusLabel={s.statusLabel}
+              statusLabel={item.statusLabel}
               showManage={false}
             />
           ))}
         </section>
-      ) : null}
+      )}
     </div>
   );
 }
-

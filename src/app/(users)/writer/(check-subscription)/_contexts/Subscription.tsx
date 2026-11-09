@@ -1,9 +1,11 @@
-import { apiFetch } from "@/lib/api/server";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/authOption";
-import { getServerSession } from "next-auth";
-import Link from "next/link";
 import { ReactNode } from "react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { LockKeyhole } from "lucide-react";
+import { StatusScreen, statusPrimaryButton } from "@/components/subscriptions/StatusScreen";
+import { apiFetch } from "@/lib/api/server";
+import { authOptions } from "@/lib/authOption";
 import GateSignOut from "../_components/GateSignOut";
 
 export default async function SubscriptionWriter({ children }: { children: ReactNode }) {
@@ -20,35 +22,16 @@ export default async function SubscriptionWriter({ children }: { children: React
 
   if (!subscription) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 rounded-lg shadow-md p-8">
-        <svg
-          width="48"
-          height="48"
-          fill="none"
-          viewBox="0 0 24 24"
-          className="mb-4"
-        >
-          <circle cx="12" cy="12" r="10" fill="#e0e7ff" />
-          <path
-            d="M12 8v4m0 4h.01"
-            stroke="#6366f1"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <p className="text-lg text-gray-700 mb-2">Você precisa se cadastrar</p>
-        <span className="text-gray-500 text-base">
-          Para acessar este conteúdo, faça seu cadastro como escritor.
-        </span>
-        <Link
-          className="bg-blue-600 text-white rounded-md px-4 py-2 my-5"
-          href={"/writer/subscription"}
-        >
-          Assinar Agora
+      <StatusScreen
+        icon={<LockKeyhole className="size-5" aria-hidden />}
+        title="Sua assinatura não está ativa"
+        text="Ative a assinatura da plataforma para publicar conteúdo e manter seu espaço no ar para os leitores."
+      >
+        <Link href="/writer/subscription" className={statusPrimaryButton}>
+          Ativar assinatura
         </Link>
         <GateSignOut />
-      </div>
+      </StatusScreen>
     );
   }
 

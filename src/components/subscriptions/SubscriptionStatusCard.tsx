@@ -1,17 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarClock, Crown, Sparkles } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CalendarClock } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { cn } from "@/lib/utils";
+import { formatDate } from "./billing";
 import ManageSubscription from "./ManageSubscription";
 
 type Props = {
@@ -45,67 +38,55 @@ export default function SubscriptionStatusCard({
   cancelAtPeriodEnd,
   showManage = true,
 }: Props) {
-  const statusVariant = isActive ? (isTrial ? "secondary" : "default") : "outline";
+  const name = writerName.trim();
+  const badge = lifetime ? "Vitalício" : isTrial && isActive ? "Teste grátis" : (statusLabel ?? status);
 
   return (
-    <Card className="border-border/60 overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
-          {writerLogoUrl ? (
-            <img
-              src={writerLogoUrl}
-              alt=""
-              className="size-12 rounded-full object-cover ring-2 ring-primary/15"
-            />
-          ) : (
-            <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Crown className="size-5" />
-            </div>
-          )}
-          <div className="min-w-0 flex-1 space-y-1">
-            <CardTitle className="text-lg">{writerName}</CardTitle>
-            <CardDescription className="flex flex-wrap items-center gap-2">
-              <Badge variant={statusVariant as "default" | "secondary" | "outline"}>
-                {lifetime ? "Vitalício" : statusLabel ?? status}
-              </Badge>
-              {isTrial && isActive ? (
-                <span className="inline-flex items-center gap-1 text-xs text-amber-700">
-                  <Sparkles className="size-3.5" />
-                  Teste grátis
-                </span>
-              ) : null}
-            </CardDescription>
-          </div>
+    <article className="grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)] p-5">
+      <div className="flex items-center gap-3">
+        {writerLogoUrl ? (
+          <OptimizedImage src={writerLogoUrl} alt="" width={48} height={48} className="size-12 shrink-0 rounded-xl object-contain" />
+        ) : (
+          <span className="reader-serif grid size-12 shrink-0 place-items-center rounded-xl bg-[var(--muted)] text-xl">
+            {name.charAt(0).toUpperCase()}
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="reader-serif truncate text-lg text-[var(--liquid-ink)]">{name}</p>
+          <span
+            className={cn(
+              "mt-0.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold",
+              isActive
+                ? "bg-emerald-600/12 text-emerald-800 dark:text-emerald-300"
+                : "bg-[var(--muted)] text-[var(--liquid-muted)]",
+            )}
+          >
+            {badge}
+          </span>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4">
-        {isActive && nextPaymentLabel ? (
-          <div className="flex items-start gap-2 rounded-lg border bg-muted/40 px-3 py-2.5 text-sm">
-            <CalendarClock className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-            <div>
-              <p className="font-medium">{nextPaymentLabel}</p>
-              {currentPeriodEnd ? (
-                <p className="text-muted-foreground text-xs">
-                  Até{" "}
-                  {new Date(currentPeriodEnd).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
+      {isActive && (nextPaymentLabel || currentPeriodEnd) && !cancelAtPeriodEnd && (
+        <p className="flex items-start gap-2 text-sm text-[var(--liquid-muted)]">
+          <CalendarClock className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            {nextPaymentLabel && <span className="block font-medium text-[var(--liquid-ink)]">{nextPaymentLabel}</span>}
+            {currentPeriodEnd && <span className="block">Período atual até {formatDate(currentPeriodEnd)}</span>}
+          </span>
+        </p>
+      )}
 
-        {!isActive && writerSlug ? (
-          <Button asChild className="w-full sm:w-auto">
-            <Link href={`/reader/area/w/${writerSlug}`}>Assinar agora</Link>
-          </Button>
-        ) : null}
+      {!isActive && writerSlug && (
+        <Link
+          href={`/reader/area/w/${writerSlug}`}
+          className="inline-flex h-10 w-fit items-center rounded-xl bg-[var(--liquid-accent)] px-4 text-sm font-bold text-[var(--liquid-on-accent)] transition hover:brightness-95"
+        >
+          Assinar novamente
+        </Link>
+      )}
 
-        {showManage && isActive ? (
+      {showManage && isActive && !lifetime && (
+        <div className="border-t border-[var(--border)] pt-4">
           <ManageSubscription
             writerId={writerId}
             status={status}
@@ -113,8 +94,8 @@ export default function SubscriptionStatusCard({
             currentPeriodEnd={currentPeriodEnd ?? null}
             isTrial={isTrial}
           />
-        ) : null}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </article>
   );
 }

@@ -1,37 +1,26 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { LockKeyhole } from "lucide-react";
 
 export function ScreenSubscription({ slug }: { slug: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200 px-4">
-      <div className="flex w-full max-w-lg flex-col items-center rounded-2xl border bg-white/90 px-8 py-10 text-center shadow-xl">
-        <Sparkles className="mb-4 size-10 text-amber-500" />
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Conteúdo exclusivo
+    <div className="grid min-h-[70vh] place-items-center px-4 py-10">
+      <div className="flex w-full max-w-md flex-col items-center rounded-3xl border border-[var(--border)] bg-[var(--reader-surface)] px-6 py-10 text-center">
+        <span className="grid size-12 place-items-center rounded-full bg-[var(--reader-gold)]/15 text-[var(--reader-gold)]">
+          <LockKeyhole className="size-5" aria-hidden />
+        </span>
+        <p className="reader-eyebrow mt-5">Conteúdo exclusivo</p>
+        <h2 className="mt-2 text-2xl text-[var(--liquid-ink)]">Disponível para assinantes</h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--liquid-muted)]">
+          Assine para liberar este e os demais conteúdos exclusivos do seu escritor.
         </p>
-        <h2 className="mt-2 text-2xl font-bold text-foreground">
-          Assinatura necessária
-        </h2>
-        <p className="mt-3 text-muted-foreground">
-          Este conteúdo faz parte do plano do escritor. Comece com o teste grátis (até 7 dias,
-          conforme o plano) e continue com a assinatura para manter o acesso.
-        </p>
-
-        <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button variant="outline" asChild>
-            <Link href="/reader/area">Voltar</Link>
-          </Button>
-          <Button asChild>
-            <Link href={`/reader/area/w/${slug}`}>Ver planos e assinar</Link>
-          </Button>
-        </div>
         <Link
-          href="/reader/area/subscription"
-          className="mt-4 text-sm text-primary underline-offset-4 hover:underline"
+          href={`/reader/area/w/${slug}`}
+          className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[var(--liquid-accent)] text-[15px] font-bold text-[var(--liquid-on-accent)] transition hover:brightness-95"
         >
-          Já assinou? Gerenciar assinatura
+          Ver planos
+        </Link>
+        <Link href="/reader/area" className="mt-4 text-sm font-semibold text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]">
+          Voltar para o início
         </Link>
       </div>
     </div>

@@ -175,6 +175,10 @@
 }
 
 .liquid-shell {
+  /* Componentes compartilhados com a área do leitor; a área do leitor redefine estes valores. */
+  --reader-surface: rgb(255 255 255 / 0.85);
+  --reader-gold: var(--liquid-accent);
+  --liquid-on-accent: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display",
     "SF Pro Text", system-ui, sans-serif;
   color: var(--liquid-ink);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,8 +57,23 @@ export default function TeacherBibleAI({
     return text || fallback;
   }
 
-  async function handleAsk() {
-    if (!prompt?.trim()) return;
+  // A Bíblia pede explicações de versículos por um evento, sem acoplar as telas ao chat.
+  useEffect(() => {
+    const onAsk = (event: Event) => {
+      const text = (event as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      if (!text) return;
+      setPrompt(text);
+      setMinimized(false);
+      setOpen(true);
+      void handleAsk(text);
+    };
+    window.addEventListener("bible-ai:ask", onAsk);
+    return () => window.removeEventListener("bible-ai:ask", onAsk);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleAsk(question = prompt) {
+    if (!question?.trim()) return;
     setLoading(true);
     setErrorMsg("");
     setAnswer("");
@@ -66,7 +81,7 @@ export default function TeacherBibleAI({
       const res = await fetch("/api/v1/ai/teacher", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: question }),
       });
 
       let data: { text?: string; message?: unknown } = {};
@@ -170,7 +185,7 @@ export default function TeacherBibleAI({
                   <span className="text-xs text-muted-foreground">
                     Dica: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> para enviar
                   </span>
-                  <Button onClick={handleAsk} disabled={loading}>
+                  <Button onClick={() => handleAsk()} disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

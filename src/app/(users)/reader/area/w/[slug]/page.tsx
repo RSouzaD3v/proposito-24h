@@ -1,31 +1,16 @@
-import { apiGet, apiGetOrNull } from "@/lib/api/server";
-import type { ReaderProfile } from "@/lib/api/types";
-import SubscribeWidget from "@/components/subscriptions/SubscribeWidget";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
+import { BackButton } from "@/components/ui/back-button";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import SubscribeWidget from "@/components/subscriptions/SubscribeWidget";
+import { apiGetOrNull } from "@/lib/api/server";
+import type { ReaderProfile } from "@/lib/api/types";
 import { authOptions } from "@/lib/authOption";
-import { Button } from "@/components/ui/button";
 
-export default async function WriterPublicPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function WriterPlansPage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session) {
-    return (
-      <div className="max-w-3xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <p className="text-lg font-semibold text-neutral-700">
-            Você precisa estar logado para acessar esta página.
-          </p>
-          <Button asChild className="mt-4">
-            <Link href="/sign-in">Entrar</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!session) redirect("/login");
 
   const { slug } = await params;
   const profile = await apiGetOrNull<ReaderProfile>("/reader/profile");
@@ -33,74 +18,35 @@ export default async function WriterPublicPage({
 
   if (!writer) {
     return (
-      <main className="max-w-3xl mx-auto p-6 text-center space-y-4">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <p className="text-lg font-semibold text-red-600">Escritor não encontrado.</p>
-          <Link href="/reader/area" className="text-blue-600 hover:underline">
-            Voltar para a página inicial
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  const { isActive } = await apiGet<{ isActive: boolean }>("/billing/subscription");
-
-  if (isActive) {
-    return (
-      <main className="mx-auto max-w-2xl space-y-6 p-6">
-        <header className="rounded-xl bg-white p-8 text-center shadow-md">
-          <p className="text-lg font-semibold text-green-700">Sua assinatura está ativa.</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Gerencie renovação, teste grátis ou cancelamento na área de assinaturas.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button asChild>
-              <Link href="/reader/area/subscription">Gerenciar assinatura</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/reader/area">Voltar ao início</Link>
-            </Button>
-          </div>
-        </header>
-      </main>
-    );
-  }
-
-  return (
-    <main className="mx-auto max-w-2xl space-y-8 p-6">
-      <header className="flex flex-col items-center gap-4 rounded-xl bg-white p-8 shadow-md">
-        {writer.logoUrl ? (
-          <img
-            src={writer.logoUrl}
-            alt={writer.name}
-            className="h-24 w-24 rounded-full border-4 border-blue-200 object-cover shadow"
-          />
-        ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-100 text-4xl font-bold text-blue-400 shadow">
-            {writer.name[0]}
-          </div>
-        )}
-        <h1 className="text-4xl font-bold text-neutral-800">{writer.name}</h1>
-        <p className="mt-2 max-w-md text-center text-lg text-neutral-500">
-          Teste grátis por 7 dias (conforme plano do escritor) e apoie este ministério com conteúdo
-          exclusivo.
-        </p>
-      </header>
-
-      <section className="flex flex-col items-center rounded-xl bg-gradient-to-br from-blue-50 to-white p-8 shadow-md">
-        <h2 className="mb-4 text-2xl font-semibold text-blue-700">Assine agora</h2>
-        <SubscribeWidget writerId={writer.id} />
-        <p className="mt-4 text-sm text-neutral-500">
-          Cancele quando quiser. Após o teste, a cobrança segue o plano escolhido.
-        </p>
-      </section>
-
-      <div className="flex justify-center">
-        <Link href="/reader/area" className="text-blue-600 hover:underline">
-          Voltar para a página inicial
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <h1 className="text-2xl text-[var(--liquid-ink)]">Escritor não encontrado</h1>
+        <p className="mt-2 text-sm text-[var(--liquid-muted)]">Você só pode assinar o escritor vinculado à sua conta.</p>
+        <Link href="/reader/area" className="mt-6 inline-block text-sm font-semibold underline underline-offset-4">
+          Voltar para o início
         </Link>
       </div>
-    </main>
+    );
+  }
+
+  const name = writer.name.trim();
+  return (
+    <div className="mx-auto max-w-xl px-4 py-8">
+      <BackButton href="/reader/area" className="mb-6" />
+      <header className="mb-8 flex items-center gap-4">
+        {writer.logoUrl ? (
+          <OptimizedImage src={writer.logoUrl} alt="" width={64} height={64} className="size-16 shrink-0 rounded-2xl object-contain" />
+        ) : (
+          <span className="reader-serif grid size-16 shrink-0 place-items-center rounded-2xl bg-[var(--muted)] text-2xl">
+            {name.charAt(0).toUpperCase()}
+          </span>
+        )}
+        <div className="min-w-0">
+          <p className="reader-eyebrow">Assinatura</p>
+          <h1 className="mt-1 text-[1.75rem] leading-tight text-[var(--liquid-ink)]">Assine {name}</h1>
+          <p className="mt-1 text-sm text-[var(--liquid-muted)]">Libere todos os conteúdos exclusivos deste escritor.</p>
+        </div>
+      </header>
+      <SubscribeWidget writerId={writer.id} />
+    </div>
   );
 }
