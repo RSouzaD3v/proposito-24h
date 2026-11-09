@@ -1,5 +1,5 @@
 "use client";
-import { Gamepad } from "lucide-react";
+import { Gamepad, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaTree } from "react-icons/fa";
@@ -45,6 +45,13 @@ export const MenuPainel = ({ colors }: MenuPainelProps) => {
       match: (path: string) =>
         path.startsWith("/reader/area/bible-nvi") ||
         path.startsWith("/reader/area/bible-acf"),
+    },
+    {
+      id: 6,
+      name: "Caderno",
+      icon: <NotebookPen size={22} />,
+      link: "/reader/area/prayer-journal",
+      match: (path: string) => path.startsWith("/reader/area/prayer-journal"),
     },
     {
       id: 4,

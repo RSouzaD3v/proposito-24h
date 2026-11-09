@@ -97,7 +97,7 @@ export default function TeacherBibleAI({
   // Minimizado: mostra só um botão no canto direito
   if (minimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-24 right-4 z-50 md:bottom-4">
         <Button
           className="rounded-full shadow-lg px-4 h-11"
           onClick={() => {
