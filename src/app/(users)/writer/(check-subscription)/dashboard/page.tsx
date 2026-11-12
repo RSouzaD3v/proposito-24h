@@ -23,6 +23,7 @@ import {
   Plus,
   Settings,
   Sparkles,
+  Wallet,
 } from "lucide-react";
 
 const ITEMS_NAV = [
@@ -30,6 +31,7 @@ const ITEMS_NAV = [
   { title: "Diários Agrupamento", href: "/writer/group-daily", icon: <FolderOpen className="size-6" /> },
   { title: "Minhas Publicações", href: "/writer/publications", icon: <Library className="size-6" /> },
   { title: "Meus Insights", href: "/writer/analytics", icon: <LineChart className="size-6" /> },
+  { title: "Recebimentos", href: "/writer/payments", icon: <Wallet className="size-6" /> },
   { title: "Configurações", href: "/writer/settings", icon: <Settings className="size-6" /> },
   { title: "Mais Recursos", href: "/writer/profile", icon: <Sparkles className="size-6" /> },
   { title: "Personalização cliente", href: "/writer/personalization", icon: <Palette className="size-6" /> },

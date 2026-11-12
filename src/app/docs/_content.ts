@@ -19,13 +19,11 @@ export const READER_DOCS: DocSection[] = [
         title: "Como criar minha conta",
         summary: "Sua conta é criada a partir do escritor que você quer acompanhar.",
         steps: [
-          "Abra a página de escritores.",
-          "Clique no escritor para ver o que ele já publicou.",
-          "Toque em “Criar conta com este escritor”.",
+          "Abra o link (endereço) do escritor que você quer acompanhar.",
+          "Toque em “Criar minha conta”.",
           "Preencha nome, e-mail e senha e confirme.",
         ],
-        note: "Sua conta fica vinculada ao escritor escolhido e, por enquanto, essa escolha é vitalícia.",
-        link: { href: "/escritores", label: "Ver escritores" },
+        note: "Sua conta fica vinculada ao escritor do link e, por enquanto, essa escolha é vitalícia.",
       },
       {
         id: "trocar-escritor",
@@ -270,14 +268,6 @@ export const WRITER_DOCS: DocSection[] = [
         title: "Gerenciar minha assinatura",
         summary: "Em Configurações você vê seus planos e as preferências da conta. Os pagamentos são processados pelo Asaas.",
         link: { href: "/writer/settings", label: "Abrir Configurações" },
-      },
-      {
-        id: "diretorio",
-        title: "Como apareço na página de escritores",
-        summary:
-          "Todos os escritores aparecem na página pública. A ordem padrão muda todo dia, sem considerar tamanho de audiência.",
-        note: "Quem publicou nos últimos 90 dias aparece antes de quem está parado.",
-        link: { href: "/escritores", label: "Ver página de escritores" },
       },
     ],
   },

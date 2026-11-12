@@ -1,4 +1,4 @@
-import { CircleHelp, CreditCard, Layers, Palette, UserRound } from "lucide-react";
+import { CircleHelp, CreditCard, Layers, Palette, UserRound, Wallet } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { WriterShell } from "@/components/ui/writer-shell";
@@ -43,7 +43,7 @@ export default async function WriterSettingsPage() {
       )}
 
       <div className="grid gap-7">
-        <SettingsGroup title="Assinatura">
+        <SettingsGroup title="Assinatura e recebimentos">
           <SettingsLink
             href="/writer/subscription"
             icon={CreditCard}
@@ -55,6 +55,12 @@ export default async function WriterSettingsPage() {
                   : "Ativa"
                 : "Inativa"
             }
+          />
+          <SettingsLink
+            href="/writer/payments"
+            icon={Wallet}
+            title="Recebimentos"
+            description="Conta Stripe ou Asaas, comissão e como seus leitores pagam"
           />
         </SettingsGroup>
 
@@ -85,7 +91,7 @@ export default async function WriterSettingsPage() {
         </SettingsGroup>
 
         <p className="px-1 text-[13px] leading-relaxed text-[var(--liquid-muted)]">
-          Os pagamentos dos seus leitores e as vendas são processados pela plataforma via Asaas.
+          Os pagamentos dos seus leitores caem na conta que você conectar em Recebimentos, já descontada a comissão da plataforma.
         </p>
 
         <SignOutButton />

@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import WriterRevenueAreaChart from "./_charts/WriterRevenueAreaChart";
 import WriterTopProductsBarChart from "./_charts/WriterTopProductsBarChart";
 import WriterSubsDonut from "./_charts/WriterSubsDonut";
+import { WriterCommissionCard } from "./_components/WriterCommissionCard";
 import { Suspense } from "react";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -59,6 +60,10 @@ export default async function AdminWriterDetail({
         <Kpi title="Vendas (período)" value={String(data.sales)} />
         <Kpi title="Assinantes" value={String(subs)} hint="ativos + vitalícios" />
         <Kpi title="Leitores totais" value={String(readers)} />
+      </div>
+
+      <div className="max-w-xl">
+        <WriterCommissionCard writerId={writer.id} initialBps={writer.commissionBps} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

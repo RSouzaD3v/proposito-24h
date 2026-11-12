@@ -22,6 +22,9 @@ const visibilities = [
     { value: "SUBSCRIPTION", label: "Somente assinantes" },
 ];
 
+/** A API aceita de 0 a 100 capítulos de degustação. */
+const clampPreview = (value: string) => Math.min(100, Math.max(0, Math.trunc(Number(value) || 0)));
+
 export default function WriterPublicationCreatePage({ params }: { params: Promise<{ bookId: string }> }) {
     const router = useRouter();
     const [form, setForm] = useState({
@@ -38,7 +41,8 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
         tags: "",
         isPdf: false,
         pdfUrl: "",
-        category: "Outros"
+        category: "Outros",
+        freePreviewChapters: "0",
     });
 
     const [loading, setLoading] = useState(false);
@@ -68,6 +72,7 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                     isPdf: data.isPdf === true || data.isPdf === "true",
                     pdfUrl: data.pdfUrl ?? "",
                     category: data.category ?? "Outros",
+                    freePreviewChapters: String(data.freePreviewChapters ?? 0),
                 });
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Erro ao carregar publicação");
@@ -111,6 +116,8 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                     tags: form.tags,
                     isPdf: hasPdf,
                     pdfUrl: hasPdf ? form.pdfUrl : null,
+                    freePreviewChapters:
+                        form.visibility === "PAID" && !hasPdf ? clampPreview(form.freePreviewChapters) : 0,
                     price:
                         form.visibility === "PAID"
                             ? form.price === ""
@@ -213,6 +220,28 @@ export default function WriterPublicationCreatePage({ params }: { params: Promis
                         </div>
                     )}
 
+
+                    {form.visibility === "PAID" && !form.pdfUrl && (
+                        <div>
+                            <label htmlFor="freePreviewChapters" className="block font-semibold text-gray-700 mb-1">
+                                Capítulos grátis (degustação)
+                            </label>
+                            <input
+                                id="freePreviewChapters"
+                                type="number"
+                                name="freePreviewChapters"
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={form.freePreviewChapters}
+                                onChange={handleChange}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200"
+                            />
+                            <p className="mt-1 text-sm text-gray-500">
+                                Os primeiros capítulos que qualquer leitor pode ler antes de comprar ou assinar. Use 0 para nenhum.
+                            </p>
+                        </div>
+                    )}
 
           {/* PDF opcional — pode coexistir com a versão escrita (capítulos) */}
           <div className="sm:col-span-2">

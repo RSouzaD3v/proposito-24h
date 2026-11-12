@@ -27,14 +27,9 @@ export const Header = ({
         </Link>
         <nav className="flex shrink-0 items-center gap-5 sm:gap-7" aria-label="Principal">
           {showPlatformLinks && (
-            <>
-              <Link href="/escritores" className={`${linkClass} hidden sm:inline`}>
-                Escritores
-              </Link>
-              <Link href="/docs" className={`${linkClass} hidden sm:inline`}>
-                Documentação
-              </Link>
-            </>
+            <Link href="/docs" className={`${linkClass} hidden sm:inline`}>
+              Documentação
+            </Link>
           )}
           <Link href="/bible-nvi" className={linkClass}>
             Bíblia

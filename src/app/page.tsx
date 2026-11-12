@@ -112,9 +112,9 @@ function PlatformHome() {
 
       <section className="bg-[var(--reader-surface)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-[15px] sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p className="text-[var(--liquid-muted)]">Quer apenas ler? Escolha um escritor e crie sua conta.</p>
-          <Link href="/escritores" className="font-bold underline decoration-[var(--reader-gold)] underline-offset-4">
-            Conhecer os escritores
+          <p className="text-[var(--liquid-muted)]">Quer apenas ler? Crie sua conta pelo link do escritor que você acompanha.</p>
+          <Link href="/docs/leitor#criar-conta" className="font-bold underline decoration-[var(--reader-gold)] underline-offset-4">
+            Como criar minha conta
           </Link>
         </div>
       </section>

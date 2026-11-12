@@ -16,6 +16,8 @@ type PreviewBook = {
   price: number | null;
   visibility: string;
   pdfUrl: string | null;
+  isPdf?: boolean;
+  freePreviewChapters?: number;
   chapters: { title: string; subtitle: string | null; content: string; coverUrl: string | null }[];
 };
 
@@ -52,7 +54,10 @@ export default async function WriterBookPreviewPage({
 
   const accessMode = book.visibility !== "PAID" ? "FREE" : book.price && book.price >= 1 ? "PAID" : "SUBSCRIPTION";
   if (as === "locked" && accessMode !== "FREE") {
-    return <LockedBook bookId={book.id} book={{ ...book, accessMode }} backHref={LIBRARY} preview />;
+    // Mesma regra da API: PDF não tem degustação; os primeiros capítulos grátis aparecem completos.
+    const free = book.isPdf ? 0 : (book.freePreviewChapters ?? 0);
+    const lockedChapters = book.chapters.map((item, index) => ({ ...item, preview: index < free }));
+    return <LockedBook bookId={book.id} book={{ ...book, accessMode, chapters: lockedChapters }} backHref={LIBRARY} preview />;
   }
 
   return (

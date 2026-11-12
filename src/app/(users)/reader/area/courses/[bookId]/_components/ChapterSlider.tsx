@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, List, Type } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, List, Lock, Type } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
 import ReaderControls, { type ReaderPanel } from "./ReaderControls";
@@ -23,6 +23,8 @@ type Props = {
   onChange: (index: number) => void;
   onExit: () => void;
   libraryHref?: string;
+  /** Livro bloqueado com degustação: depois do último capítulo grátis vem o convite para desbloquear. */
+  lockedNext?: { title: string; onUnlock: () => void };
 };
 
 const PALETTES: Record<ReaderTheme, Record<string, string>> = {
@@ -70,7 +72,7 @@ function toSafeHtml(raw: string) {
 
 const barButton = "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[var(--book-line)]";
 
-function Reader({ bookTitle, chapters, index, onChange, onExit, libraryHref = "/reader/area/courses" }: Omit<Props, "bookId">) {
+function Reader({ bookTitle, chapters, index, onChange, onExit, libraryHref = "/reader/area/courses", lockedNext }: Omit<Props, "bookId">) {
   const { prefs } = useReaderPrefs();
   const [panel, setPanel] = useState<ReaderPanel>(null);
 
@@ -141,7 +143,23 @@ function Reader({ bookTitle, chapters, index, onChange, onExit, libraryHref = "/
         />
 
         <div className="mt-14 border-t border-[var(--book-line)] pt-8 text-center" style={{ fontFamily: "var(--font-reader-sans), system-ui, sans-serif" }}>
-          {isLast ? (
+          {isLast && lockedNext ? (
+            <div className="rounded-3xl border border-[var(--book-line)] bg-[var(--book-surface)] p-6">
+              <p className="reader-eyebrow">Fim da amostra grátis</p>
+              <p className="reader-serif mt-2 text-2xl leading-snug">Gostou? Continue a leitura.</p>
+              <p className="mt-3 flex items-center justify-center gap-2 text-sm text-[var(--book-muted)]">
+                <Lock className="size-4 shrink-0" aria-hidden />
+                <span className="min-w-0">Próximo capítulo: {lockedNext.title}</span>
+              </p>
+              <button
+                type="button"
+                onClick={lockedNext.onUnlock}
+                className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--liquid-accent)] px-6 text-sm font-bold text-[var(--liquid-on-accent)]"
+              >
+                Desbloquear o livro
+              </button>
+            </div>
+          ) : isLast ? (
             <>
               <p className="reader-eyebrow">Fim do livro</p>
               <p className="reader-serif mt-2 text-2xl">Que esta leitura frutifique em você.</p>

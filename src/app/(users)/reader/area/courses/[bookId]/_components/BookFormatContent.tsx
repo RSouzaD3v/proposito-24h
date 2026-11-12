@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BookOpen, FileText } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { BookOpen, FileText, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BookHero } from "./BookHero";
@@ -28,15 +28,29 @@ type Props = {
   trackProgress?: boolean;
   /** Última posição registrada no servidor, possivelmente em outro aparelho. */
   serverProgress?: { currentChapter: number; lastReadAt: string } | null;
+  /** Livro sem acesso com degustação: só os capítulos antes deste índice podem ser lidos. */
+  lockedFrom?: number;
+  /** Opções de compra/assinatura mostradas quando há capítulos bloqueados. */
+  paywall?: ReactNode;
 };
+
+const PAYWALL_ID = "desbloquear";
+
+function scrollToPaywall() {
+  // Espera a tela do livro voltar a ser montada depois de sair do modo leitura.
+  setTimeout(() => document.getElementById(PAYWALL_ID)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+}
 
 // Tempo no capítulo para contar como lido: folhear não entra nas métricas do escritor.
 const PROGRESS_DWELL_MS = 3000;
 
-export default function BookFormatContent({ bookId, title, subtitle, description, coverUrl, pdfUrl, chapters, libraryHref, trackProgress = false, serverProgress = null }: Props) {
+export default function BookFormatContent({ bookId, title, subtitle, description, coverUrl, pdfUrl, chapters, libraryHref, trackProgress = false, serverProgress = null, lockedFrom, paywall }: Props) {
   const [reading, setReading] = useState(false);
   const [storedIndex, setIndex] = useLocalStorage<number>(`reader:${bookId}:chapterIndex`, 0);
-  const index = Math.min(Math.max(storedIndex, 0), Math.max(chapters.length - 1, 0));
+  const locked = lockedFrom !== undefined;
+  const readable = locked ? Math.min(Math.max(lockedFrom, 0), chapters.length) : chapters.length;
+  const readableChapters = locked ? chapters.slice(0, readable) : chapters;
+  const index = Math.min(Math.max(storedIndex, 0), Math.max(readable - 1, 0));
 
   const readAtKey = `reader:${bookId}:lastReadAt`;
 
@@ -86,17 +100,31 @@ export default function BookFormatContent({ bookId, title, subtitle, description
       <ChapterSlider
         bookId={bookId}
         bookTitle={title}
-        chapters={chapters}
+        chapters={readableChapters}
         index={index}
         onChange={setIndex}
         onExit={() => setReading(false)}
         libraryHref={libraryHref}
+        lockedNext={
+          locked && readable < chapters.length
+            ? {
+                title: chapters[readable].title,
+                onUnlock: () => {
+                  setReading(false);
+                  scrollToPaywall();
+                },
+              }
+            : undefined
+        }
       />
     );
   }
 
   const count = chapters.length;
-  const meta = count > 0 ? `${count} ${count === 1 ? "capítulo" : "capítulos"}` : "Livro em PDF";
+  const meta =
+    count > 0
+      ? `${count} ${count === 1 ? "capítulo" : "capítulos"}${locked && readable > 0 ? ` · ${readable} grátis` : ""}`
+      : "Livro em PDF";
 
   return (
     <>
@@ -104,10 +132,14 @@ export default function BookFormatContent({ bookId, title, subtitle, description
 
       <div className="mx-auto w-full max-w-2xl space-y-8 px-5 pt-6 animate-glass-in">
         <div className="space-y-3">
-          {count > 0 && (
+          {readable > 0 && (
             <Button variant="glass-primary" onClick={() => open(index)} className="h-12 w-full rounded-full text-sm font-bold">
               <BookOpen className="size-4" />
-              {index > 0 ? `Continuar no capítulo ${index + 1}` : "Começar a ler"}
+              {index > 0
+                ? `Continuar no capítulo ${index + 1}`
+                : locked
+                  ? `Ler amostra grátis (${readable} ${readable === 1 ? "capítulo" : "capítulos"})`
+                  : "Começar a ler"}
             </Button>
           )}
           {pdfUrl && (
@@ -117,10 +149,16 @@ export default function BookFormatContent({ bookId, title, subtitle, description
               </a>
             </Button>
           )}
-          {count === 0 && !pdfUrl && (
+          {count === 0 && !pdfUrl && !locked && (
             <p className="text-center text-sm text-[var(--liquid-muted)]">Este livro ainda não tem conteúdo disponível.</p>
           )}
         </div>
+
+        {paywall && (
+          <section id={PAYWALL_ID} className="scroll-mt-6">
+            {paywall}
+          </section>
+        )}
 
         {description && (
           <section>
@@ -133,20 +171,31 @@ export default function BookFormatContent({ bookId, title, subtitle, description
           <section>
             <h2 className="mb-3 text-xl">Capítulos</h2>
             <ol className="glass-surface-strong divide-y divide-[var(--border)] overflow-hidden">
-              {chapters.map((chapter, chapterIndex) => (
-                <li key={chapterIndex}>
-                  <button
-                    type="button"
-                    onClick={() => open(chapterIndex)}
-                    className="flex min-h-14 w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[var(--muted)]"
-                  >
-                    <span className="reader-serif w-6 shrink-0 text-center text-[var(--reader-gold)] tabular-nums">{chapterIndex + 1}</span>
-                    <span className={cn("min-w-0 flex-1 text-sm font-semibold", chapterIndex === index && index > 0 && "text-[var(--reader-gold)]")}>
-                      {chapter.title}
-                    </span>
-                  </button>
-                </li>
-              ))}
+              {chapters.map((chapter, chapterIndex) => {
+                const chapterLocked = chapterIndex >= readable;
+                return (
+                  <li key={chapterIndex}>
+                    <button
+                      type="button"
+                      onClick={() => (chapterLocked ? scrollToPaywall() : open(chapterIndex))}
+                      aria-label={chapterLocked ? `${chapter.title} (bloqueado)` : undefined}
+                      className="flex min-h-14 w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[var(--muted)]"
+                    >
+                      <span className="reader-serif w-6 shrink-0 text-center text-[var(--reader-gold)] tabular-nums">{chapterIndex + 1}</span>
+                      <span className={cn("min-w-0 flex-1 text-sm font-semibold", chapterIndex === index && index > 0 && "text-[var(--reader-gold)]")}>
+                        {chapter.title}
+                      </span>
+                      {chapterLocked ? (
+                        <Lock className="size-4 shrink-0 text-[var(--liquid-muted)]" aria-hidden />
+                      ) : locked ? (
+                        <span className="shrink-0 rounded-full bg-[var(--reader-gold)]/15 px-2 py-0.5 text-[11px] font-bold text-[var(--reader-gold)]">
+                          Grátis
+                        </span>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
           </section>
         )}

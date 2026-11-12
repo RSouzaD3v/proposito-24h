@@ -69,3 +69,17 @@ export function isValidCpfCnpj(value: string) {
   }
   return false;
 }
+
+const WRITER_PAYMENTS_NOT_CONFIGURED =
+  "Este escritor ainda não está pronto para receber pagamentos. Tente novamente mais tarde.";
+
+/** Mensagem amigável para uma resposta de erro do pagamento (inclui o 409 de escritor sem recebimento). */
+export function paymentErrorMessage(data: unknown, fallback = "Não foi possível abrir o pagamento.") {
+  const body = (data ?? {}) as { code?: string; message?: string | string[] };
+  if (body.code === "WRITER_PAYMENTS_NOT_CONFIGURED") return WRITER_PAYMENTS_NOT_CONFIGURED;
+  const message = Array.isArray(body.message) ? body.message[0] : body.message;
+  return message || fallback;
+}
+
+/** Perfil de cobrança do leitor; sem resposta, o documento continua sendo pedido. */
+export type BillingProfile = { cpfCnpj: string | null; requiresTaxId: boolean };

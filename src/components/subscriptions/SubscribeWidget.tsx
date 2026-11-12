@@ -10,6 +10,7 @@ import {
   formatCpfCnpj,
   formatMoney,
   isValidCpfCnpj,
+  paymentErrorMessage,
   planName,
   planPeriod,
   type Plan,
@@ -107,6 +108,7 @@ export default function SubscribeWidget({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [document, setDocument] = useState("");
+  const [requiresTaxId, setRequiresTaxId] = useState(true);
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,6 +132,8 @@ export default function SubscribeWidget({
         setSelected(available[0]?.id ?? null);
         setActive(!!status?.isActive);
         if (typeof profile?.cpfCnpj === "string") setDocument(formatCpfCnpj(profile.cpfCnpj));
+        // Só alguns provedores exigem CPF/CNPJ; sem a informação, o campo continua sendo pedido.
+        setRequiresTaxId(profile?.requiresTaxId !== false);
       } catch {
         if (mounted) setLoadError(true);
       } finally {
@@ -142,7 +146,7 @@ export default function SubscribeWidget({
   }, [writerId]);
 
   const plan = useMemo(() => plans.find((item) => item.id === selected) ?? null, [plans, selected]);
-  const documentValid = isValidCpfCnpj(document);
+  const documentValid = !requiresTaxId || isValidCpfCnpj(document);
 
   const subscribe = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -154,10 +158,10 @@ export default function SubscribeWidget({
       const res = await fetch("/api/v1/billing/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: plan.id, successUrl, cancelUrl, cpfCnpj: document }),
+        body: JSON.stringify({ planId: plan.id, successUrl, cancelUrl, ...(requiresTaxId ? { cpfCnpj: document } : {}) }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.url) throw new Error(data?.message || "Não foi possível abrir o pagamento.");
+      if (!res.ok || !data?.url) throw new Error(paymentErrorMessage(data));
       window.location.href = data.url;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível abrir o pagamento.");
@@ -220,7 +224,9 @@ export default function SubscribeWidget({
   return (
     <form onSubmit={subscribe} className="grid gap-6 text-left">
       <fieldset className="grid gap-3">
-        <legend className="mb-3 text-[13px] font-semibold text-[var(--liquid-ink)]">1. Escolha o plano</legend>
+        <legend className="mb-3 text-[13px] font-semibold text-[var(--liquid-ink)]">
+          {requiresTaxId ? "1. Escolha o plano" : "Escolha o plano"}
+        </legend>
         <div role="radiogroup" className="grid gap-3">
           {plans.map((item) => (
             <PlanOption key={item.id} plan={item} selected={item.id === selected} onSelect={() => setSelected(item.id)} />
@@ -228,33 +234,35 @@ export default function SubscribeWidget({
         </div>
       </fieldset>
 
-      <div className="grid gap-2">
-        <label htmlFor="cpf-cnpj" className="text-[13px] font-semibold text-[var(--liquid-ink)]">
-          2. CPF ou CNPJ do pagador
-        </label>
-        <input
-          id="cpf-cnpj"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder="000.000.000-00"
-          value={document}
-          onChange={(e) => setDocument(formatCpfCnpj(e.target.value))}
-          onBlur={() => setTouched(true)}
-          aria-invalid={touched && !documentValid}
-          aria-describedby="cpf-hint"
-          className={cn(
-            "h-12 w-full rounded-xl border bg-[var(--reader-surface)] px-4 text-base text-[var(--liquid-ink)] outline-none transition placeholder:text-[var(--liquid-muted)]/70 focus-visible:ring-[3px] md:text-[15px]",
-            touched && !documentValid
-              ? "border-red-500 focus-visible:ring-red-500/20"
-              : "border-[var(--input)] focus-visible:border-[var(--liquid-accent)] focus-visible:ring-[var(--liquid-accent)]/20",
-          )}
-        />
-        <p id="cpf-hint" className={cn("text-[13px]", touched && !documentValid ? "text-red-700 dark:text-red-300" : "text-[var(--liquid-muted)]")}>
-          {touched && !documentValid
-            ? "Confira o número: o CPF tem 11 dígitos e o CNPJ, 14."
-            : "Exigido para emitir a cobrança. Fica salvo para as próximas vezes."}
-        </p>
-      </div>
+      {requiresTaxId && (
+        <div className="grid gap-2">
+          <label htmlFor="cpf-cnpj" className="text-[13px] font-semibold text-[var(--liquid-ink)]">
+            2. CPF ou CNPJ do pagador
+          </label>
+          <input
+            id="cpf-cnpj"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="000.000.000-00"
+            value={document}
+            onChange={(e) => setDocument(formatCpfCnpj(e.target.value))}
+            onBlur={() => setTouched(true)}
+            aria-invalid={touched && !documentValid}
+            aria-describedby="cpf-hint"
+            className={cn(
+              "h-12 w-full rounded-xl border bg-[var(--reader-surface)] px-4 text-base text-[var(--liquid-ink)] outline-none transition placeholder:text-[var(--liquid-muted)]/70 focus-visible:ring-[3px] md:text-[15px]",
+              touched && !documentValid
+                ? "border-red-500 focus-visible:ring-red-500/20"
+                : "border-[var(--input)] focus-visible:border-[var(--liquid-accent)] focus-visible:ring-[var(--liquid-accent)]/20",
+            )}
+          />
+          <p id="cpf-hint" className={cn("text-[13px]", touched && !documentValid ? "text-red-700 dark:text-red-300" : "text-[var(--liquid-muted)]")}>
+            {touched && !documentValid
+              ? "Confira o número: o CPF tem 11 dígitos e o CNPJ, 14."
+              : "Exigido para emitir a cobrança. Fica salvo para as próximas vezes."}
+          </p>
+        </div>
+      )}
 
       {plan && <Summary plan={plan} />}
 
@@ -281,7 +289,7 @@ export default function SubscribeWidget({
         </button>
         <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--liquid-muted)]">
           <LockKeyhole className="size-3.5" aria-hidden />
-          Você conclui o pagamento no ambiente seguro do Asaas.
+          Você conclui o pagamento em um ambiente seguro de pagamento.
         </p>
       </div>
     </form>

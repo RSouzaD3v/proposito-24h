@@ -23,6 +23,9 @@ const visibilities = [
   { value: "SUBSCRIPTION", label: "Somente assinantes" },
 ];
 
+/** A API aceita de 0 a 100 capítulos de degustação. */
+const clampPreview = (value: string) => Math.min(100, Math.max(0, Math.trunc(Number(value) || 0)));
+
 export default function WriterPublicationCreatePage() {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -40,7 +43,8 @@ export default function WriterPublicationCreatePage() {
     tags: "",
     isPdf: false,
     pdfUrl: "",
-    category: "Outros"
+    category: "Outros",
+    freePreviewChapters: "0",
   });
 
   const [loading, setLoading] = useState(false);
@@ -77,6 +81,8 @@ export default function WriterPublicationCreatePage() {
           pdfUrl: hasPdf ? form.pdfUrl : null,
           price:
             form.visibility === "PAID" ? Number(form.price) : undefined,
+          freePreviewChapters:
+            form.visibility === "PAID" && !hasPdf ? clampPreview(form.freePreviewChapters) : 0,
           tags: form.tags
             .split(",")
             .map((t) => t.trim())
@@ -102,7 +108,8 @@ export default function WriterPublicationCreatePage() {
         tags: "",
         isPdf: false,
         pdfUrl: "",
-        category: "Outros"
+        category: "Outros",
+        freePreviewChapters: "0",
       });
 
       router.push("/writer/publications");
@@ -223,6 +230,28 @@ export default function WriterPublicationCreatePage() {
                 />
               </div>
             </>
+          )}
+
+          {form.visibility === "PAID" && !form.pdfUrl && (
+            <div className="sm:col-span-2">
+              <label htmlFor="freePreviewChapters" className="block font-semibold mb-1 text-gray-700">
+                Capítulos grátis (degustação)
+              </label>
+              <input
+                id="freePreviewChapters"
+                type="number"
+                name="freePreviewChapters"
+                value={form.freePreviewChapters}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 sm:max-w-40"
+                min={0}
+                max={100}
+                step={1}
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Os primeiros capítulos que qualquer leitor pode ler antes de comprar ou assinar. Use 0 para nenhum.
+              </p>
+            </div>
           )}
 
           {/* PDF opcional — pode coexistir com a versão escrita (capítulos) */}
