@@ -1,69 +1,46 @@
-import { apiGet } from "@/lib/api/server";
 // app/admin/payouts/page.tsx
+import { Banknote, CheckCircle2, Clock, Receipt } from "lucide-react";
+import { apiGet } from "@/lib/api/server";
+import { GlassCard } from "@/components/ui/glass-card";
 import { requireAdmin } from "../_lib/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+import { cents, INT } from "../_lib/format";
+import { StatTile } from "../_components/StatTile";
+import { PayoutsTable, type Payout } from "./_components/PayoutsTable";
 
 export default async function AdminPayoutsPage() {
   await requireAdmin();
+  const payouts = await apiGet<Payout[]>("/admin/payouts");
 
-  const payouts = await apiGet<any[]>("/admin/payouts");
+  const total = (status: string) =>
+    payouts.filter((payout) => payout.status === status).reduce((sum, payout) => sum + payout.netAmount, 0);
+  const pending = payouts.filter((payout) => payout.status === "PENDING");
+  const fees = payouts
+    .filter((payout) => payout.status !== "CANCELED")
+    .reduce((sum, payout) => sum + (payout.fees ?? 0), 0);
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Repasses</h1>
-        <p className="text-sm text-muted-foreground">Últimos 100 registros</p>
+      <header className="animate-glass-in">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Repasses</h1>
+        <p className="text-sm text-[var(--liquid-muted)]">Últimos 100 repasses aos escritores. Toque em um registro para ver os detalhes.</p>
+      </header>
+
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatTile
+          label="A pagar"
+          value={cents(total("PENDING"))}
+          icon={Clock}
+          tone={pending.length ? "orange" : "slate"}
+          hint={`${INT.format(pending.length)} ${pending.length === 1 ? "repasse pendente" : "repasses pendentes"}`}
+        />
+        <StatTile label="Já pago" value={cents(total("PAID"))} icon={CheckCircle2} tone="green" />
+        <StatTile label="Taxas" value={cents(fees)} icon={Receipt} tone="violet" hint="pendentes e pagos" />
+        <StatTile label="Registros" value={INT.format(payouts.length)} icon={Banknote} tone="slate" />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Histórico</CardTitle>
-          <CardDescription>Período, valores e status</CardDescription>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Escritor</TableHead>
-                <TableHead>Período</TableHead>
-                <TableHead className="text-right">Bruto</TableHead>
-                <TableHead className="text-right">Taxas</TableHead>
-                <TableHead className="text-right">Líquido</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ref.</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payouts.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>{p.writer.name}</TableCell>
-                  <TableCell>
-                    {new Date(p.periodStart).toLocaleDateString()} –{" "}
-                    {new Date(p.periodEnd).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">{BRL.format(p.grossAmount / 100)}</TableCell>
-                  <TableCell className="text-right">{BRL.format((p.fees ?? 0) / 100)}</TableCell>
-                  <TableCell className="text-right">{BRL.format(p.netAmount / 100)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        p.status === "PAID" ? "default" : p.status === "PENDING" ? "secondary" : "destructive"
-                      }
-                    >
-                      {p.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="truncate max-w-[180px]">{p.reference ?? "-"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <GlassCard strong padding="none">
+        <PayoutsTable payouts={payouts} />
+      </GlassCard>
     </section>
   );
 }

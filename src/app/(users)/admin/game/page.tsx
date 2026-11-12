@@ -1,170 +1,131 @@
-import { apiGet, apiSend } from "@/lib/api/server";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-
-import { authOptions } from "@/lib/authOption";
-
+// app/admin/game/page.tsx
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
+import { AlertTriangle, ChevronRight, Gamepad2, Layers, Trophy, Users2 } from "lucide-react";
+import { apiGet } from "@/lib/api/server";
+import { GlassCard } from "@/components/ui/glass-card";
+import { cn } from "@/lib/utils";
+import { requireAdmin } from "../_lib/auth";
+import { INT, PCT } from "../_lib/format";
+import { StatTile } from "../_components/StatTile";
+import { GameActiveSwitch, GameFormDialog } from "./_components/GameControls";
 
-async function toggleGameActive(formData: FormData) {
-  "use server";
+type Game = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  type: string;
+  active: boolean;
+  _count: { levels: number; playerGames: number };
+  stats: { players: number; completed: number; newPlayers30d: number; words: number; incompleteLevels: number };
+};
 
-  const id = String(formData.get("id") || "");
-  const active = String(formData.get("active") || "");
+export default async function AdminGamePage({ searchParams }: { searchParams?: Promise<{ novo?: string }> }) {
+  await requireAdmin();
+  const openCreate = (await searchParams)?.novo === "1";
+  const games = await apiGet<Game[]>("/admin/games");
 
-  if (!id) return;
-
-  const nextActive = active !== "true";
-
-  await apiSend("PUT", `/admin/games/${id}`, { active: nextActive });
-
-  revalidatePath("/admin/game");
-}
-
-export default async function AdminGamePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) redirect("/login");
-
-  // Ajuste se você usa roles diferentes
-  const role = (session.user as any)?.role;
-  if (role !== "ADMIN") redirect("/");
-
-  const games = await apiGet<any[]>("/admin/games");
-
-  const totalGames = games.length;
-  const activeGames = games.filter((g) => g.active).length;
+  const active = games.filter((game) => game.active).length;
+  const players = games.reduce((sum, game) => sum + game.stats.players, 0);
+  const completed = games.reduce((sum, game) => sum + game.stats.completed, 0);
+  const recent = games.reduce((sum, game) => sum + game.stats.newPlayers30d, 0);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      {/* Header */}
-      <header className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Jogos</h1>
-          <p className="text-sm text-muted-foreground">
-            Gerencie templates, níveis e palavras do mini-game.
-          </p>
-          <div className="flex gap-2 pt-2">
-            <Badge variant="outline">Total: {totalGames}</Badge>
-            <Badge variant="secondary">Ativos: {activeGames}</Badge>
-          </div>
+    <section className="space-y-6">
+      <header className="flex flex-col gap-4 animate-glass-in sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Game</h1>
+          <p className="text-sm text-[var(--liquid-muted)]">Jogos de palavras do app: níveis, letras e palavras.</p>
         </div>
-
-        <Button asChild>
-          <Link href="/admin/game/new">Criar jogo</Link>
-        </Button>
+        <GameFormDialog defaultOpen={openCreate} />
       </header>
 
-      {/* List */}
-      <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Jogo</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-center">Níveis</TableHead>
-              <TableHead className="text-center">Palavras</TableHead>
-              <TableHead className="text-center">Jogadores</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatTile label="Jogos" value={INT.format(games.length)} icon={Gamepad2} tone="violet" hint={`${INT.format(active)} ativos`} />
+        <StatTile label="Jogadores" value={INT.format(players)} icon={Users2} tone="blue" hint={`${INT.format(recent)} novos em 30 dias`} />
+        <StatTile label="Concluíram um jogo" value={INT.format(completed)} icon={Trophy} tone="green" hint={`${PCT.format(players ? completed / players : 0)} dos jogadores`} />
+        <StatTile
+          label="Níveis"
+          value={INT.format(games.reduce((sum, game) => sum + game._count.levels, 0))}
+          icon={Layers}
+          tone="orange"
+          hint={`${INT.format(games.reduce((sum, game) => sum + game.stats.words, 0))} palavras`}
+        />
+      </div>
 
-          <TableBody>
-            {games.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center">
-                  <div className="space-y-2">
-                    <p className="font-medium">Nenhum jogo criado ainda</p>
-                    <p className="text-sm text-muted-foreground">
-                      Crie o primeiro template para começar a montar os níveis.
-                    </p>
-                    <Button asChild className="mt-2">
-                      <Link href="/admin/game/new">Criar jogo</Link>
-                    </Button>
+      {games.length === 0 ? (
+        <GlassCard strong className="flex flex-col items-center gap-3 py-14 text-center">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-[#7c5cd6]/12 text-[#6446c2]">
+            <Gamepad2 className="size-6" aria-hidden />
+          </span>
+          <p className="font-medium text-[var(--liquid-ink)]">Nenhum jogo criado ainda</p>
+          <p className="max-w-sm text-sm text-[var(--liquid-muted)]">Crie o primeiro jogo e monte os níveis com letras e palavras.</p>
+          <GameFormDialog />
+        </GlassCard>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {games.map((game, index) => {
+            const completion = game.stats.players ? game.stats.completed / game.stats.players : 0;
+            return (
+              <GlassCard key={game.id} strong padding="none" className="flex flex-col overflow-hidden" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
+                <Link href={`/admin/game/${game.id}`} className="group flex flex-1 flex-col gap-4 p-5">
+                  <div className="flex items-start gap-3">
+                    <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", game.active ? "bg-[#7c5cd6]/12 text-[#6446c2]" : "bg-black/5 text-[var(--liquid-muted)]")}>
+                      <Gamepad2 className="size-5" aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-semibold text-[var(--liquid-ink)] group-hover:underline">{game.title}</span>
+                      <span className="block truncate text-xs text-[var(--liquid-muted)]">/{game.slug} · Word Connect</span>
+                    </span>
+                    <ChevronRight className="mt-1 size-4 shrink-0 text-[var(--liquid-muted)] transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              games.map((g) => {
-                const totalWords = g.levels.reduce(
-                  (acc: number, lvl: any) => acc + (lvl._count?.words || 0),
-                  0
-                );
 
-                return (
-                  <TableRow key={g.id}>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="font-semibold leading-tight">
-                          {g.title}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          /{g.slug}
-                        </div>
+                  {game.description && <p className="line-clamp-2 text-sm text-[var(--liquid-muted)]">{game.description}</p>}
+
+                  <dl className="grid grid-cols-3 gap-2 text-center">
+                    {[
+                      ["Níveis", game._count.levels],
+                      ["Palavras", game.stats.words],
+                      ["Jogadores", game.stats.players],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-xl bg-white/55 px-2 py-2">
+                        <dt className="text-[11px] text-[var(--liquid-muted)]">{label}</dt>
+                        <dd className="font-bold tabular-nums text-[var(--liquid-ink)]">{INT.format(Number(value))}</dd>
                       </div>
-                    </TableCell>
+                    ))}
+                  </dl>
 
-                    <TableCell>
-                      <Badge variant="outline">{g.type}</Badge>
-                    </TableCell>
+                  <div>
+                    <div className="mb-1 flex justify-between text-xs text-[var(--liquid-muted)]">
+                      <span>Conclusão</span>
+                      <span className="tabular-nums">
+                        {INT.format(game.stats.completed)} · <span className="font-semibold text-[var(--liquid-ink)]">{PCT.format(completion)}</span>
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-black/5">
+                      <div className="h-full rounded-full bg-[#1baf7a]" style={{ width: `${completion * 100}%` }} />
+                    </div>
+                  </div>
 
-                    <TableCell>
-                      {g.active ? (
-                        <Badge variant="secondary">Ativo</Badge>
-                      ) : (
-                        <Badge variant="outline">Inativo</Badge>
-                      )}
-                    </TableCell>
+                  {game.stats.incompleteLevels > 0 && (
+                    <p className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-2.5 py-1.5 text-xs font-medium text-amber-800">
+                      <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+                      {game.stats.incompleteLevels === 1 ? "1 nível sem letras ou palavras" : `${game.stats.incompleteLevels} níveis sem letras ou palavras`}
+                    </p>
+                  )}
+                </Link>
 
-                    <TableCell className="text-center">
-                      {g._count.levels}
-                    </TableCell>
-
-                    <TableCell className="text-center">{totalWords}</TableCell>
-
-                    <TableCell className="text-center">
-                      {g._count.playerGames}
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/admin/game/${g.id}`}>Editar</Link>
-                        </Button>
-
-                        <form action={toggleGameActive}>
-                          <input type="hidden" name="id" value={g.id} />
-                          <input
-                            type="hidden"
-                            name="active"
-                            value={String(g.active)}
-                          />
-                          <Button size="sm" variant="secondary">
-                            {g.active ? "Desativar" : "Ativar"}
-                          </Button>
-                        </form>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-    </div>
+                <div className="flex items-center justify-between gap-3 border-t border-white/60 px-5 py-3">
+                  <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", game.active ? "bg-emerald-100/80 text-emerald-800" : "bg-slate-200/80 text-slate-700")}>
+                    {game.active ? "Ativo no app" : "Inativo"}
+                  </span>
+                  <GameActiveSwitch id={game.id} title={game.title} active={game.active} />
+                </div>
+              </GlassCard>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }

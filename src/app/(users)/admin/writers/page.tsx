@@ -1,57 +1,41 @@
-import { apiGet } from "@/lib/api/server";
 // app/admin/writers/page.tsx
+import { CircleDollarSign, ShoppingBag, UserCheck, Users2 } from "lucide-react";
+import { apiGet } from "@/lib/api/server";
+import { GlassCard } from "@/components/ui/glass-card";
 import { requireAdmin } from "../_lib/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
-
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+import { cents, INT } from "../_lib/format";
+import { StatTile } from "../_components/StatTile";
+import { WritersTable, type WriterRow } from "./_components/WritersTable";
 
 export default async function AdminWritersPage() {
   await requireAdmin();
+  const rows = (await apiGet<WriterRow[]>("/admin/writers")).map((row) => ({
+    ...row,
+    revenue_cents: Number(row.revenue_cents),
+  }));
 
-  const rows = await apiGet<any[]>("/admin/writers");
+  const revenue = rows.reduce((sum, row) => sum + row.revenue_cents, 0);
+  const sales = rows.reduce((sum, row) => sum + row.sales, 0);
+  const subscribers = rows.reduce((sum, row) => sum + row.subscribers, 0);
+  const selling = rows.filter((row) => row.sales > 0).length;
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Escritores</h1>
-        <p className="text-sm text-muted-foreground">Últimos 30 dias + totais</p>
+      <header className="animate-glass-in">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Escritores</h1>
+        <p className="text-sm text-[var(--liquid-muted)]">Os 50 escritores com mais receita nos últimos 30 dias.</p>
+      </header>
+
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatTile label="Escritores listados" value={INT.format(rows.length)} icon={Users2} tone="slate" hint={`${INT.format(selling)} com vendas no período`} />
+        <StatTile label="Receita líquida (30d)" value={cents(revenue)} icon={CircleDollarSign} tone="blue" />
+        <StatTile label="Vendas (30d)" value={INT.format(sales)} icon={ShoppingBag} tone="green" />
+        <StatTile label="Assinantes ativos" value={INT.format(subscribers)} icon={UserCheck} tone="violet" />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Top 50 (receita)</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Escritor</TableHead>
-                <TableHead className="text-right">Receita (30d)</TableHead>
-                <TableHead className="text-right">Vendas (30d)</TableHead>
-                <TableHead className="text-right">Assinantes</TableHead>
-                <TableHead className="text-right">Leitores</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((r) => (
-                <TableRow key={r.writer_id}>
-                  <TableCell>
-                    <Link href={`/admin/writer/${r.writer_id}`} className="underline">
-                      {r.writer_name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-right">{BRL.format(Number(r.revenue_cents) / 100)}</TableCell>
-                  <TableCell className="text-right">{r.sales}</TableCell>
-                  <TableCell className="text-right">{r.subscribers}</TableCell>
-                  <TableCell className="text-right">{r.readers}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <GlassCard strong padding="none">
+        <WritersTable rows={rows} />
+      </GlassCard>
     </section>
   );
 }
