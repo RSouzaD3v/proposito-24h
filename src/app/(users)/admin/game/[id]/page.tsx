@@ -137,7 +137,7 @@ export default async function AdminGameEditPage({ params }: { params: Promise<{ 
                   return (
                     <tr key={level.id} className="group border-b border-black/5 transition-colors last:border-0 hover:bg-white/55">
                       <td className="py-3 pl-5 pr-3">
-                        <Link href={href} className="flex items-center gap-2 font-semibold text-[var(--liquid-ink)] group-hover:underline">
+                        <Link href={href} className="flex items-center gap-2 font-semibold text-[var(--liquid-ink)]">
                           <span className="flex size-7 items-center justify-center rounded-lg bg-[#7c5cd6]/12 text-xs text-[#6446c2]">{level.order}</span>
                           Nível {level.order}
                         </Link>

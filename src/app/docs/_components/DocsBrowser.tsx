@@ -53,7 +53,7 @@ function Topic({
         {topic.link && (
           <Link
             href={topic.link.href}
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-bold text-[var(--liquid-ink)] underline decoration-[var(--reader-gold)] underline-offset-4"
+            className="inline-flex h-9 w-fit items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--reader-surface)] px-4 text-sm font-bold text-[var(--liquid-ink)] transition-colors hover:bg-[var(--muted)]"
           >
             {topic.link.label}
             <ArrowRight className="size-3.5" aria-hidden />

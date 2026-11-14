@@ -39,7 +39,7 @@ function ResetPasswordForm() {
         return (
             <>
                 <p className="text-sm mb-6 text-gray-600">Sua senha foi alterada.</p>
-                <Link href="/login" className="text-sm text-blue-600 hover:underline">Ir para o login</Link>
+                <Link href="/login" className="inline-flex h-10 w-full items-center justify-center rounded text-sm bg-blue-500 text-white hover:bg-blue-600 transition-colors">Ir para o login</Link>
             </>
         );
     }
@@ -48,7 +48,7 @@ function ResetPasswordForm() {
         return (
             <>
                 <p className="text-sm mb-6 text-gray-600">Este link é inválido.</p>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">Solicitar novo link</Link>
+                <Link href="/forgot-password" className="inline-flex h-10 w-full items-center justify-center rounded text-sm border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors">Solicitar novo link</Link>
             </>
         );
     }

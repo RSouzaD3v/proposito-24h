@@ -68,7 +68,7 @@ export default async function AdminQuizPage({ searchParams }: { searchParams?: P
             const completion = quiz.stats.sessions ? quiz.stats.completed / quiz.stats.sessions : 0;
             return (
               <GlassCard key={quiz.id} strong padding="none" className="flex flex-col overflow-hidden" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
-                <Link href={`/admin/quiz/${quiz.id}`} className="group flex flex-1 flex-col">
+                <Link href={`/admin/quiz/${quiz.id}`} className="group flex flex-1 flex-col transition-colors hover:bg-white/40">
                   <div className={cn("relative h-28 overflow-hidden bg-gradient-to-br from-[#5b9cff] to-[#7c5cd6]", !quiz.active && "grayscale")}>
                     {quiz.coverUrl && (
                        
@@ -89,7 +89,7 @@ export default async function AdminQuizPage({ searchParams }: { searchParams?: P
 
                   <div className="flex flex-1 flex-col gap-3 p-5">
                     <div className="flex items-start justify-between gap-3">
-                      <span className="line-clamp-2 font-semibold text-[var(--liquid-ink)] group-hover:underline">{quiz.title}</span>
+                      <span className="line-clamp-2 font-semibold text-[var(--liquid-ink)]">{quiz.title}</span>
                       <ChevronRight className="mt-0.5 size-4 shrink-0 text-[var(--liquid-muted)] transition-transform group-hover:translate-x-0.5" aria-hidden />
                     </div>
                     {quiz.description && <p className="line-clamp-2 text-sm text-[var(--liquid-muted)]">{quiz.description}</p>}

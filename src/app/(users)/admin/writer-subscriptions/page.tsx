@@ -218,7 +218,7 @@ export default async function AdminWriterSubscriptions({
         {q && (
           <p className="px-5 pb-3 text-xs text-[var(--liquid-muted)]">
             {INT.format(data.subscriptions.length)} resultado(s) para “{q}” ·{" "}
-            <Link href={href({ q: "" })} className="font-medium text-[var(--liquid-accent)] hover:underline">
+            <Link href={href({ q: "" })} className="ml-1 inline-flex items-center rounded-full bg-[var(--liquid-accent)]/10 px-2.5 py-0.5 font-medium text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
               limpar busca
             </Link>
           </p>

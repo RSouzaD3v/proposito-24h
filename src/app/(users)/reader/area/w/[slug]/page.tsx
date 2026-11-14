@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { BackButton } from "@/components/ui/back-button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
@@ -21,9 +20,7 @@ export default async function WriterPlansPage({ params }: { params: Promise<{ sl
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <h1 className="text-2xl text-[var(--liquid-ink)]">Escritor não encontrado</h1>
         <p className="mt-2 text-sm text-[var(--liquid-muted)]">Você só pode assinar o escritor vinculado à sua conta.</p>
-        <Link href="/reader/area" className="mt-6 inline-block text-sm font-semibold underline underline-offset-4">
-          Voltar para o início
-        </Link>
+        <BackButton href="/reader/area" label="Voltar para o início" className="mt-6" />
       </div>
     );
   }

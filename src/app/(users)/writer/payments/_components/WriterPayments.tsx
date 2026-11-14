@@ -46,7 +46,7 @@ function NoticeBanner({ notice, onClose }: { notice: Notice; onClose: () => void
     <div role={notice.tone === "error" ? "alert" : "status"} className={cn("mb-6 flex items-start gap-2 rounded-xl border px-3.5 py-3 text-sm font-medium", tone)}>
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <p className="flex-1">{notice.text}</p>
-      <button type="button" onClick={onClose} className="text-xs font-semibold underline underline-offset-4">
+      <button type="button" onClick={onClose} className="shrink-0 rounded-full border border-current/20 px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-current/10">
         Fechar
       </button>
     </div>

@@ -79,7 +79,7 @@ export function SubscriptionsTable({ subscriptions }: { subscriptions: WriterSub
                         {(sub.writer?.name ?? "?").charAt(0).toUpperCase()}
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate font-medium text-[var(--liquid-ink)] group-hover:underline">
+                        <span className="block truncate font-medium text-[var(--liquid-ink)]">
                           {sub.writer?.name ?? "Escritor removido"}
                         </span>
                         {sub.description && (

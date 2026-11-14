@@ -207,8 +207,9 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
             title="Receita ao longo do período"
             description={`${BRL.format(current.netCents / 100)} líquidos em ${INT.format(current.sales)} vendas`}
             action={
-              <Link href={`/admin/analytics?range=${range.key}`} className="shrink-0 text-xs font-medium text-[var(--liquid-accent)] hover:underline">
+              <Link href={`/admin/analytics?range=${range.key}`} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
                 Analytics completo
+                <ArrowRight className="size-3.5" />
               </Link>
             }
           />
@@ -308,8 +309,9 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
                 : "Por receita líquida no período"
             }
             action={
-              <Link href="/admin/writers" className="shrink-0 text-xs font-medium text-[var(--liquid-accent)] hover:underline">
+              <Link href="/admin/writers" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
                 Ver todos
+                <ArrowRight className="size-3.5" />
               </Link>
             }
           />
@@ -333,7 +335,7 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-3">
-                      <span className="truncate text-sm font-medium text-[var(--liquid-ink)] group-hover:underline">
+                      <span className="truncate text-sm font-medium text-[var(--liquid-ink)]">
                         {writer.writer_name}
                       </span>
                       <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--liquid-ink)]">
@@ -363,8 +365,9 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
             title="Vendas recentes"
             description="Toque em uma venda para ver os detalhes"
             action={
-              <Link href="/admin/billing" className="shrink-0 text-xs font-medium text-[var(--liquid-accent)] hover:underline">
+              <Link href="/admin/billing" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
                 Pagamentos
+                <ArrowRight className="size-3.5" />
               </Link>
             }
           />

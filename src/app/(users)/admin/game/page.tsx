@@ -68,13 +68,13 @@ export default async function AdminGamePage({ searchParams }: { searchParams?: P
             const completion = game.stats.players ? game.stats.completed / game.stats.players : 0;
             return (
               <GlassCard key={game.id} strong padding="none" className="flex flex-col overflow-hidden" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
-                <Link href={`/admin/game/${game.id}`} className="group flex flex-1 flex-col gap-4 p-5">
+                <Link href={`/admin/game/${game.id}`} className="group flex flex-1 flex-col gap-4 p-5 transition-colors hover:bg-white/40">
                   <div className="flex items-start gap-3">
                     <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", game.active ? "bg-[#7c5cd6]/12 text-[#6446c2]" : "bg-black/5 text-[var(--liquid-muted)]")}>
                       <Gamepad2 className="size-5" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold text-[var(--liquid-ink)] group-hover:underline">{game.title}</span>
+                      <span className="block truncate font-semibold text-[var(--liquid-ink)]">{game.title}</span>
                       <span className="block truncate text-xs text-[var(--liquid-muted)]">/{game.slug} · Word Connect</span>
                     </span>
                     <ChevronRight className="mt-1 size-4 shrink-0 text-[var(--liquid-muted)] transition-transform group-hover:translate-x-0.5" aria-hidden />

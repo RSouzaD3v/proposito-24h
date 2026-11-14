@@ -1,6 +1,7 @@
 "use client";
 import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ButtonSpinner } from "@/components/ui/loading-state";
 import { useState, useMemo } from "react";
@@ -69,18 +70,32 @@ export default function ImportPage() {
         {/* Links de exemplos */}
         <div className="flex flex-col gap-2 text-sm">
           <span className="font-medium text-[var(--liquid-muted)]">Baixe um modelo de exemplo:</span>
-          <a href="/spreadsheets/devocional-exemplo.xlsx" download="devocional-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
-            📘 Devocional (exemplo)
-          </a>
-          <a href="/spreadsheets/citacao-exemplo.xlsx" download="citacao-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
-            💬 Citação (exemplo)
-          </a>
-          <a href="/spreadsheets/versiculo-exemplo.xlsx" download="versiculo-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
-            ✝️ Versículo (exemplo)
-          </a>
-          <a href="/spreadsheets/oracao-exemplo.xlsx" download="oracao-exemplo.xlsx" className="text-[var(--liquid-accent)] hover:underline">
-            🙏 Oração/Prayer (exemplo)
-          </a>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Button asChild variant="outline" size="sm" className="justify-start rounded-full">
+              <a href="/spreadsheets/devocional-exemplo.xlsx" download="devocional-exemplo.xlsx">
+                <Download />
+                Devocional (exemplo)
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start rounded-full">
+              <a href="/spreadsheets/citacao-exemplo.xlsx" download="citacao-exemplo.xlsx">
+                <Download />
+                Citação (exemplo)
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start rounded-full">
+              <a href="/spreadsheets/versiculo-exemplo.xlsx" download="versiculo-exemplo.xlsx">
+                <Download />
+                Versículo (exemplo)
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start rounded-full">
+              <a href="/spreadsheets/oracao-exemplo.xlsx" download="oracao-exemplo.xlsx">
+                <Download />
+                Oração/Prayer (exemplo)
+              </a>
+            </Button>
+          </div>
         </div>
 
         {/* Select de tipo */}

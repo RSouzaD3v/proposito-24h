@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { getBooks, searchBible } from "@/lib/bible";
 import { BibleTopBar, VersionSwitch, surfaceClass } from "./BibleChrome";
 import { BibleSearchBox } from "./BibleSearchBox";
@@ -105,11 +105,21 @@ export async function BibleSearchPage({
           </ul>
           {totalPages > 1 && (
             <nav className="mt-6 flex items-center justify-between text-sm font-semibold" aria-label="Páginas">
-              {results.page > 1 ? <Link href={pageHref(results.page - 1)}>← Anterior</Link> : <span />}
+              {results.page > 1 ? (
+                <Link href={pageHref(results.page - 1)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--reader-surface)] px-3.5 text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]">
+                  <ChevronLeft className="size-4" aria-hidden />
+                  Anterior
+                </Link>
+              ) : <span />}
               <span className="font-normal text-[var(--liquid-muted)]">
                 Página {results.page} de {totalPages}
               </span>
-              {results.page < totalPages ? <Link href={pageHref(results.page + 1)}>Próxima →</Link> : <span />}
+              {results.page < totalPages ? (
+                <Link href={pageHref(results.page + 1)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--reader-surface)] px-3.5 text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]">
+                  Próxima
+                  <ChevronRight className="size-4" aria-hidden />
+                </Link>
+              ) : <span />}
             </nav>
           )}
         </>

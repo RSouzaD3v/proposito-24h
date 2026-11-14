@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { GlassCard } from "@/components/ui/glass-card";
 import { apiFetch } from "@/lib/api/server";
@@ -162,8 +163,9 @@ export default async function WriterAnalyticsPage({ searchParams }: { searchPara
                 {insights.books.map((book) => (
                   <tr key={book.id} className="border-b border-black/5 last:border-0">
                     <td className="px-5 py-3">
-                      <Link href={`/writer/analytics/books/${book.id}`} className="font-medium text-[var(--liquid-ink)] hover:underline">
+                      <Link href={`/writer/analytics/books/${book.id}`} className="-ml-2.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-medium text-[var(--liquid-ink)] transition-colors hover:bg-[var(--liquid-accent)]/10 hover:text-[var(--liquid-accent)]">
                         {book.title}
+                        <ChevronRight className="size-3.5 opacity-60" />
                       </Link>
                       <span className="ml-2 align-middle"><PublicationStatusBadge status={book.status} /></span>
                     </td>

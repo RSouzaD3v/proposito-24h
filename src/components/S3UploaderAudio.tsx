@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ExternalLink } from "lucide-react";
 
 type UploadedInfo = {
   key: string;
@@ -190,8 +191,9 @@ export default function S3AudioUploader({
               href={uploadedUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-2 inline-block text-xs text-blue-700 hover:underline"
+              className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-full border border-blue-200 bg-white px-3 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-50"
             >
+              <ExternalLink className="size-3.5" />
               Abrir no navegador
             </a>
           )}

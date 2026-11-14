@@ -23,7 +23,7 @@ const BOOK_STATUS: Record<string, string> = { DRAFT: "Rascunho", PUBLISHED: "Pub
 const surface = "rounded-2xl border border-[var(--border)] bg-[var(--reader-surface)]";
 const pill = "inline-block rounded-full px-2 py-0.5 text-[11px] font-bold";
 const editLink =
-  "inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--liquid-accent)] underline-offset-4 hover:underline";
+  "inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-sm font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20";
 
 function Card({ title, icon, action, children }: { title: string; icon: React.ReactNode; action?: React.ReactNode; children: React.ReactNode }) {
   return (

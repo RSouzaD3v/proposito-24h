@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LockKeyhole } from "lucide-react";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
 
 export function ScreenSubscription({ slug }: { slug: string }) {
   return (
@@ -19,7 +19,11 @@ export function ScreenSubscription({ slug }: { slug: string }) {
         >
           Ver planos
         </Link>
-        <Link href="/reader/area" className="mt-4 text-sm font-semibold text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]">
+        <Link
+          href="/reader/area"
+          className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
           Voltar para o início
         </Link>
       </div>

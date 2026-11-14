@@ -104,7 +104,7 @@ export function PayoutsTable({ payouts }: { payouts: Payout[] }) {
                 className="group cursor-pointer border-b border-black/5 transition-colors last:border-0 hover:bg-white/55"
               >
                 <td className="py-3 pl-5 pr-3 font-medium text-[var(--liquid-ink)]">
-                  <button type="button" className="text-left hover:underline focus-visible:underline focus-visible:outline-none">
+                  <button type="button" className="rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--liquid-accent)]/40">
                     {payout.writer.name}
                   </button>
                 </td>

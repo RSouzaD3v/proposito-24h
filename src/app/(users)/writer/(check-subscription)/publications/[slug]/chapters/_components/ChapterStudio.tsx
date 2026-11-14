@@ -11,6 +11,19 @@ import { DevicePreview } from "@/components/writer/DevicePreview";
 import { uploadImage } from "@/lib/uploadImage";
 import { cn } from "@/lib/utils";
 
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** Texto puro da IA vira parágrafos HTML, sem deixar marcação crua entrar no editor. */
+function aiTextToHtml(text: string) {
+  return text
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+}
+
 const RichEditor = dynamic(() => import("./RichEditor"), {
   ssr: false,
   loading: () => <div className="min-h-[320px] animate-pulse rounded-lg border bg-white p-4 shadow-sm" />,
@@ -223,7 +236,8 @@ export default function ChapterStudio({ slug, chapterId: initialId }: { slug: st
         event.preventDefault();
         void persist();
       }
-      if (event.key === "Escape") setFocus(false);
+      // Esc dentro de um diálogo (ex.: IA) só fecha o diálogo.
+      if (event.key === "Escape" && !event.defaultPrevented) setFocus(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -361,26 +375,29 @@ export default function ChapterStudio({ slug, chapterId: initialId }: { slug: st
       {restorable && (
         <div className="flex flex-wrap items-center justify-center gap-3 bg-amber-50 px-5 py-2 text-sm text-amber-950">
           <span>Encontramos um texto não salvo de {new Date(restorable.savedAt).toLocaleString("pt-BR")}.</span>
-          <button
+          <Button
             type="button"
-            className="font-bold underline"
+            size="sm"
+            className="rounded-full bg-amber-900 px-4 text-white hover:bg-amber-950"
             onClick={() => {
               setDraft(restorable.draft);
               setRestorable(null);
             }}
           >
             Recuperar
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="underline"
+            size="sm"
+            variant="outline"
+            className="rounded-full border-amber-900/20 bg-white/70 px-4 text-amber-950 hover:bg-white"
             onClick={() => {
               localStorage.removeItem(storageKey());
               setRestorable(null);
             }}
           >
             Descartar
-          </button>
+          </Button>
         </div>
       )}
 
@@ -453,7 +470,7 @@ export default function ChapterStudio({ slug, chapterId: initialId }: { slug: st
                       onInsert={(text) =>
                         setDraft((current) => ({
                           ...current,
-                          content: `${current.content}<p>${text.replace(/\n/g, "<br/>")}</p>`,
+                          content: `${current.content}${aiTextToHtml(text)}`,
                         }))
                       }
                     />

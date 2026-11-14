@@ -49,10 +49,10 @@ export default function LandingProposito24h() {
             <span className="font-bold">Proposito24h</span>
             <Badge variant="secondary" className="ml-2">Para Escritores</Badge>
           </div>
-          <div className="hidden items-center gap-6 md:flex">
-            <a href="#como-funciona" className="text-sm hover:underline">Como funciona</a>
-            <a href="#recursos" className="text-sm hover:underline">Recursos</a>
-            <a href="#depoimentos" className="text-sm hover:underline">Resultados</a>
+          <div className="hidden items-center gap-1 md:flex">
+            <Button asChild variant="ghost" size="sm" className="rounded-full"><a href="#como-funciona">Como funciona</a></Button>
+            <Button asChild variant="ghost" size="sm" className="rounded-full"><a href="#recursos">Recursos</a></Button>
+            <Button asChild variant="ghost" size="sm" className="rounded-full"><a href="#depoimentos">Resultados</a></Button>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" className="hidden md:inline-flex">
@@ -337,10 +337,10 @@ export default function LandingProposito24h() {
       <footer className="border-t bg-muted/40 py-8 text-sm text-muted-foreground">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 md:flex-row md:justify-between">
           <p>© {new Date().getFullYear()} Proposito24h — Todos os direitos reservados.</p>
-          <div className="flex items-center gap-3">
-            <a className="hover:underline" href="#">Política de Privacidade</a>
+          <div className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="sm" className="rounded-full text-muted-foreground"><a href="#">Política de Privacidade</a></Button>
             <Separator orientation="vertical" className="h-4" />
-            <a className="hover:underline" href="#">Aviso Legal</a>
+            <Button asChild variant="ghost" size="sm" className="rounded-full text-muted-foreground"><a href="#">Aviso Legal</a></Button>
           </div>
         </div>
       </footer>

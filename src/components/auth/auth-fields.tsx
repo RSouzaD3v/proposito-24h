@@ -12,7 +12,7 @@ export const authInputClass =
   "h-12 rounded-xl border-[var(--input)] bg-[var(--reader-surface)] px-4 text-base shadow-none md:text-[15px] focus-visible:border-[var(--liquid-accent)] focus-visible:ring-[var(--liquid-accent)]/20";
 
 export const authLinkClass =
-  "font-semibold text-[var(--liquid-ink)] underline decoration-[var(--reader-gold)] decoration-1 underline-offset-4 transition-colors hover:decoration-2";
+  "inline-block rounded-full bg-[var(--liquid-accent)]/10 px-2.5 py-0.5 font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--liquid-accent)]/40";
 
 type AuthFieldProps = {
   id: string;

@@ -136,7 +136,7 @@ export default async function WriterReadersPage({
                 return (
                   <TableRow key={u.id}>
                     <TableCell className="max-w-60 truncate">
-                      <a className="underline" href={`/writer/analytics/readers/${u.id}`}>{u.name ?? "-"}</a>
+                      <a className="inline-flex max-w-full items-center rounded-full bg-[var(--liquid-accent)]/10 px-2.5 py-1 text-sm font-medium text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20" href={`/writer/analytics/readers/${u.id}`}><span className="truncate">{u.name ?? "-"}</span></a>
                     </TableCell>
                     <TableCell className="max-w-70 truncate">{u.email}</TableCell>
                     <TableCell>{new Date(u.createdAt).toLocaleDateString()}</TableCell>

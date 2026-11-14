@@ -108,12 +108,12 @@ export default async function ReaderAccountPage() {
                   {user.writer?.slug ? (
                     <>
                       {" "}
-                      <span className="text-muted-foreground/80">·</span>{" "}
                       <Link
                         href={`/reader/area/w/${user.writer.slug}`}
-                        className="text-primary font-medium underline-offset-4 hover:underline"
+                        className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-[var(--liquid-accent)]/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20"
                       >
                         Ver vitrine
+                        <ChevronRight className="size-3.5" />
                       </Link>
                     </>
                   ) : null}

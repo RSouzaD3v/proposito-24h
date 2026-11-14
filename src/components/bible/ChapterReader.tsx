@@ -419,7 +419,7 @@ export function ChapterReader({ version, book, chapter, chapters, verses, prev, 
               </li>
             ))}
           </ul>
-          <Link href={biblePath(version)} onClick={() => setPicker(false)} className="text-center text-sm font-semibold text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]">
+          <Link href={biblePath(version)} onClick={() => setPicker(false)} className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--reader-surface)] text-sm font-semibold text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]">
             Ver todos os livros
           </Link>
         </DialogContent>

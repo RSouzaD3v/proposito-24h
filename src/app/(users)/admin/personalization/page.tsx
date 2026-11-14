@@ -481,7 +481,7 @@ function ThemeEditor({
                   </div>
                 )}
                 {writers.length > 0 && (
-                  <button type="button" className="text-xs font-medium text-[#2a78d6] hover:underline" onClick={() => setManualId((value) => !value)}>
+                  <button type="button" className="inline-flex h-8 w-fit items-center rounded-full border border-[#2a78d6]/30 px-3 text-xs font-medium text-[#2a78d6] transition-colors hover:bg-[#2a78d6]/10" onClick={() => setManualId((value) => !value)}>
                     {manualId ? "Escolher da lista" : "Informar o ID manualmente"}
                   </button>
                 )}
@@ -539,9 +539,9 @@ function ThemeEditor({
         <DialogFooter className="flex-row items-center border-t px-6 py-4">
           {invalid.length > 0 && <p className="mr-auto text-xs text-red-700">Use cores no formato #RRGGBB.</p>}
           {editor.mode === "edit" && invalid.length === 0 && (
-            <Link href={`/admin/writer/${editor.writerId}`} className="mr-auto text-xs font-medium text-[#2a78d6] hover:underline">
-              Ver escritor
-            </Link>
+            <Button asChild variant="ghost" size="sm" className="mr-auto rounded-full text-[#2a78d6] hover:bg-[#2a78d6]/10 hover:text-[#2a78d6]">
+              <Link href={`/admin/writer/${editor.writerId}`}>Ver escritor</Link>
+            </Button>
           )}
           <DialogClose asChild>
             <Button variant="outline" disabled={saving}>Cancelar</Button>

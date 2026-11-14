@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope, Merriweather } from "next/font/google";
+import { Toaster } from "sonner";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`${font.className} antialiased`}
       >
         {children}
+        <Toaster position="top-center" richColors closeButton theme="system" />
       </body>
     </html>
   );

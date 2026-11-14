@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Check, CircleAlert, LockKeyhole, Wallet } from "lucide-react";
+import { Check, CircleAlert, LockKeyhole, LogOut, Wallet } from "lucide-react";
 import { WriterShell } from "@/components/ui/writer-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ButtonSpinner } from "@/components/ui/loading-state";
@@ -309,7 +309,7 @@ export default function WriterSubscriptionPage() {
             <button
               type="button"
               onClick={() => setCanceling(true)}
-              className="w-fit text-sm font-semibold text-red-700 underline-offset-4 hover:underline"
+              className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-red-600/30 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-600/10"
             >
               Cancelar assinatura
             </button>
@@ -421,8 +421,9 @@ export default function WriterSubscriptionPage() {
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="font-semibold text-[var(--liquid-ink)] underline underline-offset-4"
+          className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--input)] px-3 font-semibold text-[var(--liquid-ink)] transition hover:bg-[var(--muted)]"
         >
+          <LogOut className="size-3.5" aria-hidden />
           Sair
         </button>
       </p>

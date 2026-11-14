@@ -3,6 +3,8 @@ import { apiGetOrNull } from "@/lib/api/server";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "../../_lib/auth";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
 } from "@/components/ui/card";
@@ -124,9 +126,12 @@ export default async function AdminWriterDetail({
             <CardDescription>Publicadas: {publications}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href={`/writer/${writer.slug ?? writer.id}`} className="underline">
-              Ver storefront
-            </Link>
+            <Button asChild variant="outline" size="sm" className="rounded-full">
+              <Link href={`/writer/${writer.slug ?? writer.id}`}>
+                Ver storefront
+                <ArrowRight />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

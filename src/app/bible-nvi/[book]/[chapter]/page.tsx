@@ -1,5 +1,8 @@
 // app/bible-nvi/[book]/[chapter]/page.tsx
 import Link from "next/link";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import { getBookByAbbrev, getPrevNextChapter, getVerses } from "@/lib/bible";
 
 type RouteParams = { book: string; chapter: string };
@@ -27,18 +30,39 @@ export default async function ChapterVersesPageNVI({ params }: { params: Promise
         <p className="text-sm text-muted-foreground">NVI</p>
       </header>
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
-            ← Cap. {nav.prev}
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
+              <ChevronLeft />
+              Cap. {nav.prev}
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" className="rounded-full" disabled>
+            <ChevronLeft />
+            Cap. —
+          </Button>
+        )}
+        <Button asChild variant="outline" className="rounded-full">
+          <Link href={`/bible-nvi/${b.abbrev}`}>
+            <List />
+            Capítulos
           </Link>
-        ) : <span className="rounded-md border text-black px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md text-black border px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
+        </Button>
         {nav.next ? (
-          <Link className="rounded-md border text-black px-3 py-2 bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
-            Cap. {nav.next} →
-          </Link>
-        ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
+              Cap. {nav.next}
+              <ChevronRight />
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" className="rounded-full" disabled>
+            Cap. —
+            <ChevronRight />
+          </Button>
+        )}
       </div>
 
       <ol className="space-y-3">
@@ -52,22 +76,49 @@ export default async function ChapterVersesPageNVI({ params }: { params: Promise
         ))}
       </ol>
 
-      <div className="mt-6 flex items-center gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-2">
         {nav.prev ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
-            ← Cap. {nav.prev}
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href={`/bible-nvi/${b.abbrev}/${nav.prev}`}>
+              <ChevronLeft />
+              Cap. {nav.prev}
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" className="rounded-full" disabled>
+            <ChevronLeft />
+            Cap. —
+          </Button>
+        )}
+        <Button asChild variant="outline" className="rounded-full">
+          <Link href={`/bible-nvi/${b.abbrev}`}>
+            <List />
+            Capítulos
           </Link>
-        ) : <span className="rounded-md border px-3 py-2 opacity-50">← Cap. —</span>}
-        <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}`}>Capítulos</Link>
+        </Button>
         {nav.next ? (
-          <Link className="rounded-md border px-3 py-2 text-black bg-gray-100 hover:bg-gray-200" href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
-            Cap. {nav.next} →
-          </Link>
-        ) : <span className="rounded-md border px-3 py-2 opacity-50">Cap. — →</span>}
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href={`/bible-nvi/${b.abbrev}/${nav.next}`}>
+              Cap. {nav.next}
+              <ChevronRight />
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" className="rounded-full" disabled>
+            Cap. —
+            <ChevronRight />
+          </Button>
+        )}
       </div>
 
-      <div className="mt-6 flex items-center gap-2">
-        <Link href={`/bible-acf/${b.abbrev}/${cap}`} className="text-sm underline">Ver este capítulo em ACF</Link>
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <BackButton href="/bible-nvi" label="Todos os livros" />
+        <Button asChild variant="ghost" className="rounded-full">
+          <Link href={`/bible-acf/${b.abbrev}/${cap}`}>
+            <ArrowLeftRight />
+            Ver este capítulo em ACF
+          </Link>
+        </Button>
       </div>
     </section>
   );

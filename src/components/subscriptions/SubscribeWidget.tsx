@@ -196,7 +196,7 @@ export default function SubscribeWidget({
         <p className="font-semibold text-[var(--liquid-ink)]">Sua assinatura está ativa</p>
         <Link
           href="/reader/area/subscription"
-          className="text-sm font-semibold text-[var(--liquid-ink)] underline decoration-[var(--reader-gold)] underline-offset-4"
+          className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 text-sm font-semibold text-[var(--liquid-ink)] transition-colors hover:bg-[var(--muted)]"
         >
           Gerenciar assinatura
         </Link>

@@ -69,7 +69,7 @@ export default function ManageSubscription({ status, cancelAtPeriodEnd, currentP
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="w-fit text-sm font-semibold text-red-700 underline-offset-4 hover:underline dark:text-red-300"
+          className={`${buttonBase} w-fit border border-red-600/30 text-red-700 hover:bg-red-600/10 dark:text-red-300`}
         >
           {isTrial ? "Encerrar teste grátis" : "Cancelar assinatura"}
         </button>

@@ -1,5 +1,8 @@
 // bible/[book]/page.tsx
 import Link from "next/link";
+import { ArrowLeftRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import { getBookByAbbrev, getChaptersOfBook } from "@/lib/bible";
 
 type RouteParams = { book: string };
@@ -32,10 +35,15 @@ export default async function BookChaptersPage({ params }: { params: Promise<Rou
         ))}
       </div>
 
-      <div className="mt-6">
-        <Link href="/bible-acf" className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">← todos os livros</Link>
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <BackButton href="/bible-acf" label="Todos os livros" />
+        <Button asChild variant="ghost" className="rounded-full">
+          <Link href={`/bible-nvi/${b.abbrev}`}>
+            <ArrowLeftRight />
+            Ver este livro em NVI
+          </Link>
+        </Button>
       </div>
-      <Link href={`/bible-nvi/${b.abbrev}`} className="text-sm underline">Ver este livro em NVI</Link>
     </section>
   );
 }

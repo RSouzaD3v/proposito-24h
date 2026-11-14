@@ -276,7 +276,7 @@ export default function WriterPublicationCreatePage() {
                   onClick={() =>
                     setForm((prev) => ({ ...prev, pdfUrl: "", isPdf: false }))
                   }
-                  className="text-sm text-red-600 underline"
+                  className="inline-flex h-8 items-center rounded-full border border-red-600/30 px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-600/10"
                 >
                   Remover PDF
                 </button>

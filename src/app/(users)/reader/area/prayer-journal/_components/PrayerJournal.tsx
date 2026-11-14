@@ -192,7 +192,7 @@ export function PrayerJournal({ initial }: { initial: PrayerJournalData }) {
             </p>
             <button
               type="button"
-              className="shrink-0 rounded-lg px-2 py-1 font-semibold underline underline-offset-2"
+              className="shrink-0 rounded-full border border-emerald-600/30 bg-white/70 px-3 py-1 font-semibold transition-colors hover:bg-white"
               onClick={() => toggle(justAnswered)}
             >
               Desfazer

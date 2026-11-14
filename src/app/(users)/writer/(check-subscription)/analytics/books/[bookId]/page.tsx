@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { GlassCard } from "@/components/ui/glass-card";
 import { BackButton } from "@/components/ui/back-button";
@@ -55,9 +56,10 @@ export default async function BookFunnelPage({ params }: { params: Promise<{ boo
           <ol className="mt-4 space-y-4">
             {book.chapters.map((chapter, index) => (
               <li key={chapter.id}>
-                <div className="flex items-baseline justify-between gap-3 text-sm">
-                  <Link href={`/writer/publications/${book.slug}/chapters/${chapter.id}`} className="min-w-0 truncate text-[var(--liquid-ink)] hover:underline">
-                    {index + 1}. {chapter.title}
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <Link href={`/writer/publications/${book.slug}/chapters/${chapter.id}`} className="-ml-2.5 inline-flex min-w-0 items-center gap-1 rounded-full px-2.5 py-1 text-[var(--liquid-ink)] transition-colors hover:bg-[var(--liquid-accent)]/10 hover:text-[var(--liquid-accent)]">
+                    <span className="truncate">{index + 1}. {chapter.title}</span>
+                    <ChevronRight className="size-3.5 shrink-0 opacity-60" />
                   </Link>
                   <span className="shrink-0 tabular-nums text-[var(--liquid-muted)]">
                     <strong className="font-semibold text-[var(--liquid-ink)]">{INT.format(chapter.readers)}</strong> · {percent(chapter.readers, book.started)}%

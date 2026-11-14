@@ -100,7 +100,7 @@ export function WritersTable({ rows }: { rows: WriterRow[] }) {
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#2a78d6]/10 text-xs font-semibold text-[#2a78d6]">
                       {row.writer_name.charAt(0).toUpperCase()}
                     </span>
-                    <span className="truncate group-hover:underline">{row.writer_name}</span>
+                    <span className="truncate">{row.writer_name}</span>
                   </Link>
                 </td>
                 <td className="px-3 py-3 text-right font-semibold tabular-nums">{cents(row.revenue_cents)}</td>

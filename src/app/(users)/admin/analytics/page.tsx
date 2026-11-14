@@ -217,8 +217,8 @@ export default async function AdminAnalytics({ searchParams }: { searchParams?: 
                       <span className="mr-1.5 tabular-nums text-[var(--liquid-muted)]">{index + 1}.</span>
                       {publication.title}
                     </span>
-                    <Link href={`/admin/writer/${publication.writer_id}`} className="block truncate text-xs text-[var(--liquid-muted)] hover:underline">
-                      {publication.writer_name} · {INT.format(publication.sales)} {publication.sales === 1 ? "venda" : "vendas"}
+                    <Link href={`/admin/writer/${publication.writer_id}`} className="-ml-2 mt-0.5 inline-flex max-w-full items-center rounded-full px-2 py-0.5 text-xs text-[var(--liquid-muted)] transition-colors hover:bg-[var(--liquid-accent)]/10 hover:text-[var(--liquid-accent)]">
+                      <span className="truncate">{publication.writer_name} · {INT.format(publication.sales)} {publication.sales === 1 ? "venda" : "vendas"}</span>
                     </Link>
                   </span>
                   <span className="shrink-0 font-semibold tabular-nums text-[var(--liquid-ink)]">{cents(publication.revenue_cents)}</span>

@@ -65,7 +65,7 @@ export function TopWritersTable({ writers, totalNetCents }: { writers: TopWriter
                   </span>
                 </td>
                 <td className="px-3 py-3">
-                  <button type="button" className="block w-full text-left font-medium text-[var(--liquid-ink)] focus-visible:outline-none group-hover:underline">
+                  <button type="button" className="block w-full rounded-md text-left font-medium text-[var(--liquid-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--liquid-accent)]/40">
                     {writer.writer_name}
                   </button>
                   <span className="mt-1 block h-1.5 w-full max-w-48 rounded-full bg-black/5">

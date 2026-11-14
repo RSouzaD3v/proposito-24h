@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Highlighter, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Highlighter, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { BibleTopBar, VersionSwitch, surfaceClass } from "./BibleChrome";
@@ -125,14 +125,16 @@ export function BibleHighlightsPage({ version }: { version: BibleVersionCode }) 
 
       {totalPages > 1 && (
         <nav className="mt-6 flex items-center justify-between text-sm font-semibold" aria-label="Páginas">
-          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="disabled:opacity-30">
-            ← Anterior
+          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--reader-surface)] px-3.5 text-[var(--liquid-ink)] transition hover:bg-[var(--muted)] disabled:pointer-events-none disabled:opacity-30">
+            <ChevronLeft className="size-4" aria-hidden />
+            Anterior
           </button>
           <span className="font-normal text-[var(--liquid-muted)]">
             Página {page} de {totalPages}
           </span>
-          <button type="button" disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="disabled:opacity-30">
-            Próxima →
+          <button type="button" disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--reader-surface)] px-3.5 text-[var(--liquid-ink)] transition hover:bg-[var(--muted)] disabled:pointer-events-none disabled:opacity-30">
+            Próxima
+            <ChevronRight className="size-4" aria-hidden />
           </button>
         </nav>
       )}

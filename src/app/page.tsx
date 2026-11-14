@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BarChart3, BookOpen, Check, HandHeart, Palette, Sunrise, UsersRound } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpen, Check, HandHeart, Palette, Sunrise, UsersRound } from "lucide-react";
 import { Header } from "@/components/Header";
 import { HeroVideo } from "./_components/HeroVideo";
 import { readableOn } from "@/lib/readable-on";
@@ -78,13 +78,13 @@ function Footer({ name, showDocs }: { name: string; showDocs?: boolean }) {
     <footer className="border-t border-[var(--border)]">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-sm text-[var(--liquid-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <span>{name}</span>
-        <nav className="flex gap-6" aria-label="Rodapé">
+        <nav className="flex flex-wrap gap-2" aria-label="Rodapé">
           {showDocs && (
-            <Link href="/docs" className="hover:text-[var(--liquid-ink)]">
+            <Link href="/docs" className="inline-flex h-9 items-center rounded-full border border-[var(--border)] px-4 font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--liquid-ink)]">
               Documentação
             </Link>
           )}
-          <Link href="/bible-nvi" className="hover:text-[var(--liquid-ink)]">
+          <Link href="/bible-nvi" className="inline-flex h-9 items-center rounded-full border border-[var(--border)] px-4 font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--liquid-ink)]">
             Bíblia
           </Link>
         </nav>
@@ -113,8 +113,12 @@ function PlatformHome() {
       <section className="bg-[var(--reader-surface)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-[15px] sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="text-[var(--liquid-muted)]">Quer apenas ler? Crie sua conta pelo link do escritor que você acompanha.</p>
-          <Link href="/docs/leitor#criar-conta" className="font-bold underline decoration-[var(--reader-gold)] underline-offset-4">
+          <Link
+            href="/docs/leitor#criar-conta"
+            className="inline-flex h-10 w-fit shrink-0 items-center gap-1.5 rounded-xl border border-[var(--border)] px-4 text-[15px] font-bold text-[var(--liquid-ink)] transition-colors hover:bg-[var(--muted)]"
+          >
             Como criar minha conta
+            <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
       </section>

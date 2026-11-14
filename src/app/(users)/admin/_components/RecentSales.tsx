@@ -114,7 +114,7 @@ export function RecentSales({ sales }: { sales: RecentSale[] }) {
                   label="Escritor"
                   value={
                     selected.writer ? (
-                      <Link href={`/admin/writer/${selected.writer.id}`} className="font-medium text-[#2a78d6] hover:underline">
+                      <Link href={`/admin/writer/${selected.writer.id}`} className="inline-flex items-center rounded-full bg-[#2a78d6]/10 px-2.5 py-0.5 font-medium text-[#2a78d6] transition-colors hover:bg-[#2a78d6]/20">
                         {selected.writer.name}
                       </Link>
                     ) : (

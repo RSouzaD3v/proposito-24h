@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "rounded-full text-[var(--liquid-accent)] font-semibold hover:bg-[var(--liquid-accent)]/10",
         glass:
           "bg-[var(--glass-button,rgb(255_255_255_/_0.55))] text-[var(--liquid-ink)] border border-[var(--glass-border)] backdrop-blur-xl shadow-[0_4px_16px_rgb(15_40_80_/_0.06)] hover:bg-[var(--glass-button-hover,rgb(255_255_255_/_0.75))]",
         "glass-primary":
