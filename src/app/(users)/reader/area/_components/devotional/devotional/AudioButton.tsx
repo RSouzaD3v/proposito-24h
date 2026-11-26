@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Pause, Play } from "lucide-react";
+import { setNarrationActive } from "@/lib/atmosphere/engine";
 
 export default function AudioButton({ src }: { src?: string | null }) {
   const [playing, setPlaying] = React.useState(false);
@@ -16,9 +17,19 @@ export default function AudioButton({ src }: { src?: string | null }) {
 
     const handleEnded = () => setPlaying(false);
     audio.addEventListener("ended", handleEnded);
+    // Com a Atmosfera Devocional tocando, ela abaixa enquanto este áudio toca.
+    const handlePlay = () => setNarrationActive(audio, true);
+    const handleStop = () => setNarrationActive(audio, false);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handleStop);
+    audio.addEventListener("ended", handleStop);
 
     return () => {
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handleStop);
+      audio.removeEventListener("ended", handleStop);
+      setNarrationActive(audio, false);
       audio.pause();
       audio.currentTime = 0;
     };

@@ -1,136 +1,35 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
-import { Play, Pause } from "lucide-react";
+import { useState } from "react";
+import { AudioLines, Play } from "lucide-react";
+import { useAtmosphere } from "@/lib/atmosphere/engine";
+import { AtmosphereDialog } from "./atmosphere/AtmosphereDialog";
 
 /**
- * PlaySong — música de fundo com shuffle contínuo (loop):
- * - Botão fixo topo-direito, acima de tudo.
- * - Play/Pause.
- * - Ao iniciar, escolhe aleatoriamente music1..music5.
- * - Ao terminar a faixa, toca outra aleatória automaticamente (loop infinito).
- * Coloque os arquivos em /public/song/music1.mp3 ... /public/song/music5.mp3
+ * Botão de play do painel do leitor: abre a Atmosfera Devocional.
+ * O som vive fora deste componente (lib/atmosphere/engine), então continua tocando
+ * mesmo quando o painel é desmontado ao trocar de página.
  */
-export default function PlaySong({
-  volume = 0.35, // volume padrão mais baixo para "música de fundo"
-}: {
-  volume?: number;
-}) {
-  const TRACKS = [1, 2, 3, 4, 5].map((n) => `/song/music.mp3`);
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isPlayingRef = useRef(false);               // estado "ao vivo" p/ callbacks
-  const lastIndexRef = useRef<number | null>(null); // última faixa tocada
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-
-  const pickRandomIndex = useCallback(
-    (exclude?: number | null) => {
-      if (TRACKS.length === 1) return 0;
-      let idx = Math.floor(Math.random() * TRACKS.length);
-      while (exclude != null && TRACKS.length > 1 && idx === exclude) {
-        idx = Math.floor(Math.random() * TRACKS.length);
-      }
-      return idx;
-    },
-    [TRACKS.length]
-  );
-
-  const stopAndCleanup = useCallback(() => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.onended = null;
-    a.pause();
-    a.src = "";
-    a.load();
-    audioRef.current = null;
-  }, []);
-
-  const playNextRandom = useCallback(async () => {
-    // Limpa o áudio anterior (e listeners)
-    if (audioRef.current) {
-      audioRef.current.onended = null;
-      stopAndCleanup();
-    }
-
-    // Escolhe próxima (evita repetir imediatamente)
-    const nextIndex = pickRandomIndex(lastIndexRef.current);
-    const nextSrc = TRACKS[nextIndex];
-
-    const audio = new Audio(nextSrc);
-    audio.preload = "auto";
-    audio.volume = Math.max(0, Math.min(1, volume));
-    audio.loop = false; // o "loop" é o nosso shuffle no onended
-
-    // Ao terminar, toca outra aleatória se ainda estiver tocando
-    audio.onended = () => {
-      if (isPlayingRef.current && audioRef.current === audio) {
-        setTimeout(() => {
-          void playNextRandom();
-        }, 0);
-      }
-    };
-
-    audioRef.current = audio;
-    lastIndexRef.current = nextIndex;
-    setCurrentIndex(nextIndex);
-
-    try {
-      await audio.play();
-      isPlayingRef.current = true;
-      setIsPlaying(true);
-    } catch {
-      isPlayingRef.current = false;
-      setIsPlaying(false);
-    }
-  }, [TRACKS, pickRandomIndex, stopAndCleanup, volume]);
-
-  const handleToggle = useCallback(() => {
-    if (isPlayingRef.current) {
-      // Pausar
-      isPlayingRef.current = false;
-      setIsPlaying(false);
-      audioRef.current?.pause();
-    } else {
-      // Sempre que voltar a tocar, escolhe uma faixa aleatória
-      void playNextRandom();
-    }
-  }, [playNextRandom]);
-
-  // Limpeza ao desmontar
-  useEffect(() => {
-    return () => {
-      isPlayingRef.current = false;
-      stopAndCleanup();
-    };
-  }, [stopAndCleanup]);
+export default function PlaySong() {
+  const [open, setOpen] = useState(false);
+  const { playing } = useAtmosphere();
 
   return (
     <div>
       <button
         type="button"
-        onClick={handleToggle}
-        aria-pressed={isPlaying}
-        aria-label={
-          isPlaying ? "Pausar música de fundo" : "Tocar música de fundo"
-        }
-        title={isPlaying ? "Pausar música de fundo" : "Tocar música de fundo"}
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+        aria-label={playing ? "Atmosfera Devocional tocando. Abrir" : "Abrir Atmosfera Devocional"}
+        title="Atmosfera Devocional"
         className={[
           "flex size-9 items-center justify-center rounded-full transition-colors",
-          isPlaying
-            ? "bg-[var(--liquid-accent)] text-[var(--liquid-on-accent)]"
-            : "text-[var(--liquid-ink)] hover:bg-[var(--muted)]",
+          playing ? "bg-[var(--liquid-accent)] text-[var(--liquid-on-accent)]" : "text-[var(--liquid-ink)] hover:bg-[var(--muted)]",
         ].join(" ")}
       >
-        <span className="inline-flex items-center justify-center [&_svg]:size-4">
-          {isPlaying ? <Pause /> : <Play />}
-          {/* Mostra a faixa atual opcionalmente */}
-          {/* {currentIndex != null && (
-            <span className="text-xs opacity-80">#{currentIndex + 1}</span>
-          )} */}
-        </span>
+        <span className="inline-flex items-center justify-center [&_svg]:size-4">{playing ? <AudioLines /> : <Play />}</span>
       </button>
+      <AtmosphereDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }

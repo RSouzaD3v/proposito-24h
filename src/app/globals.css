@@ -613,3 +613,30 @@ body.reader-app {
 .admin-shell [data-slot="table-body"] [data-slot="table-row"]:hover {
   background: rgb(255 255 255 / 0.55);
 }
+
+/* Atmosfera Devocional: barrinhas que "respiram" enquanto o som toca. */
+.atmosphere-bar {
+  transition: transform 300ms ease;
+}
+
+.atmosphere-bar-active {
+  animation-name: atmosphere-bar;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes atmosphere-bar {
+  from {
+    transform: scaleY(0.3);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere-bar-active {
+    animation: none;
+  }
+}
