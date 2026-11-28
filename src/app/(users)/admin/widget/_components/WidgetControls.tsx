@@ -31,6 +31,7 @@ import {
   type WidgetSource,
   type WidgetVerseInput,
 } from "../actions";
+import { circleLabel } from "../_lib/labels";
 
 /** Mesmos limites da API (WIDGET_LIMITS). */
 export const LIMITS = { shortText: 90, inlineText: 30, reference: 40 } as const;
@@ -51,15 +52,6 @@ export type WidgetVerse = {
   active: boolean;
   book: { abbrev: string; name: string } | null;
 };
-
-/** Texto curto do círculo: "Sl 23:1". Avulso usa as iniciais da referência. */
-export function circleLabel(item: Pick<WidgetVerse, "book" | "chapter" | "verseStart" | "reference">) {
-  if (item.book && item.chapter && item.verseStart) {
-    const abbrev = item.book.abbrev.charAt(0).toUpperCase() + item.book.abbrev.slice(1);
-    return `${abbrev} ${item.chapter}:${item.verseStart}`;
-  }
-  return item.reference.slice(0, 8);
-}
 
 const WEEKDAY = new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit" });
 

@@ -9,13 +9,13 @@ import { StatTile } from "../_components/StatTile";
 import {
   type BibleBook,
   type BibleVersion,
-  circleLabel,
   DeleteWidgetVerseButton,
   LockScreenPreview,
   WidgetActiveSwitch,
   type WidgetVerse,
   WidgetVerseDialog,
 } from "./_components/WidgetControls";
+import { circleLabel } from "./_lib/labels";
 
 export const dynamic = "force-dynamic";
 
