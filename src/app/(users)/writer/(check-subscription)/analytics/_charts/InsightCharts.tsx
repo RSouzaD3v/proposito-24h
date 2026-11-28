@@ -1,15 +1,16 @@
 "use client";
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CHART, SERIES as PALETTE } from "@/components/ledger/palette";
 
 // Paleta categórica validada (visão de cores e contraste); legenda e tabela acompanham cada gráfico.
-const SERIES = { devotional: "#2a78d6", verse: "#eb6834", quote: "#1baf7a" } as const;
-const SERIES_LABEL = { devotional: "Devocionais", verse: "Versículos", quote: "Frases" } as const;
+export const SERIES = { devotional: PALETTE[0], verse: PALETTE[1], quote: PALETTE[2] } as const;
+export const SERIES_LABEL = { devotional: "Devocionais", verse: "Versículos", quote: "Frases" } as const;
 type SeriesKey = keyof typeof SERIES;
 const SERIES_KEYS = Object.keys(SERIES) as SeriesKey[];
 
-const GRID = "rgb(0 0 0 / 0.07)";
-const TICK = { fontSize: 12, fill: "var(--liquid-muted)" };
+const GRID = CHART.grid;
+const TICK = { fontSize: 12, fill: CHART.tick };
 const axisProps = { tickLine: false, axisLine: false, tick: TICK } as const;
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const INT = new Intl.NumberFormat("pt-BR");
@@ -29,7 +30,7 @@ function ChartTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-black/10 bg-white px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-[var(--admin-line)] bg-white px-3 py-2 text-xs shadow-[0_4px_16px_rgb(40_30_15_/_0.08)]">
       <p className="mb-1 font-semibold text-[var(--liquid-ink)]">{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} className="flex items-center gap-2 text-[var(--liquid-muted)]">
@@ -124,6 +125,42 @@ export function EngagementChart({ data }: { data: EngagementDay[] }) {
         headers={["Dia", ...SERIES_KEYS.map((key) => SERIES_LABEL[key])]}
         rows={data.map((day) => [day.label, ...SERIES_KEYS.map((key) => day[key])])}
       />
+    </div>
+  );
+}
+
+/** Leitores distintos que concluíram algo em cada dia. */
+export function DailyReadersChart({ data, name = "Leitores" }: { data: DayValue[]; name?: string }) {
+  return (
+    <div className="h-56 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke={GRID} />
+          <XAxis dataKey="label" minTickGap={36} {...axisProps} />
+          <YAxis width={32} allowDecimals={false} {...axisProps} />
+          <Tooltip cursor={{ fill: GRID }} content={<ChartTooltip />} />
+          <Bar dataKey="value" name={name} fill={CHART.primary} radius={[3, 3, 0, 0]} maxBarSize={22} />
+        </BarChart>
+      </ResponsiveContainer>
+      <DataTable caption={`${name} por dia`} headers={["Dia", name]} rows={data.map(({ label, value }) => [label, value])} />
+    </div>
+  );
+}
+
+/** Horário escolhido para o lembrete diário no app. */
+export function ReminderHoursChart({ data }: { data: DayValue[] }) {
+  return (
+    <div className="h-40 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke={GRID} />
+          <XAxis dataKey="label" interval={2} {...axisProps} />
+          <YAxis width={28} allowDecimals={false} {...axisProps} />
+          <Tooltip cursor={{ fill: GRID }} content={<ChartTooltip />} />
+          <Bar dataKey="value" name="Leitores" fill={PALETTE[1]} radius={[3, 3, 0, 0]} maxBarSize={14} />
+        </BarChart>
+      </ResponsiveContainer>
+      <DataTable caption="Horário do lembrete diário" headers={["Hora", "Leitores"]} rows={data.map(({ label, value }) => [label, value])} />
     </div>
   );
 }

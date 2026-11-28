@@ -13,7 +13,6 @@ export default async function DevotionalPage() {
         <WriterShell maxWidth="xl">
             <PageHeader
                 title="Devocional do Dia"
-                backHref="/writer/daily"
                 actions={
                     <>
                         {devotional && (

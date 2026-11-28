@@ -10,16 +10,7 @@ export function deltaOf(current: number, previous: number): number | "new" | nul
   return Math.round(((current - previous) / previous) * 100);
 }
 
-export const RANGES = [
-  { key: "7d", label: "7 dias" },
-  { key: "30d", label: "30 dias" },
-  { key: "90d", label: "90 dias" },
-  { key: "365d", label: "1 ano" },
-] as const;
-
-export function rangeOf(requested: string | undefined) {
-  return RANGES.find(({ key }) => key === requested) ?? RANGES[1];
-}
+export { RANGES, rangeOf } from "@/components/ledger/ranges";
 
 export const SUBSCRIPTION_STATUS: Record<string, { label: string; color: string }> = {
   ACTIVE: { label: "Ativas", color: "#3f7d4f" },

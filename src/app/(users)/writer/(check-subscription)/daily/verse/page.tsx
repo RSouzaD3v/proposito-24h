@@ -13,7 +13,6 @@ export default async function VersePage() {
         <WriterShell maxWidth="xl">
             <PageHeader
                 title="Versículo do Dia"
-                backHref="/writer/daily"
                 actions={
                     <>
                         {verse && (

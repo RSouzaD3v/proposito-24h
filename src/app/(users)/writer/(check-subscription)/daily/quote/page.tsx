@@ -13,7 +13,6 @@ export default async function QuotePage() {
         <WriterShell maxWidth="xl">
             <PageHeader
                 title="Citação do Dia"
-                backHref="/writer/daily"
                 actions={
                     <>
                         {quote && (

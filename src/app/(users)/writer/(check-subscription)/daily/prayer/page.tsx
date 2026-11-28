@@ -13,7 +13,6 @@ export default async function PrayerPage() {
         <WriterShell maxWidth="xl">
             <PageHeader
                 title="Oração do Dia"
-                backHref="/writer/daily"
                 actions={
                     <>
                         {prayer && (

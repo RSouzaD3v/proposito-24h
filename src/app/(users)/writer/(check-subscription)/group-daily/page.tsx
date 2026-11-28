@@ -29,7 +29,6 @@ export default async function GroupDaily() {
       <PageHeader
         title="Agrupamentos Diários"
         description="Organize os conteúdos do seu devocional diário"
-        backHref="/writer/dashboard"
         actions={<ModalGroupDaily />}
       />
 

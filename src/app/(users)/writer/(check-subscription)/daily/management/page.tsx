@@ -15,9 +15,8 @@ export default async function DailyManagementPage() {
     return (
         <WriterShell maxWidth="4xl">
             <PageHeader
-                title="Gerenciamento Daily"
-                description="Gerencie todo o conteúdo do diário."
-                backHref="/writer/daily"
+                title="Calendário do diário"
+                description="Tudo o que você publicou no diário, por tipo e por dia."
             />
             <SectionsDaily quotes={quotes} verses={verses} devotionals={devotionals} prayers={prayers} />
         </WriterShell>

@@ -1,5 +1,4 @@
 import { CircleHelp, CreditCard, Layers, Palette, UserRound, Wallet } from "lucide-react";
-import { BackButton } from "@/components/ui/back-button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { WriterShell } from "@/components/ui/writer-shell";
 import { ChangePassword } from "@/components/settings/ChangePassword";
@@ -21,7 +20,6 @@ export default async function WriterSettingsPage() {
 
   return (
     <WriterShell maxWidth="xl">
-      <BackButton href="/writer/dashboard" label="Voltar ao painel" className="mb-6" />
       <h1 className="mb-6 text-3xl font-semibold tracking-tight text-[var(--liquid-ink)]">Configurações</h1>
 
       {profile && (

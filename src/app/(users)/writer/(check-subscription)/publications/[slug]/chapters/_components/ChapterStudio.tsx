@@ -301,7 +301,7 @@ export default function ChapterStudio({ slug, chapterId: initialId }: { slug: st
 
   return (
     <div className={cn("flex min-h-screen flex-col", focus && "fixed inset-0 z-50 overflow-y-auto bg-[#f6f1e7]")}>
-      <header className="sticky top-0 z-30 border-b border-black/5 bg-white/85 backdrop-blur-xl">
+      <header className={cn("sticky z-30 border-b border-black/5 bg-white/85 backdrop-blur-xl", focus ? "top-0" : "top-[var(--studio-bar,0px)]")}>
         <div className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5 md:px-5">
           <Link
             href={chaptersHref}

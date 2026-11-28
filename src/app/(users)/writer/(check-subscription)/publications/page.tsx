@@ -47,7 +47,6 @@ export default async function WriterPublicationPage() {
             <PageHeader
                 title="Minhas publicações"
                 description="Escreva, organize e veja cada livro como o leitor vai ver."
-                backHref="/writer/dashboard"
                 backLabel="Voltar ao Painel"
                 actions={
                     <>

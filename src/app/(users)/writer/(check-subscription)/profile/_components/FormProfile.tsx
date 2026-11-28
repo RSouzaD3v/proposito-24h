@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GlassCard } from "@/components/ui/glass-card";
-import { BackButton } from "@/components/ui/back-button";
 import { ButtonSpinner } from "@/components/ui/loading-state";
 
 interface DataTypes {
@@ -77,7 +76,6 @@ export const FormProfile = (data: DataTypes) => {
 
     return (
         <div className="space-y-4">
-            <BackButton href="/writer/dashboard" label="Voltar ao Painel" />
             <GlassCard strong padding="lg" className="w-full">
                 <h1 className="mb-6 text-center text-2xl font-semibold tracking-tight text-[var(--liquid-ink)]">
                     Configurações do Perfil

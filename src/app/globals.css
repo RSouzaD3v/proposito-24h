@@ -577,7 +577,7 @@ body.reader-app {
 
 /* Admin: tema "livro-caixa" — papel quente, superfícies sólidas, um só acento bronze.
    Redefine os tokens do liquid glass apenas dentro do painel, então todas as subpáginas mudam juntas. */
-.admin-shell {
+:is(.admin-shell, .studio-shell) {
   --admin-paper: #f5f3ee;
   --admin-surface: #ffffff;
   --admin-sunken: #f0ede6;
@@ -611,11 +611,11 @@ body.reader-app {
   background: var(--admin-paper);
 }
 
-.admin-shell.liquid-bg::before {
+:is(.admin-shell, .studio-shell).liquid-bg::before {
   display: none;
 }
 
-.admin-shell :is(.glass-surface, .glass-surface-strong, [data-slot="card"]) {
+:is(.admin-shell, .studio-shell) :is(.glass-surface, .glass-surface-strong, [data-slot="card"]) {
   background: var(--admin-surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -625,7 +625,7 @@ body.reader-app {
   color: var(--liquid-ink);
 }
 
-.admin-shell .animate-glass-in {
+:is(.admin-shell, .studio-shell) .animate-glass-in {
   animation: admin-rise 0.3s ease-out both;
 }
 
@@ -635,75 +635,89 @@ body.reader-app {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-shell .animate-glass-in { animation: none; }
+  :is(.admin-shell, .studio-shell) .animate-glass-in { animation: none; }
 }
 
 /* Os fundos translúcidos espalhados pelas telas viram tons de papel. */
-.admin-shell :is(.bg-white\/20, .bg-white\/25, .bg-white\/30, .bg-white\/40, .bg-white\/50, .bg-white\/55, .bg-white\/60, .bg-white\/70, .bg-white\/75) {
+:is(.admin-shell, .studio-shell) :is(.bg-white\/20, .bg-white\/25, .bg-white\/30, .bg-white\/40, .bg-white\/50, .bg-white\/55, .bg-white\/60, .bg-white\/70, .bg-white\/75) {
   background-color: var(--admin-sunken);
 }
-.admin-shell :is(.hover\:bg-white\/60, .hover\:bg-white\/70, .hover\:bg-white\/55):hover {
+:is(.admin-shell, .studio-shell) :is(.hover\:bg-white\/60, .hover\:bg-white\/70, .hover\:bg-white\/55):hover {
   background-color: var(--admin-sunken);
 }
-.admin-shell :is(.border-white\/40, .border-white\/50, .border-white\/60, .border-white\/70) {
+:is(.admin-shell, .studio-shell) :is(.border-white\/40, .border-white\/50, .border-white\/60, .border-white\/70) {
   border-color: var(--admin-line);
 }
 
-.admin-shell .admin-display {
+:is(.admin-shell, .studio-shell) .admin-display {
   font-family: var(--font-reader-serif), Georgia, serif;
   font-optical-sizing: auto;
   letter-spacing: -0.015em;
   font-weight: 500;
 }
 
-.admin-shell main h1 {
+:is(.admin-shell, .studio-shell) main h1 {
   font-family: var(--font-reader-serif), Georgia, serif;
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--liquid-ink);
 }
 
-.admin-shell [data-slot="card-description"],
-.admin-shell main .text-muted-foreground {
+:is(.admin-shell, .studio-shell) [data-slot="card-description"],
+:is(.admin-shell, .studio-shell) main .text-muted-foreground {
   color: var(--liquid-muted);
 }
 
-.admin-shell [data-slot="table-header"] [data-slot="table-row"] {
+:is(.admin-shell, .studio-shell) [data-slot="table-header"] [data-slot="table-row"] {
   border-color: var(--admin-line);
 }
 
-.admin-shell [data-slot="table-head"] {
+:is(.admin-shell, .studio-shell) [data-slot="table-head"] {
   color: var(--liquid-muted);
   font-size: 0.75rem;
   font-weight: 500;
 }
 
-.admin-shell [data-slot="table-row"] {
+:is(.admin-shell, .studio-shell) [data-slot="table-row"] {
   border-color: var(--admin-line-soft);
 }
 
-.admin-shell [data-slot="table-body"] [data-slot="table-row"]:hover {
+:is(.admin-shell, .studio-shell) [data-slot="table-body"] [data-slot="table-row"]:hover {
   background: #faf8f4;
 }
 
-.admin-shell :is(input, textarea, [data-slot="select-trigger"]) {
+:is(.admin-shell, .studio-shell) :is(input, textarea, [data-slot="select-trigger"]) {
   background-color: var(--admin-surface);
 }
 
 /* Botões: cantos discretos, sem brilho nem desfoque. */
-.admin-shell [data-slot="button"] {
+:is(.admin-shell, .studio-shell) [data-slot="button"] {
   border-radius: 0.5rem;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-.admin-shell [data-slot="button"][class*="liquid-accent"] {
+:is(.admin-shell, .studio-shell) [data-slot="button"][class*="liquid-accent"] {
   border-color: transparent;
 }
 
-.admin-shell ::selection {
+:is(.admin-shell, .studio-shell) ::selection {
   background: rgb(160 88 42 / 0.18);
+}
+
+/* Estúdio do escritor: mesma base de papel, com filetes e superfícies próprias da barra lateral. */
+.studio-shell {
+  --studio-rail: #efebe3;
+  --studio-rail-hover: #e7e2d8;
+  /* Altura da barra superior no celular; cabeçalhos fixos da tela descem esse tanto. */
+  --studio-bar: 53px;
+}
+
+@media (min-width: 768px) {
+  .studio-shell {
+    --studio-bar: 0px;
+  }
 }
 
 /* Atmosfera Devocional: barrinhas que "respiram" enquanto o som toca. */

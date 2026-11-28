@@ -52,3 +52,65 @@ export function daysBetween(start: string | Date, end: string | Date) {
 }
 
 export const dayKey = (value: string | Date) => new Date(value).toISOString().slice(0, 10);
+
+export const PCT = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 0 });
+export const DECIMAL = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+
+export type Audience = {
+  start: string;
+  end: string;
+  riskDays: number;
+  totalReaders: number;
+  engagedReaders: number;
+  averageActiveDays: number;
+  averageDailyReaders: number;
+  stickiness: number;
+  heatmap: { weekday: number; hour: number; count: number }[];
+  dailyActive: { day: string; readers: number }[];
+  frequency: { bucket: string; readers: number }[];
+  recency: { bucket: string; readers: number }[];
+  contentMix: { kind: string; count: number; readers: number }[];
+  activation: { newReaders: number; activated: number; medianHoursToFirstRead: number | null };
+  cohorts: { week: string; size: number; weeks: number[] }[];
+  streaks: { active: number; atLeast3: number; atLeast7: number; atLeast30: number; longest: number };
+  devices: {
+    platforms: { platform: string; readers: number }[];
+    appReaders: number;
+    dailyReminder: number;
+    prayerReminder: number;
+    newContentAlerts: number;
+    webPush: number;
+    reminderHours: { hour: number; readers: number }[];
+  };
+  books: { readers: number; finished: number };
+  journeys: { id: string; title: string; active: boolean; started: number; reading: number; completed: number; recent: number }[];
+  highlights: { book: string; chapter: number; verse: number; readers: number }[];
+  topReaders: { id: string; name: string | null; completions: number; days: number; last: string; streak: number }[];
+  atRisk: {
+    count: number;
+    readers: { id: string; name: string | null; email: string; lastAccess: string | null; status: string; lifetime: boolean }[];
+  };
+};
+
+/** "há 3 dias", "há 2 meses"… para datas de acesso. */
+export function timeAgo(value: string | Date | null | undefined, now = Date.now()) {
+  if (!value) return "nunca";
+  const days = Math.floor((now - new Date(value).getTime()) / 86_400_000);
+  if (days <= 0) return "hoje";
+  if (days === 1) return "ontem";
+  if (days < 30) return `há ${days} dias`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return months === 1 ? "há 1 mês" : `há ${months} meses`;
+  const years = Math.floor(days / 365);
+  return years <= 1 ? "há 1 ano" : `há ${years} anos`;
+}
+
+/** Duração legível a partir de horas (mediana até a primeira leitura). */
+export function hoursLabel(hours: number | null) {
+  if (hours === null) return "—";
+  if (hours < 1) return "menos de 1 h";
+  if (hours < 48) return `${Math.round(hours)} h`;
+  return `${Math.round(hours / 24)} dias`;
+}
+
+export const KIND_LABEL: Record<string, string> = { devotional: "Devocionais", verse: "Versículos", quote: "Frases" };

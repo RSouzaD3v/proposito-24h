@@ -31,7 +31,6 @@ export default async function WriterPersonalizationPage() {
       <PageHeader
         title="Personalização do cliente"
         description="Ajuste as cores e a identidade visual do app do leitor."
-        backHref="/writer/dashboard"
         backLabel="Voltar ao Painel"
       />
       <PersonalizationForm writerId={writerId} />

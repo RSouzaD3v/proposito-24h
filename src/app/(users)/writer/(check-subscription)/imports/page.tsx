@@ -1,5 +1,4 @@
 "use client";
-import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -61,8 +60,7 @@ export default function ImportPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center liquid-shell liquid-bg px-4 py-8">
-      <BackButton href="/writer/daily" label="Voltar ao Diário" className="absolute top-4 left-4" />
+    <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center px-4 py-10">
 
       <GlassCard className="w-full max-w-md space-y-6" padding="lg">
         <h1 className="text-2xl font-bold text-[var(--liquid-ink)] text-center mb-2">Importar Arquivo</h1>
@@ -161,6 +159,6 @@ export default function ImportPage() {
         {/* Endpoint debug */}
         <p className="text-[11px] text-gray-400 text-center">POST {endpoint}</p>
       </GlassCard>
-    </main>
+    </div>
   );
 }
