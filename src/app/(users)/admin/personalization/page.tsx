@@ -262,7 +262,7 @@ export default function AdminPersonalizationPage() {
         </GlassCard>
       ) : visible.length === 0 ? (
         <GlassCard strong className="flex flex-col items-center gap-3 py-12 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-[#7c5cd6]/12 text-[#6446c2]">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--admin-sunken)] text-[var(--liquid-ink)]">
             <Palette className="size-6" aria-hidden />
           </span>
           <p className="font-medium text-[var(--liquid-ink)]">{query ? "Nenhum tema encontrado." : "Nenhum tema criado ainda."}</p>
@@ -481,7 +481,7 @@ function ThemeEditor({
                   </div>
                 )}
                 {writers.length > 0 && (
-                  <button type="button" className="inline-flex h-8 w-fit items-center rounded-full border border-[#2a78d6]/30 px-3 text-xs font-medium text-[#2a78d6] transition-colors hover:bg-[#2a78d6]/10" onClick={() => setManualId((value) => !value)}>
+                  <button type="button" className="inline-flex h-8 w-fit items-center rounded-full border border-[#a0582a]/30 px-3 text-xs font-medium text-[#a0582a] transition-colors hover:bg-[#a0582a]/10" onClick={() => setManualId((value) => !value)}>
                     {manualId ? "Escolher da lista" : "Informar o ID manualmente"}
                   </button>
                 )}
@@ -539,7 +539,7 @@ function ThemeEditor({
         <DialogFooter className="flex-row items-center border-t px-6 py-4">
           {invalid.length > 0 && <p className="mr-auto text-xs text-red-700">Use cores no formato #RRGGBB.</p>}
           {editor.mode === "edit" && invalid.length === 0 && (
-            <Button asChild variant="ghost" size="sm" className="mr-auto rounded-full text-[#2a78d6] hover:bg-[#2a78d6]/10 hover:text-[#2a78d6]">
+            <Button asChild variant="ghost" size="sm" className="mr-auto rounded-full text-[#a0582a] hover:bg-[#a0582a]/10 hover:text-[#a0582a]">
               <Link href={`/admin/writer/${editor.writerId}`}>Ver escritor</Link>
             </Button>
           )}

@@ -75,7 +75,7 @@ export function SubscriptionsTable({ subscriptions }: { subscriptions: WriterSub
                 >
                   <td className="py-3 pl-5 pr-3">
                     <button type="button" className="flex items-center gap-3 text-left focus-visible:outline-none">
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#1baf7a]/12 text-xs font-semibold text-[#138a60]">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--admin-sunken)] text-xs font-semibold text-[var(--liquid-ink)]">
                         {(sub.writer?.name ?? "?").charAt(0).toUpperCase()}
                       </span>
                       <span className="min-w-0">

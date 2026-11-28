@@ -12,10 +12,9 @@ import {
 } from "lucide-react";
 import { apiGet } from "@/lib/api/server";
 import { GlassCard } from "@/components/ui/glass-card";
-import { cn } from "@/lib/utils";
 import { requireAdmin } from "../_lib/auth";
-import { cents, deltaOf, formatDate, INT, PCT, RANGES, rangeOf, SUBSCRIPTION_STATUS } from "../_lib/format";
-import { SectionTitle, StatTile } from "../_components/StatTile";
+import { cents, deltaOf, formatDate, INT, PCT, rangeOf, SUBSCRIPTION_STATUS } from "../_lib/format";
+import { PageHeader, RangeTabs, SectionTitle, StatTile } from "../_components/StatTile";
 import { OverviewRevenueChart, type RevenueDay } from "../_components/OverviewRevenueChart";
 import { MetricsGuide } from "../_components/MetricsGuide";
 import { ExportCsvButton } from "../_components/ExportCsvButton";
@@ -50,8 +49,8 @@ type Analytics = {
 };
 
 const PROVIDER = {
-  ASAAS: { label: "Asaas", color: "#2a78d6" },
-  STRIPE: { label: "Stripe", color: "#7c5cd6" },
+  ASAAS: { label: "Asaas", color: "#a0582a" },
+  STRIPE: { label: "Stripe", color: "#8f4a8a" },
 } as Record<string, { label: string; color: string }>;
 
 const money = (valueCents: number) => (valueCents / 100).toFixed(2).replace(".", ",");
@@ -84,38 +83,22 @@ export default async function AdminAnalytics({ searchParams }: { searchParams?: 
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-4 animate-glass-in lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Analytics</h1>
-          <p className="text-sm text-[var(--liquid-muted)]">
-            {formatDate(data.start)} — {formatDate(data.end)} · vendas, assinaturas e crescimento da plataforma
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <nav aria-label="Período" className="glass-surface flex w-fit gap-0.5 rounded-full p-1">
-            {RANGES.map(({ key, label }) => (
-              <Link
-                key={key}
-                href={`?range=${key}`}
-                scroll={false}
-                aria-current={key === range.key ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                  key === range.key ? "bg-[var(--liquid-accent)] text-white shadow-sm" : "text-[var(--liquid-muted)] hover:bg-white/70",
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
+      <PageHeader
+        eyebrow="Painel"
+        title="Receita"
+        description={`${formatDate(data.start)} — ${formatDate(data.end)} · vendas, assinaturas e crescimento da plataforma`}
+        actions={
+          <>
+          <RangeTabs current={range.key} />
           <ExportCsvButton
             filename={`analytics-${range.key}-${data.end.slice(0, 10)}.csv`}
             headers={["Dia", "Receita líquida (R$)", "Vendas", "Receita período anterior (R$)"]}
             rows={data.revenueByDay.map((day) => [day.day, money(day.revenue_cents), day.sales, money(day.previous_revenue_cents)])}
           />
           <MetricsGuide />
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {/* Vendas */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -146,8 +129,8 @@ export default async function AdminAnalytics({ searchParams }: { searchParams?: 
               </p>
             </div>
             <div className="mt-2 flex h-2.5 overflow-hidden rounded-full bg-black/5" aria-hidden>
-              <div className="bg-[#1baf7a]" style={{ width: `${successRate * 100}%` }} />
-              <div className="bg-[#d64545]" style={{ width: `${attempts ? (current.failedSales / attempts) * 100 : 0}%` }} />
+              <div className="bg-[#3f7d4f]" style={{ width: `${successRate * 100}%` }} />
+              <div className="bg-[#b4412f]" style={{ width: `${attempts ? (current.failedSales / attempts) * 100 : 0}%` }} />
             </div>
             <div className="mt-2 flex justify-between text-xs text-[var(--liquid-muted)]">
               <span>{INT.format(current.sales)} pagas</span>
@@ -224,7 +207,7 @@ export default async function AdminAnalytics({ searchParams }: { searchParams?: 
                   <span className="shrink-0 font-semibold tabular-nums text-[var(--liquid-ink)]">{cents(publication.revenue_cents)}</span>
                 </div>
                 <div className="mt-1 h-1.5 rounded-full bg-black/5">
-                  <div className="h-full rounded-full bg-[#eb6834]" style={{ width: `${(publication.revenue_cents / publicationMax) * 100}%` }} />
+                  <div className="h-full rounded-full bg-[#2a6fa0]" style={{ width: `${(publication.revenue_cents / publicationMax) * 100}%` }} />
                 </div>
               </li>
             ))}

@@ -55,7 +55,7 @@ export default async function AdminGamePage({ searchParams }: { searchParams?: P
 
       {games.length === 0 ? (
         <GlassCard strong className="flex flex-col items-center gap-3 py-14 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-[#7c5cd6]/12 text-[#6446c2]">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--admin-sunken)] text-[var(--liquid-ink)]">
             <Gamepad2 className="size-6" aria-hidden />
           </span>
           <p className="font-medium text-[var(--liquid-ink)]">Nenhum jogo criado ainda</p>
@@ -70,7 +70,7 @@ export default async function AdminGamePage({ searchParams }: { searchParams?: P
               <GlassCard key={game.id} strong padding="none" className="flex flex-col overflow-hidden" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                 <Link href={`/admin/game/${game.id}`} className="group flex flex-1 flex-col gap-4 p-5 transition-colors hover:bg-white/40">
                   <div className="flex items-start gap-3">
-                    <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", game.active ? "bg-[#7c5cd6]/12 text-[#6446c2]" : "bg-black/5 text-[var(--liquid-muted)]")}>
+                    <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", game.active ? "bg-[var(--admin-sunken)] text-[var(--liquid-ink)]" : "bg-black/5 text-[var(--liquid-muted)]")}>
                       <Gamepad2 className="size-5" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ export default async function AdminGamePage({ searchParams }: { searchParams?: P
                       </span>
                     </div>
                     <div className="h-1.5 rounded-full bg-black/5">
-                      <div className="h-full rounded-full bg-[#1baf7a]" style={{ width: `${completion * 100}%` }} />
+                      <div className="h-full rounded-full bg-[#3f7d4f]" style={{ width: `${completion * 100}%` }} />
                     </div>
                   </div>
 

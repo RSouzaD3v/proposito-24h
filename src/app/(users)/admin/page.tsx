@@ -1,30 +1,17 @@
 // app/admin/page.tsx
 import Link from "next/link";
-import {
-  AlertTriangle,
-  ArrowRight,
-  Banknote,
-  BookOpen,
-  CircleDollarSign,
-  CreditCard,
-  Percent,
-  Receipt,
-  ShoppingBag,
-  UserMinus,
-  UserPlus,
-  Users2,
-  Activity,
-  Repeat,
-} from "lucide-react";
-import { apiGet } from "@/lib/api/server";
+import { AlertTriangle, ArrowRight } from "lucide-react";
+import { apiFetch, apiGet } from "@/lib/api/server";
 import { GlassCard } from "@/components/ui/glass-card";
 import { cn } from "@/lib/utils";
 import { requireAdmin } from "./_lib/auth";
-import { BRL, cents, deltaOf, formatDate, INT, PCT, RANGES, rangeOf, SUBSCRIPTION_STATUS } from "./_lib/format";
-import { SectionTitle, StatTile } from "./_components/StatTile";
+import { BRL, cents, deltaOf, formatDate, INT, PCT, rangeOf, SUBSCRIPTION_STATUS } from "./_lib/format";
+import { CHART } from "./_lib/palette";
+import { Delta, KpiStrip, PageHeader, RangeTabs, SectionLink, SectionTitle } from "./_components/StatTile";
 import { OverviewRevenueChart, type RevenueDay } from "./_components/OverviewRevenueChart";
 import { RecentSales, type RecentSale } from "./_components/RecentSales";
 import { MetricsGuide } from "./_components/MetricsGuide";
+import { ActivityFeed, type ActivityItem } from "./_components/ActivityFeed";
 
 type PeriodTotals = {
   grossCents: number;
@@ -71,7 +58,10 @@ function greeting() {
 export default async function AdminHome({ searchParams }: { searchParams?: Promise<{ range?: string }> }) {
   const { session } = await requireAdmin();
   const range = rangeOf((await searchParams)?.range);
-  const data = await apiGet<Overview>(`/admin/overview?range=${range.key}`);
+  const [data, activity] = await Promise.all([
+    apiGet<Overview>(`/admin/overview?range=${range.key}`),
+    apiFetch<ActivityItem[]>("/admin/activity"),
+  ]);
   const { current, previous } = data;
 
   const firstName = (session.user.name ?? "").split(" ")[0];
@@ -81,6 +71,8 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
   const churn = data.subsActive ? current.canceledSubs / data.subsActive : 0;
   const activeShare = data.totalReaders ? data.activeReaders / data.totalReaders : 0;
   const takeRate = current.grossCents ? current.platformFeeCents / current.grossCents : 0;
+  const attempts = current.sales + current.failedSales;
+  const approval = attempts ? current.sales / attempts : 0;
   const topMax = Math.max(1, ...data.topWriters.map(({ revenue_cents }) => revenue_cents));
   const topShare = current.netCents
     ? data.topWriters.reduce((sum, { revenue_cents }) => sum + revenue_cents, 0) / current.netCents
@@ -89,267 +81,213 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
   const alerts = [
     data.pendingPayouts.count > 0 && {
       href: "/admin/payouts",
-      tone: "amber",
-      text: `${INT.format(data.pendingPayouts.count)} ${data.pendingPayouts.count === 1 ? "repasse pendente" : "repasses pendentes"} · ${cents(data.pendingPayouts.netCents)}`,
+      tone: "warn",
+      text: `${INT.format(data.pendingPayouts.count)} ${data.pendingPayouts.count === 1 ? "repasse pendente" : "repasses pendentes"}`,
+      detail: cents(data.pendingPayouts.netCents),
     },
     current.failedSales > 0 && {
       href: "/admin/billing",
-      tone: "red",
+      tone: "bad",
       text: `${INT.format(current.failedSales)} ${current.failedSales === 1 ? "pagamento falhou" : "pagamentos falharam"} no período`,
+      detail: `aprovação de ${PCT.format(approval)}`,
     },
     pastDue > 0 && {
-      href: "/admin/analytics",
-      tone: "amber",
+      href: "/admin/readers?filter=subscribers",
+      tone: "warn",
       text: `${INT.format(pastDue)} ${pastDue === 1 ? "assinatura com pagamento atrasado" : "assinaturas com pagamento atrasado"}`,
+      detail: "risco de cancelamento",
     },
-  ].filter(Boolean) as { href: string; tone: "amber" | "red"; text: string }[];
+  ].filter(Boolean) as { href: string; tone: "warn" | "bad"; text: string; detail: string }[];
 
   return (
     <section className="space-y-6">
-      {/* Cabeçalho */}
-      <header className="flex flex-col gap-4 animate-glass-in lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-[var(--liquid-accent)]">
-            {greeting()}
-            {firstName ? `, ${firstName}` : ""}
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Visão geral</h1>
-          <p className="text-sm text-[var(--liquid-muted)]">
-            {formatDate(data.start)} — {formatDate(data.end)} · comparado ao período anterior de mesma duração
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <nav aria-label="Período" className="glass-surface flex w-fit gap-0.5 rounded-full p-1">
-            {RANGES.map(({ key, label }) => (
-              <Link
-                key={key}
-                href={`?range=${key}`}
-                scroll={false}
-                aria-current={key === range.key ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                  key === range.key ? "bg-[var(--liquid-accent)] text-white shadow-sm" : "text-[var(--liquid-muted)] hover:bg-white/70",
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <MetricsGuide />
-        </div>
-      </header>
+      <PageHeader
+        eyebrow={`${greeting()}${firstName ? `, ${firstName}` : ""}`}
+        title="Visão geral"
+        description={`${formatDate(data.start)} — ${formatDate(data.end)} · comparado ao período anterior de mesma duração`}
+        actions={
+          <>
+            <RangeTabs current={range.key} />
+            <MetricsGuide />
+          </>
+        }
+      />
 
-      {/* Alertas */}
       {alerts.length > 0 && (
-        <div className="flex flex-wrap gap-2 animate-glass-in" role="status">
+        <GlassCard padding="none" className="divide-y divide-[var(--admin-line-soft)]" role="status">
           {alerts.map((alert) => (
             <Link
               key={alert.text}
               href={alert.href}
-              className={cn(
-                "group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium backdrop-blur-xl transition-colors",
-                alert.tone === "red"
-                  ? "border-red-200/70 bg-red-50/80 text-red-800 hover:bg-red-50"
-                  : "border-amber-200/70 bg-amber-50/80 text-amber-900 hover:bg-amber-50",
-              )}
+              className="group flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#faf8f4]"
             >
-              <AlertTriangle className="size-4" aria-hidden />
-              {alert.text}
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              <AlertTriangle
+                className={cn("size-4 shrink-0", alert.tone === "bad" ? "text-[var(--admin-bad)]" : "text-[var(--admin-warn)]")}
+                aria-hidden
+              />
+              <span className="font-medium text-[var(--liquid-ink)]">{alert.text}</span>
+              <span className="hidden text-[var(--liquid-muted)] sm:inline">· {alert.detail}</span>
+              <ArrowRight className="ml-auto size-4 text-[var(--liquid-muted)] transition-transform group-hover:translate-x-0.5" aria-hidden />
             </Link>
           ))}
-        </div>
+        </GlassCard>
       )}
 
-      {/* Finanças */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile
-          size="lg"
-          label="Receita líquida"
-          value={cents(current.netCents)}
-          icon={CircleDollarSign}
-          tone="blue"
-          delta={deltaOf(current.netCents, previous.netCents)}
-        />
-        <StatTile
-          size="lg"
-          label="Volume bruto (GMV)"
-          value={cents(current.grossCents)}
-          icon={Receipt}
-          tone="violet"
-          delta={deltaOf(current.grossCents, previous.grossCents)}
-          hint={`${cents(current.feesCents)} em taxas`}
-        />
-        <StatTile
-          size="lg"
-          label="Vendas pagas"
-          value={INT.format(current.sales)}
-          icon={ShoppingBag}
-          tone="green"
-          delta={deltaOf(current.sales, previous.sales)}
-          hint={`ticket ${cents(current.avgTicketCents)}`}
-        />
-        <StatTile
-          size="lg"
-          label="Comissão da plataforma"
-          value={cents(current.platformFeeCents)}
-          icon={Percent}
-          tone="orange"
-          delta={deltaOf(current.platformFeeCents, previous.platformFeeCents)}
-          hint={`take rate ${PCT.format(takeRate)}`}
-        />
-      </div>
+      <KpiStrip
+        items={[
+          {
+            label: "Receita líquida",
+            value: cents(current.netCents),
+            delta: deltaOf(current.netCents, previous.netCents),
+            hint: "vs. período anterior",
+          },
+          {
+            label: "Volume bruto (GMV)",
+            value: cents(current.grossCents),
+            delta: deltaOf(current.grossCents, previous.grossCents),
+            hint: `${cents(current.feesCents)} em taxas`,
+          },
+          {
+            label: "Vendas pagas",
+            value: INT.format(current.sales),
+            delta: deltaOf(current.sales, previous.sales),
+            hint: `ticket médio ${cents(current.avgTicketCents)}`,
+          },
+          {
+            label: "Comissão da plataforma",
+            value: cents(current.platformFeeCents),
+            delta: deltaOf(current.platformFeeCents, previous.platformFeeCents),
+            hint: `take rate ${PCT.format(takeRate)}`,
+          },
+        ]}
+      />
 
-      {/* Gráfico + saúde das assinaturas */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <GlassCard strong className="lg:col-span-2">
+        <GlassCard className="lg:col-span-2">
           <SectionTitle
-            title="Receita ao longo do período"
+            title="Receita no período"
             description={`${BRL.format(current.netCents / 100)} líquidos em ${INT.format(current.sales)} vendas`}
-            action={
-              <Link href={`/admin/analytics?range=${range.key}`} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
-                Analytics completo
-                <ArrowRight className="size-3.5" />
-              </Link>
-            }
+            action={<SectionLink href={`/admin/analytics?range=${range.key}`}>Relatório de receita</SectionLink>}
           />
           <OverviewRevenueChart data={data.revenueByDay} />
         </GlassCard>
 
-        <GlassCard strong className="flex flex-col">
-          <SectionTitle title="Assinaturas de leitores" description={`${INT.format(statusTotal)} no total`} />
-          <div className="mb-4 grid grid-cols-2 gap-2">
+        <GlassCard className="flex flex-col">
+          <SectionTitle
+            title="Assinaturas de leitores"
+            description={`${INT.format(statusTotal)} no total`}
+            action={<SectionLink href="/admin/readers?filter=subscribers">Assinantes</SectionLink>}
+          />
+          <dl className="mb-5 grid grid-cols-2 gap-x-4 gap-y-4">
             <MiniStat label="Ativas" value={INT.format(data.subsActive)} />
-            <MiniStat label="Conversão" value={PCT.format(conversion)} hint="leitores assinantes" />
-            <MiniStat
-              label="Novas"
-              value={INT.format(current.newSubs)}
-              delta={deltaOf(current.newSubs, previous.newSubs)}
-            />
+            <MiniStat label="Conversão" value={PCT.format(conversion)} hint="dos leitores" />
+            <MiniStat label="Novas" value={INT.format(current.newSubs)} delta={deltaOf(current.newSubs, previous.newSubs)} />
             <MiniStat label="Cancelamento" value={PCT.format(churn)} hint={`${INT.format(current.canceledSubs)} no período`} />
-          </div>
+          </dl>
 
           {statusTotal > 0 ? (
-            <>
-              <div className="flex h-2.5 overflow-hidden rounded-full bg-black/5" aria-hidden>
+            <div className="mt-auto">
+              <div className="flex h-2 gap-[2px] overflow-hidden rounded-full" aria-hidden>
                 {data.statusDist.map(({ status, count }) => (
                   <div
                     key={status}
-                    style={{ width: `${(count / statusTotal) * 100}%`, background: SUBSCRIPTION_STATUS[status]?.color ?? "#a3a3a3" }}
+                    style={{ width: `${(count / statusTotal) * 100}%`, background: SUBSCRIPTION_STATUS[status]?.color ?? CHART.neutral }}
                   />
                 ))}
               </div>
               <ul className="mt-3 grid gap-1.5">
                 {data.statusDist.map(({ status, count }) => (
-                  <li key={status} className="flex items-center justify-between gap-3 text-sm">
+                  <li key={status} className="flex items-center justify-between gap-3 text-[13px]">
                     <span className="flex items-center gap-2 text-[var(--liquid-ink)]">
                       <span
-                        className="size-2.5 rounded-full"
-                        style={{ background: SUBSCRIPTION_STATUS[status]?.color ?? "#a3a3a3" }}
+                        className="size-2 rounded-[2px]"
+                        style={{ background: SUBSCRIPTION_STATUS[status]?.color ?? CHART.neutral }}
                         aria-hidden
                       />
                       {SUBSCRIPTION_STATUS[status]?.label ?? status}
                     </span>
                     <span className="tabular-nums text-[var(--liquid-muted)]">
-                      <span className="font-semibold text-[var(--liquid-ink)]">{INT.format(count)}</span> ·{" "}
-                      {PCT.format(count / statusTotal)}
+                      <span className="font-medium text-[var(--liquid-ink)]">{INT.format(count)}</span> · {PCT.format(count / statusTotal)}
                     </span>
                   </li>
                 ))}
               </ul>
-            </>
+            </div>
           ) : (
             <p className="text-sm text-[var(--liquid-muted)]">Nenhuma assinatura ainda.</p>
           )}
         </GlassCard>
       </div>
 
-      {/* Audiência */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatTile
-          label="Novos leitores"
-          value={INT.format(current.newReaders)}
-          icon={UserPlus}
-          tone="blue"
-          delta={deltaOf(current.newReaders, previous.newReaders)}
-        />
-        <StatTile
-          label="Leitores ativos"
-          value={INT.format(data.activeReaders)}
-          icon={Activity}
-          tone="green"
-          hint={`${PCT.format(activeShare)} de ${INT.format(data.totalReaders)} leitores`}
-        />
-        <StatTile
-          label="Cancelamentos"
-          value={INT.format(current.canceledSubs)}
-          icon={UserMinus}
-          tone="rose"
-          invert
-          delta={deltaOf(current.canceledSubs, previous.canceledSubs)}
-        />
-        <StatTile
-          label="Novos escritores"
-          value={INT.format(current.newWriters)}
-          icon={Users2}
-          tone="violet"
-          delta={deltaOf(current.newWriters, previous.newWriters)}
-          href="/admin/writers"
-        />
-      </div>
+      <KpiStrip
+        items={[
+          {
+            label: "Novos leitores",
+            value: INT.format(current.newReaders),
+            delta: deltaOf(current.newReaders, previous.newReaders),
+            hint: "cadastros",
+            href: "/admin/readers",
+          },
+          {
+            label: "Leitores ativos",
+            value: INT.format(data.activeReaders),
+            hint: `${PCT.format(activeShare)} de ${INT.format(data.totalReaders)}`,
+            href: `/admin/engagement?range=${range.key}`,
+          },
+          {
+            label: "Cancelamentos",
+            value: INT.format(current.canceledSubs),
+            delta: deltaOf(current.canceledSubs, previous.canceledSubs),
+            invert: true,
+            hint: "assinaturas",
+          },
+          {
+            label: "Novos escritores",
+            value: INT.format(current.newWriters),
+            delta: deltaOf(current.newWriters, previous.newWriters),
+            hint: `${INT.format(data.totalWriters)} no total`,
+            href: "/admin/writers",
+          },
+        ]}
+      />
 
-      {/* Top escritores + vendas recentes */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <GlassCard strong className="lg:col-span-2">
+        <GlassCard className="lg:col-span-2">
           <SectionTitle
-            title="Top escritores"
+            title="Escritores que mais venderam"
             description={
-              data.topWriters.length
-                ? `${PCT.format(Math.min(topShare, 1))} da receita do período`
-                : "Por receita líquida no período"
+              data.topWriters.length ? `${PCT.format(Math.min(topShare, 1))} da receita do período` : "Por receita líquida no período"
             }
-            action={
-              <Link href="/admin/writers" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
-                Ver todos
-                <ArrowRight className="size-3.5" />
-              </Link>
-            }
+            action={<SectionLink href="/admin/writers">Todos</SectionLink>}
           />
           {data.topWriters.length === 0 && (
             <p className="py-8 text-center text-sm text-[var(--liquid-muted)]">Nenhuma venda no período.</p>
           )}
-          <ol className="grid gap-1">
+          <ol className="grid gap-0.5">
             {data.topWriters.map((writer, index) => (
               <li key={writer.writer_id}>
                 <Link
                   href={`/admin/writer/${writer.writer_id}`}
-                  className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-white/60"
+                  className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-[#faf8f4]"
                 >
-                  <span
-                    className={cn(
-                      "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                      index === 0 ? "bg-amber-100 text-amber-800" : "bg-black/5 text-[var(--liquid-muted)]",
-                    )}
-                  >
-                    {index + 1}
-                  </span>
+                  <span className="w-4 shrink-0 text-right text-xs tabular-nums text-[var(--liquid-muted)]">{index + 1}</span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-3">
-                      <span className="truncate text-sm font-medium text-[var(--liquid-ink)]">
+                      <span className="truncate text-[13.5px] font-medium text-[var(--liquid-ink)] group-hover:underline group-hover:underline-offset-4">
                         {writer.writer_name}
                       </span>
-                      <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--liquid-ink)]">
+                      <span className="shrink-0 text-[13.5px] font-medium tabular-nums text-[var(--liquid-ink)]">
                         {cents(writer.revenue_cents)}
                       </span>
                     </span>
-                    <span className="mt-1 flex items-center gap-2">
-                      <span className="h-1.5 flex-1 rounded-full bg-black/5">
+                    <span className="mt-1.5 flex items-center gap-3">
+                      <span className="h-1 flex-1 rounded-full bg-[var(--admin-sunken)]">
                         <span
-                          className="block h-full rounded-full bg-[#2a78d6]"
-                          style={{ width: `${(writer.revenue_cents / topMax) * 100}%` }}
+                          className="block h-full rounded-full"
+                          style={{ width: `${(writer.revenue_cents / topMax) * 100}%`, background: CHART.primary }}
                         />
                       </span>
-                      <span className="shrink-0 text-xs tabular-nums text-[var(--liquid-muted)]">
+                      <span className="w-16 shrink-0 text-right text-[11px] tabular-nums text-[var(--liquid-muted)]">
                         {INT.format(writer.sales)} {writer.sales === 1 ? "venda" : "vendas"}
                       </span>
                     </span>
@@ -360,60 +298,88 @@ export default async function AdminHome({ searchParams }: { searchParams?: Promi
           </ol>
         </GlassCard>
 
-        <GlassCard strong className="lg:col-span-3">
+        <GlassCard className="lg:col-span-3">
           <SectionTitle
             title="Vendas recentes"
-            description="Toque em uma venda para ver os detalhes"
-            action={
-              <Link href="/admin/billing" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--liquid-accent)]/10 px-3 text-xs font-semibold text-[var(--liquid-accent)] transition-colors hover:bg-[var(--liquid-accent)]/20">
-                Pagamentos
-                <ArrowRight className="size-3.5" />
-              </Link>
-            }
+            description="Clique em uma venda para ver os detalhes"
+            action={<SectionLink href="/admin/billing">Pagamentos</SectionLink>}
           />
           <RecentSales sales={data.recentSales} />
         </GlassCard>
       </div>
 
-      {/* Plataforma */}
-      <div>
-        <SectionTitle title="Plataforma" description="Totais acumulados e pendências" />
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-          <StatTile
-            label="Escritores"
-            value={INT.format(data.totalWriters)}
-            icon={Users2}
-            tone="slate"
-            hint={`${INT.format(current.newWriters)} novos no período`}
-            href="/admin/writers"
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <GlassCard className="lg:col-span-3">
+          <SectionTitle
+            title="Atividade recente"
+            description="Cadastros, vendas, assinaturas e leituras concluídas"
+            action={<SectionLink href={`/admin/engagement?range=${range.key}`}>Engajamento</SectionLink>}
           />
-          <StatTile
-            label="Publicações"
-            value={INT.format(data.totalPublications)}
-            icon={BookOpen}
-            tone="slate"
-            hint={`${INT.format(data.publishedPublications)} publicadas`}
-            href="/admin/analytics"
-          />
-          <StatTile
-            label="MRR dos escritores"
-            value={cents(data.writerPlans.mrrCents)}
-            icon={Repeat}
-            tone="slate"
-            hint={`${INT.format(data.writerPlans.active)} ${data.writerPlans.active === 1 ? "plano ativo" : "planos ativos"}`}
-            href="/admin/writer-subscriptions"
-          />
-          <StatTile
-            label="Repasses pendentes"
-            value={cents(data.pendingPayouts.netCents)}
-            icon={data.pendingPayouts.count ? Banknote : CreditCard}
-            tone={data.pendingPayouts.count ? "orange" : "slate"}
-            hint={`${INT.format(data.pendingPayouts.count)} ${data.pendingPayouts.count === 1 ? "registro" : "registros"}`}
-            href="/admin/payouts"
-          />
-        </div>
+          {activity.ok ? (
+            <ActivityFeed items={activity.data} />
+          ) : (
+            <p className="py-6 text-center text-sm text-[var(--liquid-muted)]">Não foi possível carregar a atividade agora.</p>
+          )}
+        </GlassCard>
+
+        <GlassCard className="lg:col-span-2">
+          <SectionTitle title="Plataforma" description="Totais acumulados" />
+          <dl className="divide-y divide-[var(--admin-line-soft)] text-[13.5px]">
+            <LedgerRow label="Escritores" value={INT.format(data.totalWriters)} hint={`${INT.format(current.newWriters)} novos`} href="/admin/writers" />
+            <LedgerRow label="Leitores" value={INT.format(data.totalReaders)} hint={`${INT.format(current.newReaders)} novos`} href="/admin/readers" />
+            <LedgerRow
+              label="Publicações"
+              value={INT.format(data.totalPublications)}
+              hint={`${INT.format(data.publishedPublications)} publicadas`}
+            />
+            <LedgerRow
+              label="MRR dos escritores"
+              value={cents(data.writerPlans.mrrCents)}
+              hint={`${INT.format(data.writerPlans.active)} ${data.writerPlans.active === 1 ? "plano" : "planos"}`}
+              href="/admin/writer-subscriptions"
+            />
+            <LedgerRow
+              label="Repasses pendentes"
+              value={cents(data.pendingPayouts.netCents)}
+              hint={`${INT.format(data.pendingPayouts.count)} ${data.pendingPayouts.count === 1 ? "registro" : "registros"}`}
+              href="/admin/payouts"
+              emphasis={data.pendingPayouts.count > 0}
+            />
+          </dl>
+        </GlassCard>
       </div>
     </section>
+  );
+}
+
+function LedgerRow({
+  label,
+  value,
+  hint,
+  href,
+  emphasis,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  href?: string;
+  emphasis?: boolean;
+}) {
+  const inner = (
+    <>
+      <dt className="text-[var(--liquid-muted)]">
+        {label}
+        {hint && <span className="ml-1.5 text-xs opacity-80">· {hint}</span>}
+      </dt>
+      <dd className={cn("font-medium tabular-nums", emphasis ? "text-[var(--admin-warn)]" : "text-[var(--liquid-ink)]")}>{value}</dd>
+    </>
+  );
+  return href ? (
+    <Link href={href} className="-mx-2 flex items-baseline justify-between gap-3 rounded-md px-2 py-2.5 transition-colors hover:bg-[#faf8f4]">
+      {inner}
+    </Link>
+  ) : (
+    <div className="flex items-baseline justify-between gap-3 py-2.5">{inner}</div>
   );
 }
 
@@ -429,18 +395,13 @@ function MiniStat({
   delta?: number | "new" | null;
 }) {
   return (
-    <div className="rounded-xl bg-white/55 px-3 py-2">
-      <p className="text-xs text-[var(--liquid-muted)]">{label}</p>
-      <p className="flex items-baseline gap-1.5 text-lg font-bold tabular-nums text-[var(--liquid-ink)]">
+    <div>
+      <dt className="text-xs text-[var(--liquid-muted)]">{label}</dt>
+      <dd className="mt-0.5 flex items-baseline gap-2 text-xl font-semibold tabular-nums tracking-tight text-[var(--liquid-ink)]">
         {value}
-        {typeof delta === "number" && delta !== 0 && (
-          <span className={cn("text-xs font-semibold", delta > 0 ? "text-emerald-700" : "text-red-700")}>
-            {delta > 0 ? "+" : ""}
-            {delta}%
-          </span>
-        )}
-      </p>
-      {hint && <p className="truncate text-[11px] text-[var(--liquid-muted)]">{hint}</p>}
+        {delta !== undefined && <Delta value={delta} />}
+      </dd>
+      {hint && <dd className="truncate text-[11px] text-[var(--liquid-muted)]">{hint}</dd>}
     </div>
   );
 }

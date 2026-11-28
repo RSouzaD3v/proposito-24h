@@ -136,7 +136,7 @@ export default async function AdminQuizDetailPage({ params }: { params: Promise<
                 return (
                   <li key={question.id} className="rounded-2xl border border-white/70 bg-white/55 p-4">
                     <div className="flex items-start gap-3">
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#2a78d6]/12 text-xs font-bold text-[#2a78d6]">{index + 1}</span>
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--admin-sunken)] text-xs font-bold text-[var(--liquid-ink)]">{index + 1}</span>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-[var(--liquid-ink)]">{question.title}</p>
                         <p className="mt-0.5 text-xs text-[var(--liquid-muted)]">

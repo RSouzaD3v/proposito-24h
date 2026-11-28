@@ -63,7 +63,7 @@ export function RecentSales({ sales }: { sales: RecentSale[] }) {
               onClick={() => setSelected(sale)}
               className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-white/60 focus-visible:bg-white/60 focus-visible:outline-none"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#2a78d6]/10 text-sm font-semibold text-[#2a78d6]">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--admin-sunken)] text-sm font-semibold text-[var(--liquid-ink)]">
                 {(sale.user?.name ?? sale.user?.email ?? "?").charAt(0).toUpperCase()}
               </span>
               <span className="min-w-0 flex-1">
@@ -114,7 +114,7 @@ export function RecentSales({ sales }: { sales: RecentSale[] }) {
                   label="Escritor"
                   value={
                     selected.writer ? (
-                      <Link href={`/admin/writer/${selected.writer.id}`} className="inline-flex items-center rounded-full bg-[#2a78d6]/10 px-2.5 py-0.5 font-medium text-[#2a78d6] transition-colors hover:bg-[#2a78d6]/20">
+                      <Link href={`/admin/writer/${selected.writer.id}`} className="inline-flex items-center rounded-full bg-[#a0582a]/10 px-2.5 py-0.5 font-medium text-[#a0582a] transition-colors hover:bg-[#a0582a]/20">
                         {selected.writer.name}
                       </Link>
                     ) : (

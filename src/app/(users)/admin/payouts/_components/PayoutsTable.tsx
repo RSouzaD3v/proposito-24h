@@ -67,7 +67,7 @@ export function PayoutsTable({ payouts }: { payouts: Payout[] }) {
             onClick={() => setFilter(key)}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-              filter === key ? "bg-[var(--liquid-accent)] text-white shadow-sm" : "text-[var(--liquid-muted)] hover:bg-white/70",
+              filter === key ? "bg-[var(--liquid-ink)] text-white" : "text-[var(--liquid-muted)] hover:bg-white/70",
             )}
           >
             {label}

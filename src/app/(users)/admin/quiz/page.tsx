@@ -55,7 +55,7 @@ export default async function AdminQuizPage({ searchParams }: { searchParams?: P
 
       {quizzes.length === 0 ? (
         <GlassCard strong className="flex flex-col items-center gap-3 py-14 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-[#2a78d6]/12 text-[#2a78d6]">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--admin-sunken)] text-[var(--liquid-ink)]">
             <ListChecks className="size-6" aria-hidden />
           </span>
           <p className="font-medium text-[var(--liquid-ink)]">Nenhum quiz criado ainda</p>
@@ -69,7 +69,7 @@ export default async function AdminQuizPage({ searchParams }: { searchParams?: P
             return (
               <GlassCard key={quiz.id} strong padding="none" className="flex flex-col overflow-hidden" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                 <Link href={`/admin/quiz/${quiz.id}`} className="group flex flex-1 flex-col transition-colors hover:bg-white/40">
-                  <div className={cn("relative h-28 overflow-hidden bg-gradient-to-br from-[#5b9cff] to-[#7c5cd6]", !quiz.active && "grayscale")}>
+                  <div className={cn("relative h-28 overflow-hidden bg-[#e9e2d5]", !quiz.active && "grayscale")}>
                     {quiz.coverUrl && (
                        
                       <img src={quiz.coverUrl} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" />

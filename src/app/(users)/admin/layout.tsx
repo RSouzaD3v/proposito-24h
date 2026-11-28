@@ -14,13 +14,13 @@ export default async function AdminLayout({
 
   return (
     <WriterShell contained={false} className="admin-shell">
-      <div className="min-h-screen w-full md:grid md:grid-cols-[264px_1fr]">
+      <div className="min-h-screen w-full md:grid md:grid-cols-[248px_1fr]">
         <Sidebar userName={session.user.name ?? "Administrador"} userEmail={session.user.email ?? ""} />
-        <main className="min-w-0 px-4 pb-10 pt-4 md:px-8 md:pt-8">
+        <main className="min-w-0 px-4 pb-12 pt-5 md:px-10 md:pt-9">
           <div className="mx-auto w-full max-w-7xl">
             {children}
-            <footer className="mt-12 border-t border-white/50 pt-6 text-xs text-[var(--liquid-muted)]">
-              © {new Date().getFullYear()} Proposito24h — Painel administrativo
+            <footer className="mt-14 border-t border-[var(--admin-line)] pt-5 text-xs text-[var(--liquid-muted)]">
+              Propósito24h · administração · {new Date().getFullYear()}
             </footer>
           </div>
         </main>

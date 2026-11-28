@@ -138,7 +138,7 @@ export default async function AdminGameEditPage({ params }: { params: Promise<{ 
                     <tr key={level.id} className="group border-b border-black/5 transition-colors last:border-0 hover:bg-white/55">
                       <td className="py-3 pl-5 pr-3">
                         <Link href={href} className="flex items-center gap-2 font-semibold text-[var(--liquid-ink)]">
-                          <span className="flex size-7 items-center justify-center rounded-lg bg-[#7c5cd6]/12 text-xs text-[#6446c2]">{level.order}</span>
+                          <span className="flex size-7 items-center justify-center rounded-lg bg-[var(--admin-sunken)] text-xs text-[var(--liquid-ink)]">{level.order}</span>
                           Nível {level.order}
                         </Link>
                       </td>
@@ -161,8 +161,8 @@ export default async function AdminGameEditPage({ params }: { params: Promise<{ 
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           <div className="relative h-2 w-40 rounded-full bg-black/5">
-                            <div className="absolute inset-y-0 left-0 rounded-full bg-[#2a78d6]/35" style={{ width: `${(level.stats.started / funnelBase) * 100}%` }} />
-                            <div className="absolute inset-y-0 left-0 rounded-full bg-[#1baf7a]" style={{ width: `${(level.stats.completed / funnelBase) * 100}%` }} />
+                            <div className="absolute inset-y-0 left-0 rounded-full bg-[#a0582a]/35" style={{ width: `${(level.stats.started / funnelBase) * 100}%` }} />
+                            <div className="absolute inset-y-0 left-0 rounded-full bg-[#3f7d4f]" style={{ width: `${(level.stats.completed / funnelBase) * 100}%` }} />
                           </div>
                           <span className="whitespace-nowrap text-xs tabular-nums text-[var(--liquid-muted)]">
                             {INT.format(level.stats.started)} → <span className="font-semibold text-[var(--liquid-ink)]">{INT.format(level.stats.completed)}</span>
@@ -193,8 +193,8 @@ export default async function AdminGameEditPage({ params }: { params: Promise<{ 
           </div>
         )}
         <div className="flex items-center gap-4 border-t border-black/5 px-5 py-3 text-xs text-[var(--liquid-muted)]">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-[#2a78d6]/35" aria-hidden /> Começaram</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-[#1baf7a]" aria-hidden /> Concluíram</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-[#a0582a]/35" aria-hidden /> Começaram</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-[#3f7d4f]" aria-hidden /> Concluíram</span>
         </div>
       </GlassCard>
     </section>

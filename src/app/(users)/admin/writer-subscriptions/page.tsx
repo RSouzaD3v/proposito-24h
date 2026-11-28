@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requireAdmin } from "../_lib/auth";
-import { BRL, CYCLE, deltaOf, formatDate, INT, PCT, RANGES, rangeOf } from "../_lib/format";
-import { SectionTitle, StatTile } from "../_components/StatTile";
+import { BRL, CYCLE, deltaOf, formatDate, INT, PCT, rangeOf } from "../_lib/format";
+import { PageHeader, RangeTabs, SectionTitle, StatTile } from "../_components/StatTile";
 import { ExportCsvButton } from "../_components/ExportCsvButton";
 import { MrrChart, type MrrMonth } from "./_charts/MrrChart";
 import { SubscriptionsTable, type WriterSubscription } from "./_components/SubscriptionsTable";
@@ -32,7 +32,7 @@ const STATUSES = [
   { key: "ended", label: "Encerradas" },
 ] as const;
 
-const CYCLE_COLOR: Record<string, string> = { MONTH: "#2a78d6", QUARTER: "#1baf7a", SEMESTER: "#eb6834", YEAR: "#7c5cd6" };
+const CYCLE_COLOR: Record<string, string> = { MONTH: "#a0582a", QUARTER: "#3f7d4f", SEMESTER: "#2a6fa0", YEAR: "#8f4a8a" };
 
 export default async function AdminWriterSubscriptions({
   searchParams,
@@ -61,30 +61,12 @@ export default async function AdminWriterSubscriptions({
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-4 animate-glass-in lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--liquid-ink)] md:text-3xl">Planos dos escritores</h1>
-          <p className="text-sm text-[var(--liquid-muted)]">
-            Assinaturas que os escritores pagam à plataforma · {formatDate(data.start)} — {formatDate(data.end)}
-          </p>
-        </div>
-        <nav aria-label="Período" className="glass-surface flex w-fit gap-0.5 rounded-full p-1">
-          {RANGES.map(({ key, label }) => (
-            <Link
-              key={key}
-              href={href({ range: key })}
-              scroll={false}
-              aria-current={key === range.key ? "page" : undefined}
-              className={cn(
-                "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                key === range.key ? "bg-[var(--liquid-accent)] text-white shadow-sm" : "text-[var(--liquid-muted)] hover:bg-white/70",
-              )}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </header>
+      <PageHeader
+        eyebrow="Pessoas e finanças"
+        title="Planos dos escritores"
+        description={`Assinaturas que os escritores pagam à plataforma · ${formatDate(data.start)} — ${formatDate(data.end)}`}
+        actions={<RangeTabs current={range.key} params={{ q: q || undefined, status: status === "all" ? undefined : status }} />}
+      />
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatTile
@@ -179,7 +161,7 @@ export default async function AdminWriterSubscriptions({
                 aria-selected={status === key}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                  status === key ? "bg-[var(--liquid-accent)] text-white shadow-sm" : "text-[var(--liquid-muted)] hover:bg-white/70",
+                  status === key ? "bg-[var(--liquid-ink)] text-white" : "text-[var(--liquid-muted)] hover:bg-white/70",
                 )}
               >
                 {label}

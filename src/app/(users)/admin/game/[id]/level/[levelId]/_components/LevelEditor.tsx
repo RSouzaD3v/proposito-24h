@@ -257,8 +257,8 @@ export function LevelEditor({ level }: { level: LevelData }) {
               ) : undefined
             }
           />
-          <div className="relative mx-auto aspect-square w-full max-w-72 rounded-full bg-gradient-to-br from-[#7c5cd6]/10 to-[#2a78d6]/10">
-            <div className="absolute inset-[14%] rounded-full border-2 border-dashed border-[#7c5cd6]/20" aria-hidden />
+          <div className="relative mx-auto aspect-square w-full max-w-72 rounded-full bg-[var(--admin-sunken)]">
+            <div className="absolute inset-[14%] rounded-full border-2 border-dashed border-[#8f4a8a]/20" aria-hidden />
             {layout.map((point, index) => (
               <span
                 key={index}

@@ -485,7 +485,7 @@ export default function AdminBillingPage() {
             {/* Coluna lateral: prévia e simulador */}
             <div className="grid content-start gap-4 lg:sticky lg:top-6 lg:self-start">
               <GlassCard strong className="overflow-hidden p-0">
-                <div className="bg-gradient-to-br from-[#5b9cff] to-[#2b6de5] p-5 text-white">
+                <div className="bg-[var(--liquid-ink)] p-5 text-white">
                   <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/80">
                     <Sparkles className="size-3.5" aria-hidden /> O que novos escritores verão
                   </p>
@@ -503,7 +503,7 @@ export default function AdminBillingPage() {
                     {Number(form.trialDays) > 0 ? `${form.trialDays} dias grátis na primeira assinatura` : "Sem período de teste"}
                   </li>
                   <li className="flex gap-2">
-                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#2a78d6]" aria-hidden />
+                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#a0582a]" aria-hidden />
                     {commitmentTerms({
                       commitmentMonths: Number(form.commitmentMonths) || 0,
                       earlyCancelFeePct: Number(form.feePct) || 0,
@@ -538,19 +538,19 @@ export default function AdminBillingPage() {
                 {simulatedFee !== null && simulationCents > 0 ? (
                   <>
                     <div className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-black/5" aria-hidden>
-                      <div className="bg-[#1baf7a]" style={{ width: `${100 - (simulatedFee / simulationCents) * 100}%` }} />
-                      <div className="bg-[#eb6834]" style={{ width: `${(simulatedFee / simulationCents) * 100}%` }} />
+                      <div className="bg-[#3f7d4f]" style={{ width: `${100 - (simulatedFee / simulationCents) * 100}%` }} />
+                      <div className="bg-[#2a6fa0]" style={{ width: `${(simulatedFee / simulationCents) * 100}%` }} />
                     </div>
                     <dl className="mt-3 grid gap-1.5 text-sm">
                       <div className="flex justify-between">
                         <dt className="flex items-center gap-2 text-[var(--liquid-muted)]">
-                          <span className="size-2.5 rounded-full bg-[#1baf7a]" aria-hidden /> Escritor
+                          <span className="size-2.5 rounded-full bg-[#3f7d4f]" aria-hidden /> Escritor
                         </dt>
                         <dd className="font-semibold tabular-nums text-[var(--liquid-ink)]">{formatMoney(simulationCents - simulatedFee)}</dd>
                       </div>
                       <div className="flex justify-between">
                         <dt className="flex items-center gap-2 text-[var(--liquid-muted)]">
-                          <span className="size-2.5 rounded-full bg-[#eb6834]" aria-hidden /> Plataforma ({formatBps(commissionBps ?? 0)})
+                          <span className="size-2.5 rounded-full bg-[#2a6fa0]" aria-hidden /> Plataforma ({formatBps(commissionBps ?? 0)})
                         </dt>
                         <dd className="font-semibold tabular-nums text-[var(--liquid-ink)]">{formatMoney(simulatedFee)}</dd>
                       </div>

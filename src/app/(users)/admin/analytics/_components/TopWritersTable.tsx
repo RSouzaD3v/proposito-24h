@@ -69,7 +69,7 @@ export function TopWritersTable({ writers, totalNetCents }: { writers: TopWriter
                     {writer.writer_name}
                   </button>
                   <span className="mt-1 block h-1.5 w-full max-w-48 rounded-full bg-black/5">
-                    <span className="block h-full rounded-full bg-[#2a78d6]" style={{ width: `${(writer.revenue_cents / max) * 100}%` }} />
+                    <span className="block h-full rounded-full bg-[#a0582a]" style={{ width: `${(writer.revenue_cents / max) * 100}%` }} />
                   </span>
                 </td>
                 <td className="px-3 py-3 text-right tabular-nums">{INT.format(writer.sales)}</td>

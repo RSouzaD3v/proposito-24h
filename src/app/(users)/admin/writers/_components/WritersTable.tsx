@@ -97,7 +97,7 @@ export function WritersTable({ rows }: { rows: WriterRow[] }) {
               <tr key={row.writer_id} className="group border-b border-black/5 transition-colors last:border-0 hover:bg-white/55">
                 <td className="py-3 pl-5 pr-3">
                   <Link href={`/admin/writer/${row.writer_id}`} className="flex items-center gap-3 font-medium text-[var(--liquid-ink)]">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#2a78d6]/10 text-xs font-semibold text-[#2a78d6]">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--admin-sunken)] text-xs font-semibold text-[var(--liquid-ink)]">
                       {row.writer_name.charAt(0).toUpperCase()}
                     </span>
                     <span className="truncate">{row.writer_name}</span>

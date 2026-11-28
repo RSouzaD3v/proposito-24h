@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
+import { CHART } from "../_lib/palette";
 
-const CURRENT = "#2a78d6";
-const PREVIOUS = "#8a94a6";
-const GRID = "rgb(0 0 0 / 0.07)";
-const TICK = { fontSize: 12, fill: "var(--liquid-muted)" };
+const CURRENT = CHART.primary;
+const PREVIOUS = CHART.comparison;
+const GRID = CHART.grid;
+const TICK = { fontSize: 11, fill: CHART.tick };
 const axisProps = { tickLine: false, axisLine: false, tick: TICK } as const;
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const INT = new Intl.NumberFormat("pt-BR");
@@ -29,7 +30,7 @@ function ChartTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-black/10 bg-white px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-[var(--admin-line)] bg-white px-3 py-2 text-xs shadow-[0_6px_20px_rgb(40_30_15_/_0.08)]">
       <p className="mb-1 font-semibold text-[var(--liquid-ink)]">{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} className="flex items-center gap-2 text-[var(--liquid-muted)]">
@@ -55,7 +56,7 @@ export function OverviewRevenueChart({ data }: { data: RevenueDay[] }) {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="Métrica do gráfico" className="flex gap-0.5 rounded-full bg-black/5 p-0.5">
+        <div role="tablist" aria-label="Métrica do gráfico" className="flex gap-0.5 rounded-md bg-[var(--admin-sunken)] p-0.5">
           {(["revenue", "sales"] as const).map((key) => (
             <button
               key={key}
@@ -64,8 +65,8 @@ export function OverviewRevenueChart({ data }: { data: RevenueDay[] }) {
               aria-selected={metric === key}
               onClick={() => setMetric(key)}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                metric === key ? "bg-white text-[var(--liquid-ink)] shadow-sm" : "text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]",
+                "rounded px-3 py-1 text-xs font-medium transition-colors",
+                metric === key ? "bg-white text-[var(--liquid-ink)] shadow-[0_0_0_1px_var(--admin-line)]" : "text-[var(--liquid-muted)] hover:text-[var(--liquid-ink)]",
               )}
             >
               {key === "revenue" ? "Receita líquida" : "Vendas"}
@@ -89,8 +90,8 @@ export function OverviewRevenueChart({ data }: { data: RevenueDay[] }) {
           <AreaChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="admin-revenue-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CURRENT} stopOpacity={0.25} />
-                <stop offset="100%" stopColor={CURRENT} stopOpacity={0.02} />
+                <stop offset="0%" stopColor={CURRENT} stopOpacity={0.16} />
+                <stop offset="100%" stopColor={CURRENT} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke={GRID} />
@@ -101,7 +102,7 @@ export function OverviewRevenueChart({ data }: { data: RevenueDay[] }) {
               tickFormatter={(value) => (isRevenue ? BRL.format(value).replace(",00", "") : INT.format(value))}
               {...axisProps}
             />
-            <Tooltip cursor={{ stroke: GRID }} content={<ChartTooltip format={format} />} />
+            <Tooltip cursor={{ stroke: CHART.comparison, strokeDasharray: "3 3" }} content={<ChartTooltip format={format} />} />
             {isRevenue && (
               <Line
                 type="monotone"
@@ -121,6 +122,7 @@ export function OverviewRevenueChart({ data }: { data: RevenueDay[] }) {
               stroke={CURRENT}
               strokeWidth={2}
               fill="url(#admin-revenue-fill)"
+              activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff" }}
             />
           </AreaChart>
         </ResponsiveContainer>

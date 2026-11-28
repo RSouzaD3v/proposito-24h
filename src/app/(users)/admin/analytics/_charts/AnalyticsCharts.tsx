@@ -63,10 +63,10 @@ export function StatusDonut({ data }: { data: StatusSlice[] }) {
 export type GrowthMonth = { month: string; writers: number; readers: number; subs: number; revenue_cents: number };
 
 const GROWTH = [
-  { key: "readers", label: "Leitores", color: "#2a78d6" },
-  { key: "subs", label: "Assinaturas", color: "#1baf7a" },
-  { key: "writers", label: "Escritores", color: "#7c5cd6" },
-  { key: "revenue", label: "Receita", color: "#eb6834" },
+  { key: "readers", label: "Leitores", color: "#a0582a" },
+  { key: "subs", label: "Assinaturas", color: "#a0582a" },
+  { key: "writers", label: "Escritores", color: "#a0582a" },
+  { key: "revenue", label: "Receita", color: "#a0582a" },
 ] as const;
 
 export function GrowthChart({ data }: { data: GrowthMonth[] }) {

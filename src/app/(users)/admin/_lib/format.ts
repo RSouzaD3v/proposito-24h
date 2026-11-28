@@ -22,26 +22,26 @@ export function rangeOf(requested: string | undefined) {
 }
 
 export const SUBSCRIPTION_STATUS: Record<string, { label: string; color: string }> = {
-  ACTIVE: { label: "Ativas", color: "#1baf7a" },
-  TRIALING: { label: "Em teste", color: "#2a78d6" },
-  PAST_DUE: { label: "Pagamento atrasado", color: "#eb6834" },
-  PAUSED: { label: "Pausadas", color: "#8a94a6" },
-  CANCELED: { label: "Canceladas", color: "#d64545" },
-  UNPAID: { label: "Não pagas", color: "#b5476b" },
-  INCOMPLETE: { label: "Incompletas", color: "#c9a227" },
-  INCOMPLETE_EXPIRED: { label: "Expiradas", color: "#a3a3a3" },
+  ACTIVE: { label: "Ativas", color: "#3f7d4f" },
+  TRIALING: { label: "Em teste", color: "#2a6fa0" },
+  PAST_DUE: { label: "Pagamento atrasado", color: "#c27c12" },
+  PAUSED: { label: "Pausadas", color: "#a59d90" },
+  CANCELED: { label: "Canceladas", color: "#b4412f" },
+  UNPAID: { label: "Não pagas", color: "#8f4a8a" },
+  INCOMPLETE: { label: "Incompletas", color: "#b99a52" },
+  INCOMPLETE_EXPIRED: { label: "Expiradas", color: "#d3ccbf" },
 };
 
 export const PURCHASE_STATUS: Record<string, { label: string; className: string }> = {
-  SUCCESS: { label: "Pago", className: "bg-emerald-100/80 text-emerald-800" },
-  PENDING: { label: "Pendente", className: "bg-amber-100/80 text-amber-800" },
-  FAILED: { label: "Falhou", className: "bg-red-100/80 text-red-800" },
+  SUCCESS: { label: "Pago", className: "bg-[#e6efe8] text-[#2f6b45]" },
+  PENDING: { label: "Pendente", className: "bg-[#f5ead6] text-[#8a5a0b]" },
+  FAILED: { label: "Falhou", className: "bg-[#f6e2dd] text-[#9c3524]" },
 };
 
 export const PAYOUT_STATUS: Record<string, { label: string; className: string }> = {
-  PAID: { label: "Pago", className: "bg-emerald-100/80 text-emerald-800" },
-  PENDING: { label: "Pendente", className: "bg-amber-100/80 text-amber-800" },
-  CANCELED: { label: "Cancelado", className: "bg-red-100/80 text-red-800" },
+  PAID: { label: "Pago", className: "bg-[#e6efe8] text-[#2f6b45]" },
+  PENDING: { label: "Pendente", className: "bg-[#f5ead6] text-[#8a5a0b]" },
+  CANCELED: { label: "Cancelado", className: "bg-[#f6e2dd] text-[#9c3524]" },
 };
 
 export const CYCLE: Record<string, { name: string; per: string; months: number }> = {

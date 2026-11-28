@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 
-const COLOR = { mrr: "#1baf7a", active: "#2a78d6" } as const;
+const COLOR = { mrr: "#3f7d4f", active: "#a0582a" } as const;
 const GRID = "rgb(0 0 0 / 0.07)";
 const TICK = { fontSize: 12, fill: "var(--liquid-muted)" };
 const axisProps = { tickLine: false, axisLine: false, tick: TICK } as const;

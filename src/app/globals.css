@@ -575,16 +575,92 @@ body.reader-app {
   margin-top: 0.9em;
 }
 
-/* Admin: os cards e tabelas shadcn das subpáginas seguem o visual glass da plataforma. */
-.admin-shell [data-slot="card"] {
-  background: var(--glass-bg-strong);
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  border: 1px solid var(--glass-border);
+/* Admin: tema "livro-caixa" — papel quente, superfícies sólidas, um só acento bronze.
+   Redefine os tokens do liquid glass apenas dentro do painel, então todas as subpáginas mudam juntas. */
+.admin-shell {
+  --admin-paper: #f5f3ee;
+  --admin-surface: #ffffff;
+  --admin-sunken: #f0ede6;
+  --admin-line: #e4dfd5;
+  --admin-line-soft: #eeeae2;
+  --admin-good: #2f7a4f;
+  --admin-bad: #b4412f;
+  --admin-warn: #a86b0c;
+  --liquid-ink: #1d1b17;
+  --liquid-muted: #6e685e;
+  --liquid-accent: #a0582a;
+  --liquid-on-accent: #ffffff;
+  --reader-surface: #ffffff;
+  --glass-bg: var(--admin-surface);
+  --glass-bg-strong: var(--admin-surface);
+  --glass-border: var(--admin-line);
+  --glass-highlight: transparent;
+  --glass-shadow: 0 1px 2px rgb(40 30 15 / 0.04);
+  --glass-radius: 0.75rem;
+  --primary: #1d1b17;
+  --primary-foreground: #ffffff;
+  --accent: var(--admin-sunken);
+  --accent-foreground: #1d1b17;
+  --glass-button: #ffffff;
+  --glass-button-hover: #f7f4ee;
+  --ring: #a0582a;
+  --border: var(--admin-line);
+  --input: var(--admin-line);
+  font-family: var(--font-reader-sans), system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  background: var(--admin-paper);
+}
+
+.admin-shell.liquid-bg::before {
+  display: none;
+}
+
+.admin-shell :is(.glass-surface, .glass-surface-strong, [data-slot="card"]) {
+  background: var(--admin-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--admin-line);
   border-radius: var(--glass-radius);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  box-shadow: var(--glass-shadow);
   color: var(--liquid-ink);
-  animation: glass-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.admin-shell .animate-glass-in {
+  animation: admin-rise 0.3s ease-out both;
+}
+
+@keyframes admin-rise {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell .animate-glass-in { animation: none; }
+}
+
+/* Os fundos translúcidos espalhados pelas telas viram tons de papel. */
+.admin-shell :is(.bg-white\/20, .bg-white\/25, .bg-white\/30, .bg-white\/40, .bg-white\/50, .bg-white\/55, .bg-white\/60, .bg-white\/70, .bg-white\/75) {
+  background-color: var(--admin-sunken);
+}
+.admin-shell :is(.hover\:bg-white\/60, .hover\:bg-white\/70, .hover\:bg-white\/55):hover {
+  background-color: var(--admin-sunken);
+}
+.admin-shell :is(.border-white\/40, .border-white\/50, .border-white\/60, .border-white\/70) {
+  border-color: var(--admin-line);
+}
+
+.admin-shell .admin-display {
+  font-family: var(--font-reader-serif), Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+
+.admin-shell main h1 {
+  font-family: var(--font-reader-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--liquid-ink);
 }
 
 .admin-shell [data-slot="card-description"],
@@ -592,12 +668,8 @@ body.reader-app {
   color: var(--liquid-muted);
 }
 
-.admin-shell main h1 {
-  color: var(--liquid-ink);
-}
-
 .admin-shell [data-slot="table-header"] [data-slot="table-row"] {
-  border-color: rgb(0 0 0 / 0.06);
+  border-color: var(--admin-line);
 }
 
 .admin-shell [data-slot="table-head"] {
@@ -607,11 +679,31 @@ body.reader-app {
 }
 
 .admin-shell [data-slot="table-row"] {
-  border-color: rgb(0 0 0 / 0.05);
+  border-color: var(--admin-line-soft);
 }
 
 .admin-shell [data-slot="table-body"] [data-slot="table-row"]:hover {
-  background: rgb(255 255 255 / 0.55);
+  background: #faf8f4;
+}
+
+.admin-shell :is(input, textarea, [data-slot="select-trigger"]) {
+  background-color: var(--admin-surface);
+}
+
+/* Botões: cantos discretos, sem brilho nem desfoque. */
+.admin-shell [data-slot="button"] {
+  border-radius: 0.5rem;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.admin-shell [data-slot="button"][class*="liquid-accent"] {
+  border-color: transparent;
+}
+
+.admin-shell ::selection {
+  background: rgb(160 88 42 / 0.18);
 }
 
 /* Atmosfera Devocional: barrinhas que "respiram" enquanto o som toca. */
